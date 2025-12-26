@@ -1,4 +1,3 @@
-// src/api/turnosApi.ts
 import type { Affiliate, Appointment, AppointmentStatus } from '@/components/screens/homeModels'
 import type { AffiliateFormValues } from '@/components/ui/home/AffiliateQuicklist'
 import { apiJson } from './http'
@@ -190,4 +189,50 @@ export async function cancelarTurnoApi(id: string): Promise<void> {
 export async function fetchInitialData(): Promise<{ affiliates: Affiliate[]; appointments: Appointment[] }> {
   const [affs, turnos] = await Promise.all([fetchAffiliates(), fetchTurnos()])
   return { affiliates: affs, appointments: turnos }
+}
+
+/* ================= CAJA (NUEVO) ================= */
+
+export type CajaRow = {
+  fechaDisplay: string
+  numeroAfiliado: string
+  dni: string
+  nombre: string
+  prestador: string
+  practica: string // Especialidad o Laboratorio
+  monto: number
+}
+
+export type CierreCajaDto = {
+  fechaISO: string
+  total: number
+  rows: CajaRow[]
+}
+
+export type CajaEstadoDto = {
+  hoyFechaISO: string
+  hoy: {
+    fechaISO: string
+    rows: CajaRow[]
+  }
+  ayer: CierreCajaDto | null
+  historial: Array<{
+    fechaISO: string
+    total: number
+  }>
+}
+
+export async function fetchCajaEstado(): Promise<CajaEstadoDto> {
+  return apiJson<CajaEstadoDto>('/caja/estado')
+}
+
+export async function cerrarCajaApi(fechaISO: string): Promise<CierreCajaDto> {
+  return apiJson<CierreCajaDto>('/caja/cerrar', {
+    method: 'POST',
+    body: { fechaISO },
+  })
+}
+
+export async function fetchCajaByDate(fechaISO: string): Promise<CierreCajaDto> {
+  return apiJson<CierreCajaDto>(`/caja/${fechaISO}`)
 }

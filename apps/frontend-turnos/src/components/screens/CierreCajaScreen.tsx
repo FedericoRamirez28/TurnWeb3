@@ -322,6 +322,7 @@ export const CierreCajaScreen: React.FC<Props> = () => {
       console.error('Error previsualizando caja', err)
     }
   }
+
   const handleManualClose = async (fechaISOToClose: string) => {
     if (!estado) return
     if (isAlreadyClosed(fechaISOToClose)) {
@@ -396,7 +397,7 @@ export const CierreCajaScreen: React.FC<Props> = () => {
           historial: nextHistorial,
           ...(isClosingHoy
             ? {
-                hoy: { fechaISO: prev.hoy.fechaISO, total: 0, rows: [] },
+                hoy: { fechaISO: prev.hoy.fechaISO, rows: [] },
                 ayer: { fechaISO: cierre.fechaISO, total: cierre.total, rows: cierre.rows },
               }
             : isClosingAyer
