@@ -1,0 +1,29 @@
+.sidebar {
+  width: 220px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: var(--space-md);
+}
+
+.sidebar__brand {
+  font-weight: 700;
+  margin-bottom: var(--space-lg);
+}
+
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.sidebar__link {
+  text-decoration: none;
+  color: var(--ink);
+  padding: var(--space-sm);
+  border-radius: var(--radius-sm);
+
+  &.active {
+    background: var(--primary-soft);
+    color: var(--primary);
+  }
+}

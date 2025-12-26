@@ -1,0 +1,219 @@
+.calendar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  &__header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__month-label {
+    font-weight: 600;
+    min-width: 140px;
+    text-align: center;
+    text-transform: capitalize;
+  }
+
+  .calendar__today-btn {
+    font-size: 0.75rem;
+    padding-inline: 10px;
+  }
+
+  &__weekdays,
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+
+  &__weekday {
+    text-align: center;
+    font-size: 0.7rem;
+    color: var(--color-ink-soft);
+  }
+
+  &__day {
+    border-radius: 10px;
+    border: 1px solid rgba(209, 213, 219, 0.9);
+    background: #fff;
+    height: 38px;
+    padding: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    font-size: 0.8rem;
+    position: relative;
+    transition: border-color var(--transition-fast),
+      box-shadow var(--transition-fast), background-color var(--transition-fast);
+
+    &--empty {
+      border: none;
+      background: transparent;
+      cursor: default;
+    }
+
+    &-number {
+      position: absolute;
+      top: 4px;
+      left: 6px;
+      font-size: 0.75rem;
+      color: var(--color-ink-soft);
+      font-weight: 500;
+    }
+
+    &--low::after,
+    &--medium::after,
+    &--high::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      position: absolute;
+      bottom: 4px;
+      right: 6px;
+    }
+
+    &--low::after {
+      background: #10b981;
+    }
+
+    &--medium::after {
+      background: #f59e0b;
+    }
+
+    &--high::after {
+      background: #ef4444;
+    }
+
+    &--today {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 1px color-mix(
+          in oklab,
+          var(--color-primary) 20%,
+          transparent
+        );
+    }
+
+    &--selected {
+      box-shadow: 0 0 0 2px color-mix(
+          in oklab,
+          var(--color-primary) 60%,
+          transparent
+        );
+      border-color: var(--color-primary);
+    }
+
+    &:hover:not(&--empty) {
+      border-color: color-mix(in oklab, var(--color-primary) 60%, #e5e7eb);
+      background: color-mix(in oklab, #ffffff 90%, var(--color-primary-soft));
+    }
+  }
+
+  &__tag {
+    position: absolute;
+    left: 6px;
+    bottom: 4px;
+    max-width: 75%;
+    padding: 1px 5px;
+    border-radius: 999px;
+    font-size: 0.55rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+
+    &--holiday {
+      background: color-mix(in oklab, var(--color-primary-soft) 85%, #fff);
+      color: var(--color-primary);
+    }
+
+    &--efemeride {
+      background: #eef2ff;
+      color: #4f46e5;
+    }
+  }
+
+  &__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 4px;
+    font-size: 0.75rem;
+    color: var(--color-ink-soft);
+
+    &-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+  }
+
+  &__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+
+    &--low {
+      background: #10b981;
+    }
+
+    &--medium {
+      background: #f59e0b;
+    }
+
+    &--high {
+      background: #ef4444;
+    }
+  }
+
+  &__tag-sample {
+    width: 22px;
+    height: 10px;
+    border-radius: 999px;
+
+    &--holiday {
+      background: color-mix(in oklab, var(--color-primary-soft) 85%, #fff);
+    }
+
+    &--efemeride {
+      background: #eef2ff;
+    }
+  }
+}
+.calendar-sidebar__slot-taken {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+}
+
+.calendar-sidebar__slot-text {
+  min-width: 0;
+}
+
+.calendar-sidebar__trash {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  flex: 0 0 auto;
+
+  img {
+    width: 18px;
+    height: 18px;
+    display: block;
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+}

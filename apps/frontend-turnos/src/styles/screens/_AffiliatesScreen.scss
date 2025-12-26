@@ -1,0 +1,471 @@
+/* =========================================================
+   CONTENEDOR PRINCIPAL: ANCLADO AL VIEWPORT
+   ========================================================= */
+/* ================================
+   AFILIADOS — FULL WIDTH/HEIGHT
+   ================================ */
+
+.affiliates-screen {
+  /* Ajustá esto a tu TopNavbar real */
+  --topbar-h: 64px;
+
+  position: fixed;
+  top: var(--topbar-h);
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  width: 100vw;
+  height: calc(100dvh - var(--topbar-h));
+
+  display: flex;
+  flex-direction: column;
+
+  /* sin scroll global */
+  overflow: hidden;
+
+  background: radial-gradient(circle at top, #d4e5dd 0, #e0e5f0 45%, #cbd5e1 100%);
+  z-index: 10;
+
+  /* =========================
+     HEADER
+     ========================= */
+  &__header {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+
+    width: 100%;
+    padding: 16px 24px;
+    box-sizing: border-box;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 1.4rem;
+    color: var(--color-ink);
+  }
+
+  &__subtitle {
+    margin: 4px 0 0;
+    font-size: 0.9rem;
+    color: var(--color-ink-soft);
+  }
+
+  &__search {
+    width: min(420px, 100%);
+  }
+
+  &__search-input {
+    background: #f8fafc;
+    width: 100%;
+  }
+
+  /* =========================
+     ZONA COLUMNAS (FULL HEIGHT)
+     ========================= */
+  &__plans-row {
+    flex: 1 1 auto;
+    min-height: 0; /* CLAVE para que el overflow interno funcione */
+
+    padding: 0 24px 16px;
+    box-sizing: border-box;
+
+    display: grid;
+    gap: 16px;
+
+    /* 5 columnas que se estiran en desktop */
+    grid-template-columns: repeat(5, minmax(260px, 1fr));
+    align-items: stretch;
+
+    /* si no entra, aparece scroll horizontal */
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    /* scrollbar horizontal prolijo */
+    &::-webkit-scrollbar {
+      height: 8px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.18);
+      border-radius: 999px;
+    }
+  }
+
+  /* =========================
+     COLUMNA (PLAN)
+     ========================= */
+  &__plan-column {
+    height: 100%;
+    min-height: 0; /* CLAVE para que el body scrollee */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+
+    /* Bordes */
+    &--rubi { border-top: 4px solid #e11d48; }
+    &--esmeralda { border-top: 4px solid #10b981; }
+    &--base { border-top: 4px solid #0ea5e9; }
+    &--particular { border-top: 4px solid #8b5cf6; }
+    &--dorado { border-top: 4px solid #fbbf24; }
+  }
+
+  &__plan-header {
+    flex: 0 0 auto;
+    padding: 12px;
+    text-align: center;
+    background: rgba(255,255,255,0.4);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+  }
+
+  &__plan-title {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-ink-soft);
+  }
+
+  /* =========================
+     BODY con scroll vertical
+     ========================= */
+  &__plan-body {
+    flex: 1 1 auto;
+    min-height: 0;
+
+    overflow: auto;
+    padding: 12px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    &::-webkit-scrollbar { width: 6px; }
+    &::-webkit-scrollbar-thumb {
+      background: rgba(0,0,0,0.14);
+      border-radius: 999px;
+    }
+  }
+
+  /* =========================
+     CARD AFILIADO (override global .card)
+     ========================= */
+  &__card.card {
+    width: 100%;
+    flex: 0 0 auto; /* no se estira raro */
+    padding: 12px;
+
+    border: 1px solid rgba(255,255,255,0.55);
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.10);
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  &__card.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 18px rgba(0,0,0,0.12);
+    z-index: 2;
+  }
+
+  &__card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  &__avatar {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 30% 20%, #bbf7d0, #e0f4ee);
+    color: #0f766e;
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
+
+  &__card-title {
+    flex: 1;
+    min-width: 0;
+
+    h3 {
+      margin: 0;
+      font-size: 0.9rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 2px;
+  }
+
+  &__tag {
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: #f3f4f6;
+    color: #4b5563;
+    white-space: nowrap;
+
+    &--plan { background: #d1fae5; color: #065f46; }
+    &--role { background: #fee2e2; color: #991b1b; }
+  }
+
+  &__card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__info-block {
+    h4 {
+      margin: 0 0 2px;
+      font-size: 0.7rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    p {
+      margin: 0;
+      font-size: 0.8rem;
+      line-height: 1.3;
+      color: #334155;
+      word-break: break-word;
+    }
+  }
+
+  &__turnos {
+    border-top: 1px dashed #e2e8f0;
+    padding-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &__turno {
+    h5 {
+      margin: 0;
+      font-size: 0.65rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+    }
+  }
+
+  &__turno-label { margin: 0; font-size: 0.75rem; font-weight: 500; }
+  &__turno-meta { margin: 0; font-size: 0.7rem; color: #64748b; }
+  &__turno-empty { margin: 0; font-size: 0.7rem; color: #cbd5e1; font-style: italic; }
+
+  &__card-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 4px;
+
+    .btn {
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      height: 26px;
+    }
+
+    img { width: 20px; height: 20px; }
+  }
+
+  &__empty-plan {
+    text-align: center;
+    padding: 24px;
+    font-size: 0.85rem;
+    color: #9ca3af;
+    font-style: italic;
+  }
+
+  /* =========================
+     RESPONSIVE
+     ========================= */
+  @media (max-width: 960px) {
+    &__header {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    &__search {
+      width: 100%;
+    }
+
+    /* en pantallas chicas, permitimos menos ancho mínimo por columna */
+    &__plans-row {
+      grid-template-columns: repeat(5, minmax(240px, 1fr));
+      padding: 0 16px 16px;
+    }
+  }
+
+  @media (max-width: 520px) {
+    &__plans-row {
+      grid-template-columns: repeat(5, minmax(220px, 1fr));
+    }
+  }
+}
+
+/* (tu modal de historial puede quedar como lo tenías) */
+
+
+/* El modal se mantiene fuera del flujo, con position fixed y z-index alto */
+.affiliate-history-modal__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; /* Máxima prioridad */
+}
+
+/* El modal de historial se mantiene igual ya que es fixed y tiene z-index alto */
+.affiliate-history-modal__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  backdrop-filter: blur(2px);
+}
+/* ... resto de estilos del modal ... */
+
+/* ===== Modal historial: overlay centrado ===== */
+
+.affiliate-history-modal__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.38);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 40;
+}
+
+.affiliate-history-modal {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  padding: 18px 20px 14px;
+  width: min(960px, 96vw);
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.affiliate-history-modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.affiliate-history-modal__title {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.affiliate-history-modal__subtitle {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: var(--color-ink-soft);
+}
+
+.affiliate-history-modal__close {
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: #f9fafb;
+}
+
+.affiliate-history-modal__body {
+  flex: 1;
+  overflow: auto;
+  margin-bottom: 10px;
+}
+
+.affiliate-history-modal__empty {
+  font-size: 0.9rem;
+  color: var(--color-ink-soft);
+}
+
+.affiliate-history-modal__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+
+  th,
+  td {
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--color-border);
+    text-align: left;
+  }
+
+  th {
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+}
+
+.affiliate-history-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ===== Breakpoints ===== */
+
+@media (max-width: 960px) {
+  .affiliates-screen {
+    padding: 16px 16px 32px;
+  }
+
+  .affiliates-screen__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .affiliates-screen__search {
+    width: 100%;
+  }
+
+  .affiliates-screen__card-body {
+    flex-direction: column; 
+  }
+
+  .affiliates-screen__turnos {
+    grid-template-columns: 1fr; 
+  }
+}

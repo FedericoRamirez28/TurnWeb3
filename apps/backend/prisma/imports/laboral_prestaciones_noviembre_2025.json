@@ -1,0 +1,194 @@
+[
+  {
+    "categoria": "concepto",
+    "nombre": "Preocupacional, periódico o egreso, Básico de Ley, Masculino y Femenino.",
+    "valorSocios": 65899,
+    "valorNoSocios": 90895
+  },
+  {
+    "categoria": "concepto",
+    "nombre": "Psicotécnico",
+    "valorSocios": 44539,
+    "valorNoSocios": 52265
+  },
+  {
+    "categoria": "concepto",
+    "nombre": "Psicotécnico para trabajos en Altura / Manejo de Autoelevadores / Clarkista",
+    "valorSocios": 74307,
+    "valorNoSocios": 86805
+  },
+  {
+    "categoria": "concepto",
+    "nombre": "Evaluación Neurológica (Requiere turno previo)*",
+    "valorSocios": 64208,
+    "valorNoSocios": 83319
+  },
+  {
+    "categoria": "concepto",
+    "nombre": "Electronistagmografia (Requiere turno previo)*",
+    "valorSocios": 71830,
+    "valorNoSocios": 84078
+  },
+  {
+    "categoria": "concepto",
+    "nombre": "Ergometría (Requiere turno previo)*",
+    "valorSocios": 74307,
+    "valorNoSocios": 94304
+  },
+  {
+    "categoria": "concepto",
+    "nombre": "Rx. Col. Lumbosacra F Y P (2)",
+    "valorSocios": 22045,
+    "valorNoSocios": 33404
+  },
+  {
+    "categoria": "concepto",
+    "nombre": "Rx. Col. Cervical F Y P (2)",
+    "valorSocios": 22045,
+    "valorNoSocios": 33404
+  },
+  {
+    "categoria": "concepto",
+    "nombre": "Audiometría",
+    "valorSocios": 20743,
+    "valorNoSocios": 25054
+  },
+  {
+    "categoria": "concepto",
+    "nombre": "Sub Unidad Beta",
+    "valorSocios": 10605,
+    "valorNoSocios": 15894
+  },
+  {
+    "categoria": "concepto",
+    "nombre": "Cocaína",
+    "valorSocios": 22781,
+    "valorNoSocios": 32220
+  },
+  {
+    "categoria": "concepto",
+    "nombre": "Marihuana",
+    "valorSocios": 22781,
+    "valorNoSocios": 32220
+  },
+  {
+    "categoria": "concepto",
+    "nombre": "HIV",
+    "valorSocios": 14051,
+    "valorNoSocios": 21209
+  },
+  {
+    "categoria": "concepto",
+    "nombre": "EEG con informe",
+    "valorSocios": 30111,
+    "valorNoSocios": 37110
+  },
+  {
+    "categoria": "concepto",
+    "nombre": "Espirometria",
+    "valorSocios": 29996,
+    "valorNoSocios": 37494
+  },
+  {
+    "categoria": "concepto",
+    "nombre": "Consulta Clínica Médica en Consultorio",
+    "valorSocios": 0,
+    "valorNoSocios": 29541
+  },
+  {
+    "categoria": "concepto",
+    "nombre": "Control de Ausentismo hasta 40 km CABA Final",
+    "valorSocios": 24997,
+    "valorNoSocios": 36358
+  },
+  {
+    "categoria": "concepto",
+    "nombre": "Zona Oeste",
+    "valorSocios": 23860,
+    "valorNoSocios": 29541
+  },
+  {
+    "categoria": "concepto",
+    "nombre": "Zona Sur",
+    "valorSocios": 27269,
+    "valorNoSocios": 32950
+  },
+  {
+    "categoria": "concepto",
+    "nombre": "Zona Norte",
+    "valorSocios": 29996,
+    "valorNoSocios": 36358
+  },
+  {
+    "categoria": "concepto",
+    "nombre": "Control de Ausentismo KM Excedente C/U",
+    "valorSocios": 2046,
+    "valorNoSocios": 3182
+  },
+  {
+    "categoria": "Adicionales Laboratorio",
+    "nombre": "Grupo y Factor (C/U)",
+    "valorSocios": 5973,
+    "valorNoSocios": 9296
+  },
+  {
+    "categoria": "Adicionales Laboratorio",
+    "nombre": "Colesterol Total",
+    "valorSocios": 4694,
+    "valorNoSocios": 5943
+  },
+  {
+    "categoria": "Adicionales Laboratorio",
+    "nombre": "HDL",
+    "valorSocios": 3661,
+    "valorNoSocios": 5684
+  },
+  {
+    "catego": "Adicionales Laboratorio",
+    "nombre": "LDL",
+    "valorSocios": 4817,
+    "valorNoSocios": 7466
+  },
+  {
+    "categoria": "Adicionales Laboratorio",
+    "nombre": "Triglicéridos",
+    "valorSocios": 4312,
+    "valorNoSocios": 6060
+  },
+  {
+    "categoria": "Adicionales Laboratorio",
+    "nombre": "Reacción de Huddleson",
+    "valorSocios": 3471,
+    "valorNoSocios": 4687
+  },
+  {
+    "categoria": "Adicionales Laboratorio",
+    "nombre": "V.D.R.L",
+    "valorSocios": 7691,
+    "valorNoSocios": 9905
+  },
+  {
+    "categoria": "Adicionales Laboratorio",
+    "nombre": "Hepatograma",
+    "valorSocios": 7225,
+    "valorNoSocios": 11223
+  },
+  {
+    "categoria": "Adicionales Laboratorio",
+    "nombre": "TSH",
+    "valorSocios": 10693,
+    "valorNoSocios": 16569
+  },
+  {
+    "categoria": "Adicionales Laboratorio",
+    "nombre": "T3",
+    "valorSocios": 10693,
+    "valorNoSocios": 16569
+  },
+  {
+    "categoria": "Adicionales Laboratorio",
+    "nombre": "T4",
+    "valorSocios": 10693,
+    "valorNoSocios": 16569
+  }
+]

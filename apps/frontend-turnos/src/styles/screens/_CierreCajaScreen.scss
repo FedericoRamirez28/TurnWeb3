@@ -1,0 +1,235 @@
+.cierre-caja-screen {
+  padding: var(--space-lg) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* ===== Planilla principal ===== */
+
+.cierre-caja {
+  &__table {
+    margin-top: var(--space);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    background: #f9fbff;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__header-row,
+  &__row {
+    display: grid;
+    grid-template-columns: 90px 100px 110px minmax(0, 1.6fr) 110px 1.3fr 90px;
+    gap: 8px;
+    padding: 8px 14px;
+    font-size: 0.82rem;
+
+    @media (max-width: 960px) {
+      grid-template-columns: 80px 90px 0px minmax(0, 1.7fr) 90px 1.4fr 80px;
+      & > :nth-child(3) {
+        display: none;
+      }
+    }
+  }
+
+  &__header-row {
+    background: #e5ecfa;
+    font-weight: 600;
+    color: var(--color-ink-soft);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  &__body {
+    max-height: 420px;
+    overflow-y: auto;
+    background: #ffffff;
+  }
+
+  &__row:nth-child(odd) {
+    background: #f8fafc;
+  }
+
+  &__row:nth-child(even) {
+    background: #ffffff;
+  }
+
+  &__col-monto {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__empty {
+    margin: 10px 14px 14px;
+    font-size: 0.85rem;
+    color: var(--color-ink-soft);
+  }
+
+  &__total-bar {
+    margin-top: auto;
+    padding: 10px 14px;
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    background: #eef2ff;
+    font-size: 0.9rem;
+  }
+
+  &__total-label {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  &__total-value {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  /* ===== Caja de ayer ===== */
+
+  &__yesterday {
+    background: #edf1fa;
+    border-radius: var(--radius-lg);
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__yesterday-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.85rem;
+  }
+
+  &__yesterday-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  &__yesterday-label {
+    font-weight: 600;
+  }
+
+  &__yesterday-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 4px 6px;
+    border-radius: 999px;
+    transition: background var(--transition-fast);
+  }
+
+  &__yesterday-btn:hover {
+    background: rgba(15, 23, 42, 0.03);
+  }
+
+  &__yesterday-date {
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__yesterday-empty {
+    color: var(--color-ink-soft);
+  }
+
+  &__yesterday-actions {
+    display: flex;
+    align-items: center;
+  }
+}
+
+/* ===== Historial de cajas ===== */
+
+.cierre-caja-history {
+  &__tools {
+    margin-top: var(--space);
+    margin-bottom: 10px;
+  }
+
+  &__list {
+    max-height: 460px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &__item {
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    background: #f9fbff;
+    padding: 8px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition:
+      background var(--transition-fast),
+      box-shadow var(--transition-fast),
+      transform var(--transition-fast);
+  }
+
+  &__item:hover {
+    background: #eef2ff;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+    transform: translateY(-1px);
+  }
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__date {
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__right {
+    font-weight: 600;
+  }
+
+  &__total {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.cierre-caja__pdf-tag{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  line-height: 1;
+  white-space: nowrap;
+
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: #f9735b;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+.cierre-caja__pdf-icon{
+  width: 14px;
+  height: 14px;
+  display: block;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+.card__header--compact{
+  display: flexbox;
+  justify-content: space-between
+}

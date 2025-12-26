@@ -1,0 +1,134 @@
+/* src/styles/screens/_adicionales.scss */
+
+.adicionales {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.adicionales__card {
+  display: flex;
+  flex-direction: column;
+}
+
+.adicionales__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space);
+}
+
+.adicionales__title {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.adicionales__subtitle {
+  margin: 6px 0 0;
+  font-size: 0.85rem;
+  color: var(--color-ink-soft);
+}
+
+.adicionales__right {
+  display: flex;
+  gap: var(--space);
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.adicionales__month {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--color-ink-soft);
+  min-width: 220px;
+}
+
+.adicionales__search {
+  margin-top: var(--space);
+}
+
+.adicionales__empty {
+  margin-top: var(--space);
+  padding: 12px;
+  color: var(--color-ink-soft);
+}
+
+.adicionales__groups {
+  margin-top: var(--space);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space);
+}
+
+.adicionales__group {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.65);
+  overflow: hidden;
+}
+
+.adicionales__groupHead {
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.adicionales__groupHead h3 {
+  margin: 0;
+  font-weight: 800;
+  color: var(--color-ink);
+}
+
+.muted {
+  font-size: 0.85rem;
+  color: var(--color-ink-soft);
+}
+
+.adicionales__tableWrap {
+  width: 100%;
+  overflow: auto;
+}
+
+.adicionales__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.adicionales__table thead th {
+  text-align: left;
+  font-weight: 700;
+  color: var(--color-ink);
+  background: rgba(255, 255, 255, 0.6);
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  white-space: nowrap;
+}
+
+.adicionales__table tbody td {
+  padding: 10px 14px;
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  vertical-align: top;
+}
+
+.adicionales__table tbody td:last-child {
+  min-width: 320px;
+}
+
+@media (max-width: 980px) {
+  .adicionales__table tbody td:last-child {
+    min-width: 240px;
+  }
+}
+
+@media (max-width: 520px) {
+  .adicionales__month {
+    min-width: 160px;
+  }
+}

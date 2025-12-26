@@ -1,0 +1,7832 @@
+[
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "25 HIDROXIVITAMINA D",
+    "plan": "BASE",
+    "valor": 43892.69
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "25 HIDROXIVITAMINA D",
+    "plan": "ESMERALDA",
+    "valor": 42063.83
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "25 HIDROXIVITAMINA D",
+    "plan": "RUBI",
+    "valor": 40234.97
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "25 HIDROXIVITAMINA D",
+    "plan": "DORADO",
+    "valor": 40234.97
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "25 HIDROXIVITAMINA D",
+    "plan": "PARTICULAR",
+    "valor": 49379.28
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "5'NUCLEOTIDASA",
+    "plan": "BASE",
+    "valor": 10973.17
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "5'NUCLEOTIDASA",
+    "plan": "ESMERALDA",
+    "valor": 10515.96
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "5'NUCLEOTIDASA",
+    "plan": "RUBI",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "5'NUCLEOTIDASA",
+    "plan": "DORADO",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "5'NUCLEOTIDASA",
+    "plan": "PARTICULAR",
+    "valor": 12344.82
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ACIDO FENIL ACETICO",
+    "plan": "BASE",
+    "valor": 20849.02
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ACIDO FENIL ACETICO",
+    "plan": "ESMERALDA",
+    "valor": 19980.31
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ACIDO FENIL ACETICO",
+    "plan": "RUBI",
+    "valor": 19111.6
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ACIDO FENIL ACETICO",
+    "plan": "DORADO",
+    "valor": 19111.6
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ACIDO FENIL ACETICO",
+    "plan": "PARTICULAR",
+    "valor": 23455.15
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ACIDO FOLICO",
+    "plan": "BASE",
+    "valor": 15362.43
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ACIDO FOLICO",
+    "plan": "ESMERALDA",
+    "valor": 14722.33
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ACIDO FOLICO",
+    "plan": "RUBI",
+    "valor": 14082.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ACIDO FOLICO",
+    "plan": "DORADO",
+    "valor": 14082.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ACIDO FOLICO",
+    "plan": "PARTICULAR",
+    "valor": 17282.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ACIDO HOMOVANILICO",
+    "plan": "BASE",
+    "valor": 21946.35
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ACIDO HOMOVANILICO",
+    "plan": "ESMERALDA",
+    "valor": 21031.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ACIDO HOMOVANILICO",
+    "plan": "RUBI",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ACIDO HOMOVANILICO",
+    "plan": "DORADO",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ACIDO HOMOVANILICO",
+    "plan": "PARTICULAR",
+    "valor": 24689.64
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ACTH",
+    "plan": "BASE",
+    "valor": 13167.8
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ACTH",
+    "plan": "ESMERALDA",
+    "valor": 12619.15
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ACTH",
+    "plan": "RUBI",
+    "valor": 12070.49
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ACTH",
+    "plan": "DORADO",
+    "valor": 12070.49
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ACTH",
+    "plan": "PARTICULAR",
+    "valor": 14813.78
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ADRENALINA",
+    "plan": "BASE",
+    "valor": 27432.93
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ADRENALINA",
+    "plan": "ESMERALDA",
+    "valor": 26289.89
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ADRENALINA",
+    "plan": "RUBI",
+    "valor": 25146.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ADRENALINA",
+    "plan": "DORADO",
+    "valor": 25146.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ADRENALINA",
+    "plan": "PARTICULAR",
+    "valor": 30862.05
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ALBUMINURIA EN ORINA",
+    "plan": "BASE",
+    "valor": 13716.47
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ALBUMINURIA EN ORINA",
+    "plan": "ESMERALDA",
+    "valor": 13144.95
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ALBUMINURIA EN ORINA",
+    "plan": "RUBI",
+    "valor": 12573.43
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ALBUMINURIA EN ORINA",
+    "plan": "DORADO",
+    "valor": 12573.43
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ALBUMINURIA EN ORINA",
+    "plan": "PARTICULAR",
+    "valor": 15431.02
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ALDOSTERONA",
+    "plan": "BASE",
+    "valor": 16459.76
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ALDOSTERONA",
+    "plan": "ESMERALDA",
+    "valor": 15773.94
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ALDOSTERONA",
+    "plan": "RUBI",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ALDOSTERONA",
+    "plan": "DORADO",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ALDOSTERONA",
+    "plan": "PARTICULAR",
+    "valor": 18517.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ALFA 1 ANTITRIPSINA",
+    "plan": "BASE",
+    "valor": 21946.35
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ALFA 1 ANTITRIPSINA",
+    "plan": "ESMERALDA",
+    "valor": 21031.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ALFA 1 ANTITRIPSINA",
+    "plan": "RUBI",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ALFA 1 ANTITRIPSINA",
+    "plan": "DORADO",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ALFA 1 ANTITRIPSINA",
+    "plan": "PARTICULAR",
+    "valor": 24689.64
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ALFA FETO PROTEINA",
+    "plan": "BASE",
+    "valor": 10973.17
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ALFA FETO PROTEINA",
+    "plan": "ESMERALDA",
+    "valor": 10515.96
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ALFA FETO PROTEINA",
+    "plan": "RUBI",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ALFA FETO PROTEINA",
+    "plan": "DORADO",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ALFA FETO PROTEINA",
+    "plan": "PARTICULAR",
+    "valor": 12344.82
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "AMILASA",
+    "plan": "BASE",
+    "valor": 4389.26
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "AMILASA",
+    "plan": "ESMERALDA",
+    "valor": 4206.38
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "AMILASA",
+    "plan": "RUBI",
+    "valor": 4023.49
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "AMILASA",
+    "plan": "DORADO",
+    "valor": 4023.49
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "AMILASA",
+    "plan": "PARTICULAR",
+    "valor": 4937.92
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANDROSTERODIONA DELTA 4",
+    "plan": "BASE",
+    "valor": 13167.8
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANDROSTERODIONA DELTA 4",
+    "plan": "ESMERALDA",
+    "valor": 12619.15
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANDROSTERODIONA DELTA 4",
+    "plan": "RUBI",
+    "valor": 12070.49
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANDROSTERODIONA DELTA 4",
+    "plan": "DORADO",
+    "valor": 12070.49
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANDROSTERODIONA DELTA 4",
+    "plan": "PARTICULAR",
+    "valor": 14813.78
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANCA",
+    "plan": "BASE",
+    "valor": 51573.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANCA",
+    "plan": "ESMERALDA",
+    "valor": 49425.0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANCA",
+    "plan": "RUBI",
+    "valor": 47276.08
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANCA",
+    "plan": "DORADO",
+    "valor": 47276.08
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANCA",
+    "plan": "PARTICULAR",
+    "valor": 58020.65
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIFOSFOLIPIDOS (G-M ) C/U",
+    "plan": "BASE",
+    "valor": 27432.93
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIFOSFOLIPIDOS (G-M ) C/U",
+    "plan": "ESMERALDA",
+    "valor": 26289.89
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIFOSFOLIPIDOS (G-M ) C/U",
+    "plan": "RUBI",
+    "valor": 25146.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIFOSFOLIPIDOS (G-M ) C/U",
+    "plan": "DORADO",
+    "valor": 25146.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIFOSFOLIPIDOS (G-M ) C/U",
+    "plan": "PARTICULAR",
+    "valor": 30862.05
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIGLIADINA IGG   /  ANTIENDOMISIO C/ U",
+    "plan": "BASE",
+    "valor": 27432.93
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIGLIADINA IGG   /  ANTIENDOMISIO C/ U",
+    "plan": "ESMERALDA",
+    "valor": 26289.89
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIGLIADINA IGG   /  ANTIENDOMISIO C/ U",
+    "plan": "RUBI",
+    "valor": 25146.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIGLIADINA IGG   /  ANTIENDOMISIO C/ U",
+    "plan": "DORADO",
+    "valor": 25146.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIGLIADINA IGG   /  ANTIENDOMISIO C/ U",
+    "plan": "PARTICULAR",
+    "valor": 30862.05
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIGLIADINA IGA",
+    "plan": "BASE",
+    "valor": 27432.93
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIGLIADINA IGA",
+    "plan": "ESMERALDA",
+    "valor": 26289.89
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIGLIADINA IGA",
+    "plan": "RUBI",
+    "valor": 25146.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIGLIADINA IGA",
+    "plan": "DORADO",
+    "valor": 25146.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIGLIADINA IGA",
+    "plan": "PARTICULAR",
+    "valor": 30862.05
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIGLIADINA IGM",
+    "plan": "BASE",
+    "valor": 27432.93
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIGLIADINA IGM",
+    "plan": "ESMERALDA",
+    "valor": 26289.89
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIGLIADINA IGM",
+    "plan": "RUBI",
+    "valor": 25146.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIGLIADINA IGM",
+    "plan": "DORADO",
+    "valor": 25146.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIGLIADINA IGM",
+    "plan": "PARTICULAR",
+    "valor": 30862.05
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTITIROGLOBULINA",
+    "plan": "BASE",
+    "valor": 10973.17
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTITIROGLOBULINA",
+    "plan": "ESMERALDA",
+    "valor": 10515.96
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTITIROGLOBULINA",
+    "plan": "RUBI",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTITIROGLOBULINA",
+    "plan": "DORADO",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTITIROGLOBULINA",
+    "plan": "PARTICULAR",
+    "valor": 12344.82
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICARDIOLIPINA G",
+    "plan": "BASE",
+    "valor": 19751.71
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICARDIOLIPINA G",
+    "plan": "ESMERALDA",
+    "valor": 18928.73
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICARDIOLIPINA G",
+    "plan": "RUBI",
+    "valor": 18105.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICARDIOLIPINA G",
+    "plan": "DORADO",
+    "valor": 18105.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICARDIOLIPINA G",
+    "plan": "PARTICULAR",
+    "valor": 22220.68
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICARDIOLIPINA M",
+    "plan": "BASE",
+    "valor": 19751.71
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICARDIOLIPINA M",
+    "plan": "ESMERALDA",
+    "valor": 18928.73
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICARDIOLIPINA M",
+    "plan": "RUBI",
+    "valor": 18105.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICARDIOLIPINA M",
+    "plan": "DORADO",
+    "valor": 18105.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICARDIOLIPINA M",
+    "plan": "PARTICULAR",
+    "valor": 22220.68
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICOAGULANTE LUPICO/FIBRIGENO",
+    "plan": "BASE",
+    "valor": 32919.52
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICOAGULANTE LUPICO/FIBRIGENO",
+    "plan": "ESMERALDA",
+    "valor": 31547.87
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICOAGULANTE LUPICO/FIBRIGENO",
+    "plan": "RUBI",
+    "valor": 30176.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICOAGULANTE LUPICO/FIBRIGENO",
+    "plan": "DORADO",
+    "valor": 30176.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICOAGULANTE LUPICO/FIBRIGENO",
+    "plan": "PARTICULAR",
+    "valor": 37034.46
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI B2 GLICO PROTEINA IGA",
+    "plan": "BASE",
+    "valor": 32919.52
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI B2 GLICO PROTEINA IGA",
+    "plan": "ESMERALDA",
+    "valor": 31547.87
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI B2 GLICO PROTEINA IGA",
+    "plan": "RUBI",
+    "valor": 30176.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI B2 GLICO PROTEINA IGA",
+    "plan": "DORADO",
+    "valor": 30176.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI B2 GLICO PROTEINA IGA",
+    "plan": "PARTICULAR",
+    "valor": 37034.46
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI B2 GLICO PROTEINA IGG",
+    "plan": "BASE",
+    "valor": 32919.52
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI B2 GLICO PROTEINA IGG",
+    "plan": "ESMERALDA",
+    "valor": 31547.87
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI B2 GLICO PROTEINA IGG",
+    "plan": "RUBI",
+    "valor": 30176.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI B2 GLICO PROTEINA IGG",
+    "plan": "DORADO",
+    "valor": 30176.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI B2 GLICO PROTEINA IGG",
+    "plan": "PARTICULAR",
+    "valor": 37034.46
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI B2 GLICO PROTEINA IGM",
+    "plan": "BASE",
+    "valor": 32919.52
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI B2 GLICO PROTEINA IGM",
+    "plan": "ESMERALDA",
+    "valor": 31547.87
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI B2 GLICO PROTEINA IGM",
+    "plan": "RUBI",
+    "valor": 30176.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI B2 GLICO PROTEINA IGM",
+    "plan": "DORADO",
+    "valor": 30176.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI B2 GLICO PROTEINA IGM",
+    "plan": "PARTICULAR",
+    "valor": 37034.46
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICUERPO ANTIMUSCULO LISO",
+    "plan": "BASE",
+    "valor": 10973.17
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICUERPO ANTIMUSCULO LISO",
+    "plan": "ESMERALDA",
+    "valor": 10515.96
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICUERPO ANTIMUSCULO LISO",
+    "plan": "RUBI",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICUERPO ANTIMUSCULO LISO",
+    "plan": "DORADO",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICUERPO ANTIMUSCULO LISO",
+    "plan": "PARTICULAR",
+    "valor": 12344.82
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI MITO AMA",
+    "plan": "BASE",
+    "valor": 10973.17
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI MITO AMA",
+    "plan": "ESMERALDA",
+    "valor": 10515.96
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI MITO AMA",
+    "plan": "RUBI",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI MITO AMA",
+    "plan": "DORADO",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI MITO AMA",
+    "plan": "PARTICULAR",
+    "valor": 12344.82
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI MICONDRIA M2",
+    "plan": "BASE",
+    "valor": 29627.56
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI MICONDRIA M2",
+    "plan": "ESMERALDA",
+    "valor": 28393.08
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI MICONDRIA M2",
+    "plan": "RUBI",
+    "valor": 27158.6
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI MICONDRIA M2",
+    "plan": "DORADO",
+    "valor": 27158.6
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI MICONDRIA M2",
+    "plan": "PARTICULAR",
+    "valor": 33331.01
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICUERPO ANTIPEROXIDASA",
+    "plan": "BASE",
+    "valor": 13167.8
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICUERPO ANTIPEROXIDASA",
+    "plan": "ESMERALDA",
+    "valor": 12619.15
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICUERPO ANTIPEROXIDASA",
+    "plan": "RUBI",
+    "valor": 12070.49
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICUERPO ANTIPEROXIDASA",
+    "plan": "DORADO",
+    "valor": 12070.49
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICUERPO ANTIPEROXIDASA",
+    "plan": "PARTICULAR",
+    "valor": 14813.78
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICUERPO ANTIRECEPTOR DE TSH",
+    "plan": "BASE",
+    "valor": 43892.69
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICUERPO ANTIRECEPTOR DE TSH",
+    "plan": "ESMERALDA",
+    "valor": 42063.83
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICUERPO ANTIRECEPTOR DE TSH",
+    "plan": "RUBI",
+    "valor": 40234.97
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICUERPO ANTIRECEPTOR DE TSH",
+    "plan": "DORADO",
+    "valor": 40234.97
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICUERPO ANTIRECEPTOR DE TSH",
+    "plan": "PARTICULAR",
+    "valor": 49379.28
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICUERPOS ANTITIROGLOBULINA ATG",
+    "plan": "BASE",
+    "valor": 10973.17
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICUERPOS ANTITIROGLOBULINA ATG",
+    "plan": "ESMERALDA",
+    "valor": 10515.96
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICUERPOS ANTITIROGLOBULINA ATG",
+    "plan": "RUBI",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICUERPOS ANTITIROGLOBULINA ATG",
+    "plan": "DORADO",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICUERPOS ANTITIROGLOBULINA ATG",
+    "plan": "PARTICULAR",
+    "valor": 12344.82
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICUERPO E DE HEPATITIS B",
+    "plan": "BASE",
+    "valor": 16459.76
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICUERPO E DE HEPATITIS B",
+    "plan": "ESMERALDA",
+    "valor": 15773.94
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICUERPO E DE HEPATITIS B",
+    "plan": "RUBI",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICUERPO E DE HEPATITIS B",
+    "plan": "DORADO",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTICUERPO E DE HEPATITIS B",
+    "plan": "PARTICULAR",
+    "valor": 18517.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIGENO PROSTATICO ESPECIFICO-TOTAL",
+    "plan": "BASE",
+    "valor": 19751.71
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIGENO PROSTATICO ESPECIFICO-TOTAL",
+    "plan": "ESMERALDA",
+    "valor": 18928.73
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIGENO PROSTATICO ESPECIFICO-TOTAL",
+    "plan": "RUBI",
+    "valor": 18105.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIGENO PROSTATICO ESPECIFICO-TOTAL",
+    "plan": "DORADO",
+    "valor": 18105.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIGENO PROSTATICO ESPECIFICO-TOTAL",
+    "plan": "PARTICULAR",
+    "valor": 22220.68
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PSA LIBRE + TOTAL",
+    "plan": "BASE",
+    "valor": 39503.43
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PSA LIBRE + TOTAL",
+    "plan": "ESMERALDA",
+    "valor": 37857.45
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PSA LIBRE + TOTAL",
+    "plan": "RUBI",
+    "valor": 36211.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PSA LIBRE + TOTAL",
+    "plan": "DORADO",
+    "valor": 36211.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PSA LIBRE + TOTAL",
+    "plan": "PARTICULAR",
+    "valor": 44441.36
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIDESOXIRRIBONUCLEASA ANTI DNA",
+    "plan": "BASE",
+    "valor": 16459.76
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIDESOXIRRIBONUCLEASA ANTI DNA",
+    "plan": "ESMERALDA",
+    "valor": 15773.94
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIDESOXIRRIBONUCLEASA ANTI DNA",
+    "plan": "RUBI",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIDESOXIRRIBONUCLEASA ANTI DNA",
+    "plan": "DORADO",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTIDESOXIRRIBONUCLEASA ANTI DNA",
+    "plan": "PARTICULAR",
+    "valor": 18517.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI SCL 70",
+    "plan": "BASE",
+    "valor": 21946.35
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI SCL 70",
+    "plan": "ESMERALDA",
+    "valor": 21031.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI SCL 70",
+    "plan": "RUBI",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI SCL 70",
+    "plan": "DORADO",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI SCL 70",
+    "plan": "PARTICULAR",
+    "valor": 24689.64
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI LKM",
+    "plan": "BASE",
+    "valor": 21946.35
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI LKM",
+    "plan": "ESMERALDA",
+    "valor": 21031.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI LKM",
+    "plan": "RUBI",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI LKM",
+    "plan": "DORADO",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTI LKM",
+    "plan": "PARTICULAR",
+    "valor": 24689.64
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTITRASGLUTAMINASA IGA",
+    "plan": "BASE",
+    "valor": 25238.3
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTITRASGLUTAMINASA IGA",
+    "plan": "ESMERALDA",
+    "valor": 24186.71
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTITRASGLUTAMINASA IGA",
+    "plan": "RUBI",
+    "valor": 23135.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTITRASGLUTAMINASA IGA",
+    "plan": "DORADO",
+    "valor": 23135.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ANTITRASGLUTAMINASA IGA",
+    "plan": "PARTICULAR",
+    "valor": 28393.09
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "APOLIPOPROTEINA A",
+    "plan": "BASE",
+    "valor": 12070.5
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "APOLIPOPROTEINA A",
+    "plan": "ESMERALDA",
+    "valor": 11567.56
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "APOLIPOPROTEINA A",
+    "plan": "RUBI",
+    "valor": 11064.62
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "APOLIPOPROTEINA A",
+    "plan": "DORADO",
+    "valor": 11064.62
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "APOLIPOPROTEINA A",
+    "plan": "PARTICULAR",
+    "valor": 13579.31
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "APOLIPOPROTEINA B",
+    "plan": "BASE",
+    "valor": 12070.5
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "APOLIPOPROTEINA B",
+    "plan": "ESMERALDA",
+    "valor": 11567.56
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "APOLIPOPROTEINA B",
+    "plan": "RUBI",
+    "valor": 11064.62
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "APOLIPOPROTEINA B",
+    "plan": "DORADO",
+    "valor": 11064.62
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "APOLIPOPROTEINA B",
+    "plan": "PARTICULAR",
+    "valor": 13579.31
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ARCO 5 HIDATIDOSIS",
+    "plan": "BASE",
+    "valor": 24140.98
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ARCO 5 HIDATIDOSIS",
+    "plan": "ESMERALDA",
+    "valor": 23135.1
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ARCO 5 HIDATIDOSIS",
+    "plan": "RUBI",
+    "valor": 22129.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ARCO 5 HIDATIDOSIS",
+    "plan": "DORADO",
+    "valor": 22129.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ARCO 5 HIDATIDOSIS",
+    "plan": "PARTICULAR",
+    "valor": 27158.6
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ASTO (ANTIESTREPTOLISINAS)",
+    "plan": "BASE",
+    "valor": 6583.73
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ASTO (ANTIESTREPTOLISINAS)",
+    "plan": "ESMERALDA",
+    "valor": 6309.41
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ASTO (ANTIESTREPTOLISINAS)",
+    "plan": "RUBI",
+    "valor": 6035.08
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ASTO (ANTIESTREPTOLISINAS)",
+    "plan": "DORADO",
+    "valor": 6035.08
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ASTO (ANTIESTREPTOLISINAS)",
+    "plan": "PARTICULAR",
+    "valor": 7406.69
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "BETA 2 MICROGLOBULINA",
+    "plan": "BASE",
+    "valor": 19751.71
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "BETA 2 MICROGLOBULINA",
+    "plan": "ESMERALDA",
+    "valor": 18928.73
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "BETA 2 MICROGLOBULINA",
+    "plan": "RUBI",
+    "valor": 18105.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "BETA 2 MICROGLOBULINA",
+    "plan": "DORADO",
+    "valor": 18105.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "BETA 2 MICROGLOBULINA",
+    "plan": "PARTICULAR",
+    "valor": 22220.68
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "BETA SUB UNIDAD CUALITATIVA",
+    "plan": "BASE",
+    "valor": 8778.54
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "BETA SUB UNIDAD CUALITATIVA",
+    "plan": "ESMERALDA",
+    "valor": 8412.77
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "BETA SUB UNIDAD CUALITATIVA",
+    "plan": "RUBI",
+    "valor": 8047.0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "BETA SUB UNIDAD CUALITATIVA",
+    "plan": "DORADO",
+    "valor": 8047.0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "BETA SUB UNIDAD CUALITATIVA",
+    "plan": "PARTICULAR",
+    "valor": 9875.86
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "BETA SUB UNIDAD CUANTITATIVA",
+    "plan": "BASE",
+    "valor": 15362.43
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "BETA SUB UNIDAD CUANTITATIVA",
+    "plan": "ESMERALDA",
+    "valor": 14722.33
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "BETA SUB UNIDAD CUANTITATIVA",
+    "plan": "RUBI",
+    "valor": 14082.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "BETA SUB UNIDAD CUANTITATIVA",
+    "plan": "DORADO",
+    "valor": 14082.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "BETA SUB UNIDAD CUANTITATIVA",
+    "plan": "PARTICULAR",
+    "valor": 17282.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "C3",
+    "plan": "BASE",
+    "valor": 5486.59
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "C3",
+    "plan": "ESMERALDA",
+    "valor": 5257.98
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "C3",
+    "plan": "RUBI",
+    "valor": 5029.37
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "C3",
+    "plan": "DORADO",
+    "valor": 5029.37
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "C3",
+    "plan": "PARTICULAR",
+    "valor": 6172.41
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "C4",
+    "plan": "BASE",
+    "valor": 5486.59
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "C4",
+    "plan": "ESMERALDA",
+    "valor": 5257.98
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "C4",
+    "plan": "RUBI",
+    "valor": 5029.37
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "C4",
+    "plan": "DORADO",
+    "valor": 5029.37
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "C4",
+    "plan": "PARTICULAR",
+    "valor": 6172.41
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CA 15.3",
+    "plan": "BASE",
+    "valor": 21946.35
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CA 15.3",
+    "plan": "ESMERALDA",
+    "valor": 21031.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CA 15.3",
+    "plan": "RUBI",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CA 15.3",
+    "plan": "DORADO",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CA 15.3",
+    "plan": "PARTICULAR",
+    "valor": 24689.64
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CA 125",
+    "plan": "BASE",
+    "valor": 21946.35
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CA 125",
+    "plan": "ESMERALDA",
+    "valor": 21031.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CA 125",
+    "plan": "RUBI",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CA 125",
+    "plan": "DORADO",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CA 125",
+    "plan": "PARTICULAR",
+    "valor": 24689.64
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CA 19.9",
+    "plan": "BASE",
+    "valor": 21946.35
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CA 19.9",
+    "plan": "ESMERALDA",
+    "valor": 21031.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CA 19.9",
+    "plan": "RUBI",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CA 19.9",
+    "plan": "DORADO",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CA 19.9",
+    "plan": "PARTICULAR",
+    "valor": 24689.64
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CA 21.1( PULMONG",
+    "plan": "BASE",
+    "valor": 65839.04
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CA 21.1( PULMONG",
+    "plan": "ESMERALDA",
+    "valor": 63095.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CA 21.1( PULMONG",
+    "plan": "RUBI",
+    "valor": 60352.45
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CA 21.1( PULMONG",
+    "plan": "DORADO",
+    "valor": 60352.45
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CA 21.1( PULMONG",
+    "plan": "PARTICULAR",
+    "valor": 74068.92
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CALCIO TOTAL ORINA O SANGRE",
+    "plan": "BASE",
+    "valor": 2194.63
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CALCIO TOTAL ORINA O SANGRE",
+    "plan": "ESMERALDA",
+    "valor": 2103.19
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CALCIO TOTAL ORINA O SANGRE",
+    "plan": "RUBI",
+    "valor": 2011.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CALCIO TOTAL ORINA O SANGRE",
+    "plan": "DORADO",
+    "valor": 2011.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CALCIO TOTAL ORINA O SANGRE",
+    "plan": "PARTICULAR",
+    "valor": 2468.96
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CALCITONINA",
+    "plan": "BASE",
+    "valor": 17557.08
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CALCITONINA",
+    "plan": "ESMERALDA",
+    "valor": 16825.54
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CALCITONINA",
+    "plan": "RUBI",
+    "valor": 16093.99
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CALCITONINA",
+    "plan": "DORADO",
+    "valor": 16093.99
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CALCITONINA",
+    "plan": "PARTICULAR",
+    "valor": 19751.72
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CALCIO IONICO",
+    "plan": "BASE",
+    "valor": 4389.26
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CALCIO IONICO",
+    "plan": "ESMERALDA",
+    "valor": 4206.38
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CALCIO IONICO",
+    "plan": "RUBI",
+    "valor": 4023.49
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CALCIO IONICO",
+    "plan": "DORADO",
+    "valor": 4023.49
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CALCIO IONICO",
+    "plan": "PARTICULAR",
+    "valor": 4937.92
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CARGA VIRAL HIV",
+    "plan": "BASE",
+    "valor": 175570.76
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CARGA VIRAL HIV",
+    "plan": "ESMERALDA",
+    "valor": 168255.32
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CARGA VIRAL HIV",
+    "plan": "RUBI",
+    "valor": 160939.87
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CARGA VIRAL HIV",
+    "plan": "DORADO",
+    "valor": 160939.87
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CARGA VIRAL HIV",
+    "plan": "PARTICULAR",
+    "valor": 197517.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CARGA VIRAL HEPATITIS C",
+    "plan": "BASE",
+    "valor": 203003.6
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CARGA VIRAL HEPATITIS C",
+    "plan": "ESMERALDA",
+    "valor": 194545.12
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CARGA VIRAL HEPATITIS C",
+    "plan": "RUBI",
+    "valor": 186086.64
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CARGA VIRAL HEPATITIS C",
+    "plan": "DORADO",
+    "valor": 186086.64
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CARGA VIRAL HEPATITIS C",
+    "plan": "PARTICULAR",
+    "valor": 228379.06
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CD4",
+    "plan": "BASE",
+    "valor": 38406.1
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CD4",
+    "plan": "ESMERALDA",
+    "valor": 36805.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CD4",
+    "plan": "RUBI",
+    "valor": 35205.6
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CD4",
+    "plan": "DORADO",
+    "valor": 35205.6
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CD4",
+    "plan": "PARTICULAR",
+    "valor": 43206.87
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CD8",
+    "plan": "BASE",
+    "valor": 38406.1
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CD8",
+    "plan": "ESMERALDA",
+    "valor": 36805.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CD8",
+    "plan": "RUBI",
+    "valor": 35205.6
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CD8",
+    "plan": "DORADO",
+    "valor": 35205.6
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CD8",
+    "plan": "PARTICULAR",
+    "valor": 43206.87
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CEA (ANTIGENO CARCINOEMBRIONARIO)",
+    "plan": "BASE",
+    "valor": 13716.47
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CEA (ANTIGENO CARCINOEMBRIONARIO)",
+    "plan": "ESMERALDA",
+    "valor": 13144.95
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CEA (ANTIGENO CARCINOEMBRIONARIO)",
+    "plan": "RUBI",
+    "valor": 12573.43
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CEA (ANTIGENO CARCINOEMBRIONARIO)",
+    "plan": "DORADO",
+    "valor": 12573.43
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CEA (ANTIGENO CARCINOEMBRIONARIO)",
+    "plan": "PARTICULAR",
+    "valor": 15431.02
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CHAGAS INMUNOFLUORESCENCIA    IFI",
+    "plan": "BASE",
+    "valor": 15362.43
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CHAGAS INMUNOFLUORESCENCIA    IFI",
+    "plan": "ESMERALDA",
+    "valor": 14722.33
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CHAGAS INMUNOFLUORESCENCIA    IFI",
+    "plan": "RUBI",
+    "valor": 14082.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CHAGAS INMUNOFLUORESCENCIA    IFI",
+    "plan": "DORADO",
+    "valor": 14082.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CHAGAS INMUNOFLUORESCENCIA    IFI",
+    "plan": "PARTICULAR",
+    "valor": 17282.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CLEARENCE DE CRATININA",
+    "plan": "BASE",
+    "valor": 5486.59
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CLEARENCE DE CRATININA",
+    "plan": "ESMERALDA",
+    "valor": 5257.98
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CLEARENCE DE CRATININA",
+    "plan": "RUBI",
+    "valor": 5029.37
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CLEARENCE DE CRATININA",
+    "plan": "DORADO",
+    "valor": 5029.37
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CLEARENCE DE CRATININA",
+    "plan": "PARTICULAR",
+    "valor": 6172.41
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CLORO ORINA O SANGRE",
+    "plan": "BASE",
+    "valor": 2194.63
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CLORO ORINA O SANGRE",
+    "plan": "ESMERALDA",
+    "valor": 2103.19
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CLORO ORINA O SANGRE",
+    "plan": "RUBI",
+    "valor": 2011.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CLORO ORINA O SANGRE",
+    "plan": "DORADO",
+    "valor": 2011.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CLORO ORINA O SANGRE",
+    "plan": "PARTICULAR",
+    "valor": 2468.96
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CITOMEGALOVIRUS IGG",
+    "plan": "BASE",
+    "valor": 16459.76
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CITOMEGALOVIRUS IGG",
+    "plan": "ESMERALDA",
+    "valor": 15773.94
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CITOMEGALOVIRUS IGG",
+    "plan": "RUBI",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CITOMEGALOVIRUS IGG",
+    "plan": "DORADO",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CITOMEGALOVIRUS IGG",
+    "plan": "PARTICULAR",
+    "valor": 18517.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CITOMEGALOVIRUS IGM",
+    "plan": "BASE",
+    "valor": 21946.35
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CITOMEGALOVIRUS IGM",
+    "plan": "ESMERALDA",
+    "valor": 21031.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CITOMEGALOVIRUS IGM",
+    "plan": "RUBI",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CITOMEGALOVIRUS IGM",
+    "plan": "DORADO",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CITOMEGALOVIRUS IGM",
+    "plan": "PARTICULAR",
+    "valor": 24689.64
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COAGULOGRAMA",
+    "plan": "BASE",
+    "valor": 8778.54
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COAGULOGRAMA",
+    "plan": "ESMERALDA",
+    "valor": 8412.77
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COAGULOGRAMA",
+    "plan": "RUBI",
+    "valor": 8047.0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COAGULOGRAMA",
+    "plan": "DORADO",
+    "valor": 8047.0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COAGULOGRAMA",
+    "plan": "PARTICULAR",
+    "valor": 9875.86
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COCAINA ( O )",
+    "plan": "BASE",
+    "valor": 19202.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COCAINA ( O )",
+    "plan": "ESMERALDA",
+    "valor": 18402.79
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COCAINA ( O )",
+    "plan": "RUBI",
+    "valor": 17602.66
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COCAINA ( O )",
+    "plan": "DORADO",
+    "valor": 17602.66
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COCAINA ( O )",
+    "plan": "PARTICULAR",
+    "valor": 21603.27
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COFACTOR RISTOCETINA",
+    "plan": "BASE",
+    "valor": 65839.04
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COFACTOR RISTOCETINA",
+    "plan": "ESMERALDA",
+    "valor": 63095.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COFACTOR RISTOCETINA",
+    "plan": "RUBI",
+    "valor": 60352.45
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COFACTOR RISTOCETINA",
+    "plan": "DORADO",
+    "valor": 60352.45
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COFACTOR RISTOCETINA",
+    "plan": "PARTICULAR",
+    "valor": 74068.92
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COMPLEMENTO ACTIVIDAD TOTAL",
+    "plan": "BASE",
+    "valor": 54865.86
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COMPLEMENTO ACTIVIDAD TOTAL",
+    "plan": "ESMERALDA",
+    "valor": 52579.79
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COMPLEMENTO ACTIVIDAD TOTAL",
+    "plan": "RUBI",
+    "valor": 50293.71
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COMPLEMENTO ACTIVIDAD TOTAL",
+    "plan": "DORADO",
+    "valor": 50293.71
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COMPLEMENTO ACTIVIDAD TOTAL",
+    "plan": "PARTICULAR",
+    "valor": 61724.1
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COOMBS  DIRECTA",
+    "plan": "BASE",
+    "valor": 2194.63
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COOMBS  DIRECTA",
+    "plan": "ESMERALDA",
+    "valor": 2103.19
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COOMBS  DIRECTA",
+    "plan": "RUBI",
+    "valor": 2011.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COOMBS  DIRECTA",
+    "plan": "DORADO",
+    "valor": 2011.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COOMBS  DIRECTA",
+    "plan": "PARTICULAR",
+    "valor": 2468.96
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COOMBS  INDIRECTA",
+    "plan": "BASE",
+    "valor": 13167.8
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COOMBS  INDIRECTA",
+    "plan": "ESMERALDA",
+    "valor": 12619.15
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COOMBS  INDIRECTA",
+    "plan": "RUBI",
+    "valor": 12070.49
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COOMBS  INDIRECTA",
+    "plan": "DORADO",
+    "valor": 12070.49
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COOMBS  INDIRECTA",
+    "plan": "PARTICULAR",
+    "valor": 14813.78
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COPROCULTIVO + ATB",
+    "plan": "BASE",
+    "valor": 20847.38
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COPROCULTIVO + ATB",
+    "plan": "ESMERALDA",
+    "valor": 19978.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COPROCULTIVO + ATB",
+    "plan": "RUBI",
+    "valor": 19110.1
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COPROCULTIVO + ATB",
+    "plan": "DORADO",
+    "valor": 19110.1
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COPROCULTIVO + ATB",
+    "plan": "PARTICULAR",
+    "valor": 23453.3
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CORTISOL PLASMATICO",
+    "plan": "BASE",
+    "valor": 10973.17
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CORTISOL PLASMATICO",
+    "plan": "ESMERALDA",
+    "valor": 10515.96
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CORTISOL PLASMATICO",
+    "plan": "RUBI",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CORTISOL PLASMATICO",
+    "plan": "DORADO",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CORTISOL PLASMATICO",
+    "plan": "PARTICULAR",
+    "valor": 12344.82
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CORTISOL LIBRE URINARIO (ORINA DE 24 HS)",
+    "plan": "BASE",
+    "valor": 13167.8
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CORTISOL LIBRE URINARIO (ORINA DE 24 HS)",
+    "plan": "ESMERALDA",
+    "valor": 12619.15
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CORTISOL LIBRE URINARIO (ORINA DE 24 HS)",
+    "plan": "RUBI",
+    "valor": 12070.49
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CORTISOL LIBRE URINARIO (ORINA DE 24 HS)",
+    "plan": "DORADO",
+    "valor": 12070.49
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CORTISOL LIBRE URINARIO (ORINA DE 24 HS)",
+    "plan": "PARTICULAR",
+    "valor": 14813.78
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CROSS LAPS BETA",
+    "plan": "BASE",
+    "valor": 35114.15
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CROSS LAPS BETA",
+    "plan": "ESMERALDA",
+    "valor": 33651.06
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CROSS LAPS BETA",
+    "plan": "RUBI",
+    "valor": 32187.97
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CROSS LAPS BETA",
+    "plan": "DORADO",
+    "valor": 32187.97
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CROSS LAPS BETA",
+    "plan": "PARTICULAR",
+    "valor": 39503.42
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CPK",
+    "plan": "BASE",
+    "valor": 3291.96
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CPK",
+    "plan": "ESMERALDA",
+    "valor": 3154.79
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CPK",
+    "plan": "RUBI",
+    "valor": 3017.63
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CPK",
+    "plan": "DORADO",
+    "valor": 3017.63
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CPK",
+    "plan": "PARTICULAR",
+    "valor": 3703.45
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CK MB",
+    "plan": "BASE",
+    "valor": 10973.17
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CK MB",
+    "plan": "ESMERALDA",
+    "valor": 10515.96
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CK MB",
+    "plan": "RUBI",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CK MB",
+    "plan": "DORADO",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CK MB",
+    "plan": "PARTICULAR",
+    "valor": 12344.82
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CULTIVOS VARIOS C/U",
+    "plan": "BASE",
+    "valor": 12070.5
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CULTIVOS VARIOS C/U",
+    "plan": "ESMERALDA",
+    "valor": 11567.56
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CULTIVOS VARIOS C/U",
+    "plan": "RUBI",
+    "valor": 11064.62
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CULTIVOS VARIOS C/U",
+    "plan": "DORADO",
+    "valor": 11064.62
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CULTIVOS VARIOS C/U",
+    "plan": "PARTICULAR",
+    "valor": 13579.31
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CULTIVO SECRESION URETRAL",
+    "plan": "BASE",
+    "valor": 12070.5
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CULTIVO SECRESION URETRAL",
+    "plan": "ESMERALDA",
+    "valor": 11567.56
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CULTIVO SECRESION URETRAL",
+    "plan": "RUBI",
+    "valor": 11064.62
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CULTIVO SECRESION URETRAL",
+    "plan": "DORADO",
+    "valor": 11064.62
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CULTIVO SECRESION URETRAL",
+    "plan": "PARTICULAR",
+    "valor": 13579.31
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CURVA DE GLUCEMIA ( P75 ) X 2",
+    "plan": "BASE",
+    "valor": 4937.92
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CURVA DE GLUCEMIA ( P75 ) X 2",
+    "plan": "ESMERALDA",
+    "valor": 4732.18
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CURVA DE GLUCEMIA ( P75 ) X 2",
+    "plan": "RUBI",
+    "valor": 4526.43
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CURVA DE GLUCEMIA ( P75 ) X 2",
+    "plan": "DORADO",
+    "valor": 4526.43
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CURVA DE GLUCEMIA ( P75 ) X 2",
+    "plan": "PARTICULAR",
+    "valor": 5555.16
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DELTA 4 ANDROSTENODIONA (NO NOM",
+    "plan": "BASE",
+    "valor": 13166.89
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DELTA 4 ANDROSTENODIONA (NO NOM",
+    "plan": "ESMERALDA",
+    "valor": 12618.27
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DELTA 4 ANDROSTENODIONA (NO NOM",
+    "plan": "RUBI",
+    "valor": 12069.65
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DELTA 4 ANDROSTENODIONA (NO NOM",
+    "plan": "DORADO",
+    "valor": 12069.65
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DELTA 4 ANDROSTENODIONA (NO NOM",
+    "plan": "PARTICULAR",
+    "valor": 14812.75
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DEHIDROEPIANDROSTERONA",
+    "plan": "BASE",
+    "valor": 21946.16
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DEHIDROEPIANDROSTERONA",
+    "plan": "ESMERALDA",
+    "valor": 21031.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DEHIDROEPIANDROSTERONA",
+    "plan": "RUBI",
+    "valor": 20117.32
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DEHIDROEPIANDROSTERONA",
+    "plan": "DORADO",
+    "valor": 20117.32
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DEHIDROEPIANDROSTERONA",
+    "plan": "PARTICULAR",
+    "valor": 24689.43
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DIMERO D",
+    "plan": "BASE",
+    "valor": 38406.1
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DIMERO D",
+    "plan": "ESMERALDA",
+    "valor": 36805.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DIMERO D",
+    "plan": "RUBI",
+    "valor": 35205.6
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DIMERO D",
+    "plan": "DORADO",
+    "valor": 35205.6
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DIMERO D",
+    "plan": "PARTICULAR",
+    "valor": 43206.87
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DOPAMINA",
+    "plan": "BASE",
+    "valor": 21946.35
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DOPAMINA",
+    "plan": "ESMERALDA",
+    "valor": 21031.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DOPAMINA",
+    "plan": "RUBI",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DOPAMINA",
+    "plan": "DORADO",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DOPAMINA",
+    "plan": "PARTICULAR",
+    "valor": 24689.64
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DOSAJE ANT.RECEP.ACETILCOLINA",
+    "plan": "BASE",
+    "valor": 109731.73
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DOSAJE ANT.RECEP.ACETILCOLINA",
+    "plan": "ESMERALDA",
+    "valor": 105159.57
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DOSAJE ANT.RECEP.ACETILCOLINA",
+    "plan": "RUBI",
+    "valor": 100587.42
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DOSAJE ANT.RECEP.ACETILCOLINA",
+    "plan": "DORADO",
+    "valor": 100587.42
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DOSAJE ANT.RECEP.ACETILCOLINA",
+    "plan": "PARTICULAR",
+    "valor": 123448.19
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DOSAJE PLASMATICO HOMOSISTEINA",
+    "plan": "BASE",
+    "valor": 32919.52
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DOSAJE PLASMATICO HOMOSISTEINA",
+    "plan": "ESMERALDA",
+    "valor": 31547.87
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DOSAJE PLASMATICO HOMOSISTEINA",
+    "plan": "RUBI",
+    "valor": 30176.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DOSAJE PLASMATICO HOMOSISTEINA",
+    "plan": "DORADO",
+    "valor": 30176.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DOSAJE PLASMATICO HOMOSISTEINA",
+    "plan": "PARTICULAR",
+    "valor": 37034.46
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DOSAJE DE TIROGLOBULINA",
+    "plan": "BASE",
+    "valor": 16459.76
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DOSAJE DE TIROGLOBULINA",
+    "plan": "ESMERALDA",
+    "valor": 15773.94
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DOSAJE DE TIROGLOBULINA",
+    "plan": "RUBI",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DOSAJE DE TIROGLOBULINA",
+    "plan": "DORADO",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DOSAJE DE TIROGLOBULINA",
+    "plan": "PARTICULAR",
+    "valor": 18517.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DOSAJE PLASMATICO LITIO",
+    "plan": "BASE",
+    "valor": 6583.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DOSAJE PLASMATICO LITIO",
+    "plan": "ESMERALDA",
+    "valor": 6309.58
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DOSAJE PLASMATICO LITIO",
+    "plan": "RUBI",
+    "valor": 6035.25
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DOSAJE PLASMATICO LITIO",
+    "plan": "DORADO",
+    "valor": 6035.25
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "DOSAJE PLASMATICO LITIO",
+    "plan": "PARTICULAR",
+    "valor": 7406.9
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ELECTROFORESIS DE HEMOGLOBINA",
+    "plan": "BASE",
+    "valor": 12070.5
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ELECTROFORESIS DE HEMOGLOBINA",
+    "plan": "ESMERALDA",
+    "valor": 11567.56
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ELECTROFORESIS DE HEMOGLOBINA",
+    "plan": "RUBI",
+    "valor": 11064.62
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ELECTROFORESIS DE HEMOGLOBINA",
+    "plan": "DORADO",
+    "valor": 11064.62
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ELECTROFORESIS DE HEMOGLOBINA",
+    "plan": "PARTICULAR",
+    "valor": 13579.31
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ERITROPOYETINA",
+    "plan": "BASE",
+    "valor": 49379.28
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ERITROPOYETINA",
+    "plan": "ESMERALDA",
+    "valor": 47321.81
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ERITROPOYETINA",
+    "plan": "RUBI",
+    "valor": 45264.34
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ERITROPOYETINA",
+    "plan": "DORADO",
+    "valor": 45264.34
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ERITROPOYETINA",
+    "plan": "PARTICULAR",
+    "valor": 55551.69
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EPSTEIN BARR IGG",
+    "plan": "BASE",
+    "valor": 16459.76
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EPSTEIN BARR IGG",
+    "plan": "ESMERALDA",
+    "valor": 15773.94
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EPSTEIN BARR IGG",
+    "plan": "RUBI",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EPSTEIN BARR IGG",
+    "plan": "DORADO",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EPSTEIN BARR IGG",
+    "plan": "PARTICULAR",
+    "valor": 18517.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EPSTEIN BARR IGM",
+    "plan": "BASE",
+    "valor": 21946.35
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EPSTEIN BARR IGM",
+    "plan": "ESMERALDA",
+    "valor": 21031.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EPSTEIN BARR IGM",
+    "plan": "RUBI",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EPSTEIN BARR IGM",
+    "plan": "DORADO",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EPSTEIN BARR IGM",
+    "plan": "PARTICULAR",
+    "valor": 24689.64
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ESTRADIOL",
+    "plan": "BASE",
+    "valor": 10973.17
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ESTRADIOL",
+    "plan": "ESMERALDA",
+    "valor": 10515.96
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ESTRADIOL",
+    "plan": "RUBI",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ESTRADIOL",
+    "plan": "DORADO",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ESTRADIOL",
+    "plan": "PARTICULAR",
+    "valor": 12344.82
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EXUDADO VAGINAL  (16 unidades)                                                                                                                                                                                                             (micologico/gonococos/trichomonas/germenes comunes)",
+    "plan": "BASE",
+    "valor": 17557.08
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EXUDADO VAGINAL  (16 unidades)                                                                                                                                                                                                             (micologico/gonococos/trichomonas/germenes comunes)",
+    "plan": "ESMERALDA",
+    "valor": 16825.54
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EXUDADO VAGINAL  (16 unidades)                                                                                                                                                                                                             (micologico/gonococos/trichomonas/germenes comunes)",
+    "plan": "RUBI",
+    "valor": 16093.99
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EXUDADO VAGINAL  (16 unidades)                                                                                                                                                                                                             (micologico/gonococos/trichomonas/germenes comunes)",
+    "plan": "DORADO",
+    "valor": 16093.99
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EXUDADO VAGINAL  (16 unidades)                                                                                                                                                                                                             (micologico/gonococos/trichomonas/germenes comunes)",
+    "plan": "PARTICULAR",
+    "valor": 19751.72
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EXUDADO DE FAUCES",
+    "plan": "BASE",
+    "valor": 5486.59
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EXUDADO DE FAUCES",
+    "plan": "ESMERALDA",
+    "valor": 5257.98
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EXUDADO DE FAUCES",
+    "plan": "RUBI",
+    "valor": 5029.37
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EXUDADO DE FAUCES",
+    "plan": "DORADO",
+    "valor": 5029.37
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EXUDADO DE FAUCES",
+    "plan": "PARTICULAR",
+    "valor": 6172.41
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EXUDADO DE FLUJO",
+    "plan": "BASE",
+    "valor": 16459.76
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EXUDADO DE FLUJO",
+    "plan": "ESMERALDA",
+    "valor": 15773.94
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EXUDADO DE FLUJO",
+    "plan": "RUBI",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EXUDADO DE FLUJO",
+    "plan": "DORADO",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EXUDADO DE FLUJO",
+    "plan": "PARTICULAR",
+    "valor": 18517.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EXUDADO URETRAL",
+    "plan": "BASE",
+    "valor": 12070.5
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EXUDADO URETRAL",
+    "plan": "ESMERALDA",
+    "valor": 11567.56
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EXUDADO URETRAL",
+    "plan": "RUBI",
+    "valor": 11064.62
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EXUDADO URETRAL",
+    "plan": "DORADO",
+    "valor": 11064.62
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EXUDADO URETRAL",
+    "plan": "PARTICULAR",
+    "valor": 13579.31
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EXUDADO DE FAUCES TEST RÁPIDO",
+    "plan": "BASE",
+    "valor": 16459.76
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EXUDADO DE FAUCES TEST RÁPIDO",
+    "plan": "ESMERALDA",
+    "valor": 15773.94
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EXUDADO DE FAUCES TEST RÁPIDO",
+    "plan": "RUBI",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EXUDADO DE FAUCES TEST RÁPIDO",
+    "plan": "DORADO",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "EXUDADO DE FAUCES TEST RÁPIDO",
+    "plan": "PARTICULAR",
+    "valor": 18517.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FACTOR REUMATOIDEO  (ARTRITIS REUMATOIDEA)",
+    "plan": "BASE",
+    "valor": 6583.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FACTOR REUMATOIDEO  (ARTRITIS REUMATOIDEA)",
+    "plan": "ESMERALDA",
+    "valor": 6309.58
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FACTOR REUMATOIDEO  (ARTRITIS REUMATOIDEA)",
+    "plan": "RUBI",
+    "valor": 6035.25
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FACTOR REUMATOIDEO  (ARTRITIS REUMATOIDEA)",
+    "plan": "DORADO",
+    "valor": 6035.25
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FACTOR REUMATOIDEO  (ARTRITIS REUMATOIDEA)",
+    "plan": "PARTICULAR",
+    "valor": 7406.9
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FACTOR REUMATOIDEO (NEFELOMETRIA)",
+    "plan": "BASE",
+    "valor": 17557.08
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FACTOR REUMATOIDEO (NEFELOMETRIA)",
+    "plan": "ESMERALDA",
+    "valor": 16825.54
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FACTOR REUMATOIDEO (NEFELOMETRIA)",
+    "plan": "RUBI",
+    "valor": 16093.99
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FACTOR REUMATOIDEO (NEFELOMETRIA)",
+    "plan": "DORADO",
+    "valor": 16093.99
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FACTOR REUMATOIDEO (NEFELOMETRIA)",
+    "plan": "PARTICULAR",
+    "valor": 19751.72
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FACTOR VIII",
+    "plan": "BASE",
+    "valor": 32919.52
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FACTOR VIII",
+    "plan": "ESMERALDA",
+    "valor": 31547.87
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FACTOR VIII",
+    "plan": "RUBI",
+    "valor": 30176.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FACTOR VIII",
+    "plan": "DORADO",
+    "valor": 30176.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FACTOR VIII",
+    "plan": "PARTICULAR",
+    "valor": 37034.46
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FACTOR  IX",
+    "plan": "BASE",
+    "valor": 32919.52
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FACTOR  IX",
+    "plan": "ESMERALDA",
+    "valor": 31547.87
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FACTOR  IX",
+    "plan": "RUBI",
+    "valor": 30176.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FACTOR  IX",
+    "plan": "DORADO",
+    "valor": 30176.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FACTOR  IX",
+    "plan": "PARTICULAR",
+    "valor": 37034.46
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FACTOR VON WILLEBRAND",
+    "plan": "BASE",
+    "valor": 76812.21
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FACTOR VON WILLEBRAND",
+    "plan": "ESMERALDA",
+    "valor": 73611.7
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FACTOR VON WILLEBRAND",
+    "plan": "RUBI",
+    "valor": 70411.19
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FACTOR VON WILLEBRAND",
+    "plan": "DORADO",
+    "valor": 70411.19
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FACTOR VON WILLEBRAND",
+    "plan": "PARTICULAR",
+    "valor": 86413.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FAN",
+    "plan": "BASE",
+    "valor": 12070.5
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FAN",
+    "plan": "ESMERALDA",
+    "valor": 11567.56
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FAN",
+    "plan": "RUBI",
+    "valor": 11064.62
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FAN",
+    "plan": "DORADO",
+    "valor": 11064.62
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FAN",
+    "plan": "PARTICULAR",
+    "valor": 13579.31
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FERREMIA",
+    "plan": "BASE",
+    "valor": 2194.63
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FERREMIA",
+    "plan": "ESMERALDA",
+    "valor": 2103.19
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FERREMIA",
+    "plan": "RUBI",
+    "valor": 2011.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FERREMIA",
+    "plan": "DORADO",
+    "valor": 2011.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FERREMIA",
+    "plan": "PARTICULAR",
+    "valor": 2468.96
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FERRITINA",
+    "plan": "BASE",
+    "valor": 16459.72
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FERRITINA",
+    "plan": "ESMERALDA",
+    "valor": 15773.9
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FERRITINA",
+    "plan": "RUBI",
+    "valor": 15088.08
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FERRITINA",
+    "plan": "DORADO",
+    "valor": 15088.08
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FERRITINA",
+    "plan": "PARTICULAR",
+    "valor": 18517.19
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FIBRINOGENO",
+    "plan": "BASE",
+    "valor": 13167.8
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FIBRINOGENO",
+    "plan": "ESMERALDA",
+    "valor": 12619.15
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FIBRINOGENO",
+    "plan": "RUBI",
+    "valor": 12070.49
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FIBRINOGENO",
+    "plan": "DORADO",
+    "valor": 12070.49
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FIBRINOGENO",
+    "plan": "PARTICULAR",
+    "valor": 14813.78
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FLUJO VAGINAL/EXDUDADO VAGINAL",
+    "plan": "BASE",
+    "valor": 16459.76
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FLUJO VAGINAL/EXDUDADO VAGINAL",
+    "plan": "ESMERALDA",
+    "valor": 15773.94
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FLUJO VAGINAL/EXDUDADO VAGINAL",
+    "plan": "RUBI",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FLUJO VAGINAL/EXDUDADO VAGINAL",
+    "plan": "DORADO",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FLUJO VAGINAL/EXDUDADO VAGINAL",
+    "plan": "PARTICULAR",
+    "valor": 18517.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FOSFATASA ALCALINA FRACCION OSEA",
+    "plan": "BASE",
+    "valor": 27432.93
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FOSFATASA ALCALINA FRACCION OSEA",
+    "plan": "ESMERALDA",
+    "valor": 26289.89
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FOSFATASA ALCALINA FRACCION OSEA",
+    "plan": "RUBI",
+    "valor": 25146.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FOSFATASA ALCALINA FRACCION OSEA",
+    "plan": "DORADO",
+    "valor": 25146.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FOSFATASA ALCALINA FRACCION OSEA",
+    "plan": "PARTICULAR",
+    "valor": 30862.05
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FOSFATEMIA",
+    "plan": "BASE",
+    "valor": 1645.97
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FOSFATEMIA",
+    "plan": "ESMERALDA",
+    "valor": 1577.39
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FOSFATEMIA",
+    "plan": "RUBI",
+    "valor": 1508.8
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FOSFATEMIA",
+    "plan": "DORADO",
+    "valor": 1508.8
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FOSFATEMIA",
+    "plan": "PARTICULAR",
+    "valor": 1851.71
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FOSFATURIA",
+    "plan": "BASE",
+    "valor": 1645.97
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FOSFATURIA",
+    "plan": "ESMERALDA",
+    "valor": 1577.39
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FOSFATURIA",
+    "plan": "RUBI",
+    "valor": 1508.8
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FOSFATURIA",
+    "plan": "DORADO",
+    "valor": 1508.8
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FOSFATURIA",
+    "plan": "PARTICULAR",
+    "valor": 1851.71
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FRUCTOSAMINA",
+    "plan": "BASE",
+    "valor": 16459.76
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FRUCTOSAMINA",
+    "plan": "ESMERALDA",
+    "valor": 15773.94
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FRUCTOSAMINA",
+    "plan": "RUBI",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FRUCTOSAMINA",
+    "plan": "DORADO",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FRUCTOSAMINA",
+    "plan": "PARTICULAR",
+    "valor": 18517.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FSH",
+    "plan": "BASE",
+    "valor": 10973.17
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FSH",
+    "plan": "ESMERALDA",
+    "valor": 10515.96
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FSH",
+    "plan": "RUBI",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FSH",
+    "plan": "DORADO",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FSH",
+    "plan": "PARTICULAR",
+    "valor": 12344.82
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FTA/ABS",
+    "plan": "BASE",
+    "valor": 8778.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FTA/ABS",
+    "plan": "ESMERALDA",
+    "valor": 8413.12
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FTA/ABS",
+    "plan": "RUBI",
+    "valor": 8047.33
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FTA/ABS",
+    "plan": "DORADO",
+    "valor": 8047.33
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "FTA/ABS",
+    "plan": "PARTICULAR",
+    "valor": 9876.27
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "GAMMA GLUTAMIL",
+    "plan": "BASE",
+    "valor": 2743.29
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "GAMMA GLUTAMIL",
+    "plan": "ESMERALDA",
+    "valor": 2628.99
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "GAMMA GLUTAMIL",
+    "plan": "RUBI",
+    "valor": 2514.69
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "GAMMA GLUTAMIL",
+    "plan": "DORADO",
+    "valor": 2514.69
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "GAMMA GLUTAMIL",
+    "plan": "PARTICULAR",
+    "valor": 3086.2
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "GENOTIPO VIRUS HEP. C",
+    "plan": "BASE",
+    "valor": 148137.83
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "GENOTIPO VIRUS HEP. C",
+    "plan": "ESMERALDA",
+    "valor": 141965.42
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "GENOTIPO VIRUS HEP. C",
+    "plan": "RUBI",
+    "valor": 135793.01
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "GENOTIPO VIRUS HEP. C",
+    "plan": "DORADO",
+    "valor": 135793.01
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "GENOTIPO VIRUS HEP. C",
+    "plan": "PARTICULAR",
+    "valor": 166655.06
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "GRUPO Y FACTOR",
+    "plan": "BASE",
+    "valor": 5486.59
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "GRUPO Y FACTOR",
+    "plan": "ESMERALDA",
+    "valor": 5257.98
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "GRUPO Y FACTOR",
+    "plan": "RUBI",
+    "valor": 5029.37
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "GRUPO Y FACTOR",
+    "plan": "DORADO",
+    "valor": 5029.37
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "GRUPO Y FACTOR",
+    "plan": "PARTICULAR",
+    "valor": 6172.41
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS A  AC (HVA - IGG) si tuvo hepatitis",
+    "plan": "BASE",
+    "valor": 16459.76
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS A  AC (HVA - IGG) si tuvo hepatitis",
+    "plan": "ESMERALDA",
+    "valor": 15773.94
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS A  AC (HVA - IGG) si tuvo hepatitis",
+    "plan": "RUBI",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS A  AC (HVA - IGG) si tuvo hepatitis",
+    "plan": "DORADO",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS A  AC (HVA - IGG) si tuvo hepatitis",
+    "plan": "PARTICULAR",
+    "valor": 18517.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS A AC  (HVA - IGM )si esta cursando hepatitis",
+    "plan": "BASE",
+    "valor": 16459.76
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS A AC  (HVA - IGM )si esta cursando hepatitis",
+    "plan": "ESMERALDA",
+    "valor": 15773.94
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS A AC  (HVA - IGM )si esta cursando hepatitis",
+    "plan": "RUBI",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS A AC  (HVA - IGM )si esta cursando hepatitis",
+    "plan": "DORADO",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS A AC  (HVA - IGM )si esta cursando hepatitis",
+    "plan": "PARTICULAR",
+    "valor": 18517.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS B AC DE SUPERFICIE  ANTI (HBSAC)",
+    "plan": "BASE",
+    "valor": 21946.35
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS B AC DE SUPERFICIE  ANTI (HBSAC)",
+    "plan": "ESMERALDA",
+    "valor": 21031.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS B AC DE SUPERFICIE  ANTI (HBSAC)",
+    "plan": "RUBI",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS B AC DE SUPERFICIE  ANTI (HBSAC)",
+    "plan": "DORADO",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS B AC DE SUPERFICIE  ANTI (HBSAC)",
+    "plan": "PARTICULAR",
+    "valor": 24689.64
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS B ANTIGENO DE SUPERFICIE (AG. HBS)",
+    "plan": "BASE",
+    "valor": 13166.89
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS B ANTIGENO DE SUPERFICIE (AG. HBS)",
+    "plan": "ESMERALDA",
+    "valor": 12618.27
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS B ANTIGENO DE SUPERFICIE (AG. HBS)",
+    "plan": "RUBI",
+    "valor": 12069.65
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS B ANTIGENO DE SUPERFICIE (AG. HBS)",
+    "plan": "DORADO",
+    "valor": 12069.65
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS B ANTIGENO DE SUPERFICIE (AG. HBS)",
+    "plan": "PARTICULAR",
+    "valor": 14812.75
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS B AC ANTI CORE IGG (HBC-IGG)",
+    "plan": "BASE",
+    "valor": 16459.76
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS B AC ANTI CORE IGG (HBC-IGG)",
+    "plan": "ESMERALDA",
+    "valor": 15773.94
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS B AC ANTI CORE IGG (HBC-IGG)",
+    "plan": "RUBI",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS B AC ANTI CORE IGG (HBC-IGG)",
+    "plan": "DORADO",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS B AC ANTI CORE IGG (HBC-IGG)",
+    "plan": "PARTICULAR",
+    "valor": 18517.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS B AC ANTI CORE IGM (HBCM)",
+    "plan": "BASE",
+    "valor": 19751.7
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS B AC ANTI CORE IGM (HBCM)",
+    "plan": "ESMERALDA",
+    "valor": 18928.71
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS B AC ANTI CORE IGM (HBCM)",
+    "plan": "RUBI",
+    "valor": 18105.72
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS B AC ANTI CORE IGM (HBCM)",
+    "plan": "DORADO",
+    "valor": 18105.72
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS B AC ANTI CORE IGM (HBCM)",
+    "plan": "PARTICULAR",
+    "valor": 22220.66
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS C AC IGG ANTI (HCV AC.IGG)",
+    "plan": "BASE",
+    "valor": 21946.31
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS C AC IGG ANTI (HCV AC.IGG)",
+    "plan": "ESMERALDA",
+    "valor": 21031.88
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS C AC IGG ANTI (HCV AC.IGG)",
+    "plan": "RUBI",
+    "valor": 20117.45
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS C AC IGG ANTI (HCV AC.IGG)",
+    "plan": "DORADO",
+    "valor": 20117.45
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS C AC IGG ANTI (HCV AC.IGG)",
+    "plan": "PARTICULAR",
+    "valor": 24689.6
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS C AC IGM ANTI (HCV AC.IGM)",
+    "plan": "BASE",
+    "valor": 65839.04
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS C AC IGM ANTI (HCV AC.IGM)",
+    "plan": "ESMERALDA",
+    "valor": 63095.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS C AC IGM ANTI (HCV AC.IGM)",
+    "plan": "RUBI",
+    "valor": 60352.45
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS C AC IGM ANTI (HCV AC.IGM)",
+    "plan": "DORADO",
+    "valor": 60352.45
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS C AC IGM ANTI (HCV AC.IGM)",
+    "plan": "PARTICULAR",
+    "valor": 74068.92
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEMOGLOBINA A2 (CUANTIFICACION)",
+    "plan": "BASE",
+    "valor": 21946.35
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEMOGLOBINA A2 (CUANTIFICACION)",
+    "plan": "ESMERALDA",
+    "valor": 21031.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEMOGLOBINA A2 (CUANTIFICACION)",
+    "plan": "RUBI",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEMOGLOBINA A2 (CUANTIFICACION)",
+    "plan": "DORADO",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEMOGLOBINA A2 (CUANTIFICACION)",
+    "plan": "PARTICULAR",
+    "valor": 24689.64
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEMOGLOBINA ELECTROFORESIS",
+    "plan": "BASE",
+    "valor": 13167.8
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEMOGLOBINA ELECTROFORESIS",
+    "plan": "ESMERALDA",
+    "valor": 12619.15
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEMOGLOBINA ELECTROFORESIS",
+    "plan": "RUBI",
+    "valor": 12070.49
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEMOGLOBINA ELECTROFORESIS",
+    "plan": "DORADO",
+    "valor": 12070.49
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEMOGLOBINA ELECTROFORESIS",
+    "plan": "PARTICULAR",
+    "valor": 14813.78
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEMOGLOBINA FETAL",
+    "plan": "BASE",
+    "valor": 10973.17
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEMOGLOBINA FETAL",
+    "plan": "ESMERALDA",
+    "valor": 10515.96
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEMOGLOBINA FETAL",
+    "plan": "RUBI",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEMOGLOBINA FETAL",
+    "plan": "DORADO",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEMOGLOBINA FETAL",
+    "plan": "PARTICULAR",
+    "valor": 12344.82
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEMOGLOBINA GLICOSILADA   HB A1C",
+    "plan": "BASE",
+    "valor": 16459.76
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEMOGLOBINA GLICOSILADA   HB A1C",
+    "plan": "ESMERALDA",
+    "valor": 15773.94
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEMOGLOBINA GLICOSILADA   HB A1C",
+    "plan": "RUBI",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEMOGLOBINA GLICOSILADA   HB A1C",
+    "plan": "DORADO",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEMOGLOBINA GLICOSILADA   HB A1C",
+    "plan": "PARTICULAR",
+    "valor": 18517.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEMOGRAMA",
+    "plan": "BASE",
+    "valor": 5486.59
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEMOGRAMA",
+    "plan": "ESMERALDA",
+    "valor": 5257.98
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEMOGRAMA",
+    "plan": "RUBI",
+    "valor": 5029.37
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEMOGRAMA",
+    "plan": "DORADO",
+    "valor": 5029.37
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEMOGRAMA",
+    "plan": "PARTICULAR",
+    "valor": 6172.41
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HELICOBACTER PYLORI IGG / IGM C/U",
+    "plan": "BASE",
+    "valor": 17557.08
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HELICOBACTER PYLORI IGG / IGM C/U",
+    "plan": "ESMERALDA",
+    "valor": 16825.54
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HELICOBACTER PYLORI IGG / IGM C/U",
+    "plan": "RUBI",
+    "valor": 16093.99
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HELICOBACTER PYLORI IGG / IGM C/U",
+    "plan": "DORADO",
+    "valor": 16093.99
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HELICOBACTER PYLORI IGG / IGM C/U",
+    "plan": "PARTICULAR",
+    "valor": 19751.72
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HELICOBACTER PYLORI IGA",
+    "plan": "BASE",
+    "valor": 24140.98
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HELICOBACTER PYLORI IGA",
+    "plan": "ESMERALDA",
+    "valor": 23135.1
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HELICOBACTER PYLORI IGA",
+    "plan": "RUBI",
+    "valor": 22129.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HELICOBACTER PYLORI IGA",
+    "plan": "DORADO",
+    "valor": 22129.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HELICOBACTER PYLORI IGA",
+    "plan": "PARTICULAR",
+    "valor": 27158.6
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS C",
+    "plan": "BASE",
+    "valor": 21946.35
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS C",
+    "plan": "ESMERALDA",
+    "valor": 21031.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS C",
+    "plan": "RUBI",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS C",
+    "plan": "DORADO",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATITIS C",
+    "plan": "PARTICULAR",
+    "valor": 24689.64
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HIV-WESTERN BLOT",
+    "plan": "BASE",
+    "valor": 109731.73
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HIV-WESTERN BLOT",
+    "plan": "ESMERALDA",
+    "valor": 105159.57
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HIV-WESTERN BLOT",
+    "plan": "RUBI",
+    "valor": 100587.42
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HIV-WESTERN BLOT",
+    "plan": "DORADO",
+    "valor": 100587.42
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HIV-WESTERN BLOT",
+    "plan": "PARTICULAR",
+    "valor": 123448.19
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HOMA (INDICE DE INSULINA RESISTENCIA)",
+    "plan": "BASE",
+    "valor": 15907.18
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HOMA (INDICE DE INSULINA RESISTENCIA)",
+    "plan": "ESMERALDA",
+    "valor": 15244.38
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HOMA (INDICE DE INSULINA RESISTENCIA)",
+    "plan": "RUBI",
+    "valor": 14581.58
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HOMA (INDICE DE INSULINA RESISTENCIA)",
+    "plan": "DORADO",
+    "valor": 14581.58
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HOMA (INDICE DE INSULINA RESISTENCIA)",
+    "plan": "PARTICULAR",
+    "valor": 17895.58
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HOMOCISTEINA SERICA",
+    "plan": "BASE",
+    "valor": 32919.52
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HOMOCISTEINA SERICA",
+    "plan": "ESMERALDA",
+    "valor": 31547.87
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HOMOCISTEINA SERICA",
+    "plan": "RUBI",
+    "valor": 30176.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HOMOCISTEINA SERICA",
+    "plan": "DORADO",
+    "valor": 30176.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HOMOCISTEINA SERICA",
+    "plan": "PARTICULAR",
+    "valor": 37034.46
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HUDDLESON",
+    "plan": "BASE",
+    "valor": 2194.43
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HUDDLESON",
+    "plan": "ESMERALDA",
+    "valor": 2103.0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HUDDLESON",
+    "plan": "RUBI",
+    "valor": 2011.56
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HUDDLESON",
+    "plan": "DORADO",
+    "valor": 2011.56
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HUDDLESON",
+    "plan": "PARTICULAR",
+    "valor": 2468.73
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES 1 IGG  EN SANGRE",
+    "plan": "BASE",
+    "valor": 20849.02
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES 1 IGG  EN SANGRE",
+    "plan": "ESMERALDA",
+    "valor": 19980.31
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES 1 IGG  EN SANGRE",
+    "plan": "RUBI",
+    "valor": 19111.6
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES 1 IGG  EN SANGRE",
+    "plan": "DORADO",
+    "valor": 19111.6
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES 1 IGG  EN SANGRE",
+    "plan": "PARTICULAR",
+    "valor": 23455.15
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES 1 IGM EN SANGRE",
+    "plan": "BASE",
+    "valor": 20849.02
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES 1 IGM EN SANGRE",
+    "plan": "ESMERALDA",
+    "valor": 19980.31
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES 1 IGM EN SANGRE",
+    "plan": "RUBI",
+    "valor": 19111.6
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES 1 IGM EN SANGRE",
+    "plan": "DORADO",
+    "valor": 19111.6
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES 1 IGM EN SANGRE",
+    "plan": "PARTICULAR",
+    "valor": 23455.15
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES 2 IGG  EN SANGRE",
+    "plan": "BASE",
+    "valor": 20849.02
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES 2 IGG  EN SANGRE",
+    "plan": "ESMERALDA",
+    "valor": 19980.31
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES 2 IGG  EN SANGRE",
+    "plan": "RUBI",
+    "valor": 19111.6
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES 2 IGG  EN SANGRE",
+    "plan": "DORADO",
+    "valor": 19111.6
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES 2 IGG  EN SANGRE",
+    "plan": "PARTICULAR",
+    "valor": 23455.15
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES 2 IGM   EN SANGRE",
+    "plan": "BASE",
+    "valor": 20849.02
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES 2 IGM   EN SANGRE",
+    "plan": "ESMERALDA",
+    "valor": 19980.31
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES 2 IGM   EN SANGRE",
+    "plan": "RUBI",
+    "valor": 19111.6
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES 2 IGM   EN SANGRE",
+    "plan": "DORADO",
+    "valor": 19111.6
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES 2 IGM   EN SANGRE",
+    "plan": "PARTICULAR",
+    "valor": 23455.15
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES VIRUS VI IGM EN SANGRE",
+    "plan": "BASE",
+    "valor": 40600.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES VIRUS VI IGM EN SANGRE",
+    "plan": "ESMERALDA",
+    "valor": 38909.04
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES VIRUS VI IGM EN SANGRE",
+    "plan": "RUBI",
+    "valor": 37217.34
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES VIRUS VI IGM EN SANGRE",
+    "plan": "DORADO",
+    "valor": 37217.34
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES VIRUS VI IGM EN SANGRE",
+    "plan": "PARTICULAR",
+    "valor": 45675.83
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES VIRUS VI IGG EN SANGRE",
+    "plan": "BASE",
+    "valor": 40600.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES VIRUS VI IGG EN SANGRE",
+    "plan": "ESMERALDA",
+    "valor": 38909.04
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES VIRUS VI IGG EN SANGRE",
+    "plan": "RUBI",
+    "valor": 37217.34
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES VIRUS VI IGG EN SANGRE",
+    "plan": "DORADO",
+    "valor": 37217.34
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HERPES VIRUS VI IGG EN SANGRE",
+    "plan": "PARTICULAR",
+    "valor": 45675.83
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HIDROXIPROLINURIA",
+    "plan": "BASE",
+    "valor": 13167.8
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HIDROXIPROLINURIA",
+    "plan": "ESMERALDA",
+    "valor": 12619.15
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HIDROXIPROLINURIA",
+    "plan": "RUBI",
+    "valor": 12070.49
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HIDROXIPROLINURIA",
+    "plan": "DORADO",
+    "valor": 12070.49
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HIDROXIPROLINURIA",
+    "plan": "PARTICULAR",
+    "valor": 14813.78
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HIV ELISA",
+    "plan": "BASE",
+    "valor": 12070.5
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HIV ELISA",
+    "plan": "ESMERALDA",
+    "valor": 11567.56
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HIV ELISA",
+    "plan": "RUBI",
+    "valor": 11064.62
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HIV ELISA",
+    "plan": "DORADO",
+    "valor": 11064.62
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HIV ELISA",
+    "plan": "PARTICULAR",
+    "valor": 13579.31
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INMUNOGLOBULINA A",
+    "plan": "BASE",
+    "valor": 5486.59
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INMUNOGLOBULINA A",
+    "plan": "ESMERALDA",
+    "valor": 5257.98
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INMUNOGLOBULINA A",
+    "plan": "RUBI",
+    "valor": 5029.37
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INMUNOGLOBULINA A",
+    "plan": "DORADO",
+    "valor": 5029.37
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INMUNOGLOBULINA A",
+    "plan": "PARTICULAR",
+    "valor": 6172.41
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INMUNOGLOBULINA E",
+    "plan": "BASE",
+    "valor": 10973.17
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INMUNOGLOBULINA E",
+    "plan": "ESMERALDA",
+    "valor": 10515.96
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INMUNOGLOBULINA E",
+    "plan": "RUBI",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INMUNOGLOBULINA E",
+    "plan": "DORADO",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INMUNOGLOBULINA E",
+    "plan": "PARTICULAR",
+    "valor": 12344.82
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INMUNOGLOBULINA G",
+    "plan": "BASE",
+    "valor": 5486.59
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INMUNOGLOBULINA G",
+    "plan": "ESMERALDA",
+    "valor": 5257.98
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INMUNOGLOBULINA G",
+    "plan": "RUBI",
+    "valor": 5029.37
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INMUNOGLOBULINA G",
+    "plan": "DORADO",
+    "valor": 5029.37
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INMUNOGLOBULINA G",
+    "plan": "PARTICULAR",
+    "valor": 6172.41
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INMUNOGLOBULINA M",
+    "plan": "BASE",
+    "valor": 5486.59
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INMUNOGLOBULINA M",
+    "plan": "ESMERALDA",
+    "valor": 5257.98
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INMUNOGLOBULINA M",
+    "plan": "RUBI",
+    "valor": 5029.37
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INMUNOGLOBULINA M",
+    "plan": "DORADO",
+    "valor": 5029.37
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INMUNOGLOBULINA M",
+    "plan": "PARTICULAR",
+    "valor": 6172.41
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "IONOGRAMA",
+    "plan": "BASE",
+    "valor": 3840.62
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "IONOGRAMA",
+    "plan": "ESMERALDA",
+    "valor": 3680.59
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "IONOGRAMA",
+    "plan": "RUBI",
+    "valor": 3520.57
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "IONOGRAMA",
+    "plan": "DORADO",
+    "valor": 3520.57
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "IONOGRAMA",
+    "plan": "PARTICULAR",
+    "valor": 4320.69
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INMUNOELECTROFORESIS",
+    "plan": "BASE",
+    "valor": 10973.17
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INMUNOELECTROFORESIS",
+    "plan": "ESMERALDA",
+    "valor": 10515.96
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INMUNOELECTROFORESIS",
+    "plan": "RUBI",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INMUNOELECTROFORESIS",
+    "plan": "DORADO",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INMUNOELECTROFORESIS",
+    "plan": "PARTICULAR",
+    "valor": 12344.82
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INHIBIDOR LUPICO",
+    "plan": "BASE",
+    "valor": 32919.37
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INHIBIDOR LUPICO",
+    "plan": "ESMERALDA",
+    "valor": 31547.73
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INHIBIDOR LUPICO",
+    "plan": "RUBI",
+    "valor": 30176.09
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INHIBIDOR LUPICO",
+    "plan": "DORADO",
+    "valor": 30176.09
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INHIBIDOR LUPICO",
+    "plan": "PARTICULAR",
+    "valor": 37034.29
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INSULINA BASAL X 2",
+    "plan": "BASE",
+    "valor": 12070.5
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INSULINA BASAL X 2",
+    "plan": "ESMERALDA",
+    "valor": 11567.56
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INSULINA BASAL X 2",
+    "plan": "RUBI",
+    "valor": 11064.62
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INSULINA BASAL X 2",
+    "plan": "DORADO",
+    "valor": 11064.62
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "INSULINA BASAL X 2",
+    "plan": "PARTICULAR",
+    "valor": 13579.31
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "KPTT (TROMBOPLASTINA TIEMPO DE)",
+    "plan": "BASE",
+    "valor": 3291.96
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "KPTT (TROMBOPLASTINA TIEMPO DE)",
+    "plan": "ESMERALDA",
+    "valor": 3154.79
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "KPTT (TROMBOPLASTINA TIEMPO DE)",
+    "plan": "RUBI",
+    "valor": 3017.63
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "KPTT (TROMBOPLASTINA TIEMPO DE)",
+    "plan": "DORADO",
+    "valor": 3017.63
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "KPTT (TROMBOPLASTINA TIEMPO DE)",
+    "plan": "PARTICULAR",
+    "valor": 3703.45
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LATEX PARA ARTRITIS-REUMATOGRAMA",
+    "plan": "BASE",
+    "valor": 6583.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LATEX PARA ARTRITIS-REUMATOGRAMA",
+    "plan": "ESMERALDA",
+    "valor": 6309.58
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LATEX PARA ARTRITIS-REUMATOGRAMA",
+    "plan": "RUBI",
+    "valor": 6035.25
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LATEX PARA ARTRITIS-REUMATOGRAMA",
+    "plan": "DORADO",
+    "valor": 6035.25
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LATEX PARA ARTRITIS-REUMATOGRAMA",
+    "plan": "PARTICULAR",
+    "valor": 7406.9
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LIPIDOGRAMA  ELECTROFORETICO",
+    "plan": "BASE",
+    "valor": 14265.13
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LIPIDOGRAMA  ELECTROFORETICO",
+    "plan": "ESMERALDA",
+    "valor": 13670.75
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LIPIDOGRAMA  ELECTROFORETICO",
+    "plan": "RUBI",
+    "valor": 13076.37
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LIPIDOGRAMA  ELECTROFORETICO",
+    "plan": "DORADO",
+    "valor": 13076.37
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LIPIDOGRAMA  ELECTROFORETICO",
+    "plan": "PARTICULAR",
+    "valor": 16048.27
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LDH (LACTATO DESHIDROGENASA)",
+    "plan": "BASE",
+    "valor": 3293.47
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LDH (LACTATO DESHIDROGENASA)",
+    "plan": "ESMERALDA",
+    "valor": 3156.24
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LDH (LACTATO DESHIDROGENASA)",
+    "plan": "RUBI",
+    "valor": 3019.01
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LDH (LACTATO DESHIDROGENASA)",
+    "plan": "DORADO",
+    "valor": 3019.01
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LDH (LACTATO DESHIDROGENASA)",
+    "plan": "PARTICULAR",
+    "valor": 3705.15
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LH   (HORMONA LUTEINIZANTE)",
+    "plan": "BASE",
+    "valor": 10973.17
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LH   (HORMONA LUTEINIZANTE)",
+    "plan": "ESMERALDA",
+    "valor": 10515.96
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LH   (HORMONA LUTEINIZANTE)",
+    "plan": "RUBI",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LH   (HORMONA LUTEINIZANTE)",
+    "plan": "DORADO",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LH   (HORMONA LUTEINIZANTE)",
+    "plan": "PARTICULAR",
+    "valor": 12344.82
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LIPASA SERICA",
+    "plan": "BASE",
+    "valor": 13167.68
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LIPASA SERICA",
+    "plan": "ESMERALDA",
+    "valor": 12619.02
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LIPASA SERICA",
+    "plan": "RUBI",
+    "valor": 12070.37
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LIPASA SERICA",
+    "plan": "DORADO",
+    "valor": 12070.37
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LIPASA SERICA",
+    "plan": "PARTICULAR",
+    "valor": 14813.64
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LIPIDOS TOTALES",
+    "plan": "BASE",
+    "valor": 14265.07
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LIPIDOS TOTALES",
+    "plan": "ESMERALDA",
+    "valor": 13670.7
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LIPIDOS TOTALES",
+    "plan": "RUBI",
+    "valor": 13076.32
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LIPIDOS TOTALES",
+    "plan": "DORADO",
+    "valor": 13076.32
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LIPIDOS TOTALES",
+    "plan": "PARTICULAR",
+    "valor": 16048.21
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LISTERIAS",
+    "plan": "BASE",
+    "valor": 9875.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LISTERIAS",
+    "plan": "ESMERALDA",
+    "valor": 9464.35
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LISTERIAS",
+    "plan": "RUBI",
+    "valor": 9052.86
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LISTERIAS",
+    "plan": "DORADO",
+    "valor": 9052.86
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LISTERIAS",
+    "plan": "PARTICULAR",
+    "valor": 11110.33
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LITIO PLASMATICO",
+    "plan": "BASE",
+    "valor": 6583.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LITIO PLASMATICO",
+    "plan": "ESMERALDA",
+    "valor": 6309.58
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LITIO PLASMATICO",
+    "plan": "RUBI",
+    "valor": 6035.25
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LITIO PLASMATICO",
+    "plan": "DORADO",
+    "valor": 6035.25
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "LITIO PLASMATICO",
+    "plan": "PARTICULAR",
+    "valor": 7406.9
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "MAGNESIO",
+    "plan": "BASE",
+    "valor": 2743.29
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "MAGNESIO",
+    "plan": "ESMERALDA",
+    "valor": 2628.99
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "MAGNESIO",
+    "plan": "RUBI",
+    "valor": 2514.69
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "MAGNESIO",
+    "plan": "DORADO",
+    "valor": 2514.69
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "MAGNESIO",
+    "plan": "PARTICULAR",
+    "valor": 3086.2
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "MICOLOGICO DIRECTO-RASP.MICOL.UÑA",
+    "plan": "BASE",
+    "valor": 15362.43
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "MICOLOGICO DIRECTO-RASP.MICOL.UÑA",
+    "plan": "ESMERALDA",
+    "valor": 14722.33
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "MICOLOGICO DIRECTO-RASP.MICOL.UÑA",
+    "plan": "RUBI",
+    "valor": 14082.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "MICOLOGICO DIRECTO-RASP.MICOL.UÑA",
+    "plan": "DORADO",
+    "valor": 14082.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "MICOLOGICO DIRECTO-RASP.MICOL.UÑA",
+    "plan": "PARTICULAR",
+    "valor": 17282.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "MICROALBUMINURIA / ALBUMINA URINARIA",
+    "plan": "BASE",
+    "valor": 13716.47
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "MICROALBUMINURIA / ALBUMINA URINARIA",
+    "plan": "ESMERALDA",
+    "valor": 13144.95
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "MICROALBUMINURIA / ALBUMINA URINARIA",
+    "plan": "RUBI",
+    "valor": 12573.43
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "MICROALBUMINURIA / ALBUMINA URINARIA",
+    "plan": "DORADO",
+    "valor": 12573.43
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "MICROALBUMINURIA / ALBUMINA URINARIA",
+    "plan": "PARTICULAR",
+    "valor": 15431.02
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "MONOTEST",
+    "plan": "BASE",
+    "valor": 3291.96
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "MONOTEST",
+    "plan": "ESMERALDA",
+    "valor": 3154.79
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "MONOTEST",
+    "plan": "RUBI",
+    "valor": 3017.63
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "MONOTEST",
+    "plan": "DORADO",
+    "valor": 3017.63
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "MONOTEST",
+    "plan": "PARTICULAR",
+    "valor": 3703.45
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "MYCOPLASMA  CULTIVO",
+    "plan": "BASE",
+    "valor": 27432.93
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "MYCOPLASMA  CULTIVO",
+    "plan": "ESMERALDA",
+    "valor": 26289.89
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "MYCOPLASMA  CULTIVO",
+    "plan": "RUBI",
+    "valor": 25146.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "MYCOPLASMA  CULTIVO",
+    "plan": "DORADO",
+    "valor": 25146.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "MYCOPLASMA  CULTIVO",
+    "plan": "PARTICULAR",
+    "valor": 30862.05
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "NORADRENALINA-catecolamina",
+    "plan": "BASE",
+    "valor": 27432.93
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "NORADRENALINA-catecolamina",
+    "plan": "ESMERALDA",
+    "valor": 26289.89
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "NORADRENALINA-catecolamina",
+    "plan": "RUBI",
+    "valor": 25146.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "NORADRENALINA-catecolamina",
+    "plan": "DORADO",
+    "valor": 25146.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "NORADRENALINA-catecolamina",
+    "plan": "PARTICULAR",
+    "valor": 30862.05
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "OSTEOCALCINA",
+    "plan": "BASE",
+    "valor": 27432.93
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "OSTEOCALCINA",
+    "plan": "ESMERALDA",
+    "valor": 26289.89
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "OSTEOCALCINA",
+    "plan": "RUBI",
+    "valor": 25146.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "OSTEOCALCINA",
+    "plan": "DORADO",
+    "valor": 25146.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "OSTEOCALCINA",
+    "plan": "PARTICULAR",
+    "valor": 30862.05
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "OX CARBAMACEPINA",
+    "plan": "BASE",
+    "valor": 16459.76
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "OX CARBAMACEPINA",
+    "plan": "ESMERALDA",
+    "valor": 15773.94
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "OX CARBAMACEPINA",
+    "plan": "RUBI",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "OX CARBAMACEPINA",
+    "plan": "DORADO",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "OX CARBAMACEPINA",
+    "plan": "PARTICULAR",
+    "valor": 18517.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "OXALURIA (AC. OXALICO EN ORINA)",
+    "plan": "BASE",
+    "valor": 16459.76
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "OXALURIA (AC. OXALICO EN ORINA)",
+    "plan": "ESMERALDA",
+    "valor": 15773.94
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "OXALURIA (AC. OXALICO EN ORINA)",
+    "plan": "RUBI",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "OXALURIA (AC. OXALICO EN ORINA)",
+    "plan": "DORADO",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "OXALURIA (AC. OXALICO EN ORINA)",
+    "plan": "PARTICULAR",
+    "valor": 18517.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PARASITOLOGICO en materia fecal (seriado 6 dias)",
+    "plan": "BASE",
+    "valor": 44570.15
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PARASITOLOGICO en materia fecal (seriado 6 dias)",
+    "plan": "ESMERALDA",
+    "valor": 42713.06
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PARASITOLOGICO en materia fecal (seriado 6 dias)",
+    "plan": "RUBI",
+    "valor": 40855.97
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PARASITOLOGICO en materia fecal (seriado 6 dias)",
+    "plan": "DORADO",
+    "valor": 40855.97
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PARASITOLOGICO en materia fecal (seriado 6 dias)",
+    "plan": "PARTICULAR",
+    "valor": 50141.42
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PARATHORMONA",
+    "plan": "BASE",
+    "valor": 14813.79
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PARATHORMONA",
+    "plan": "ESMERALDA",
+    "valor": 14196.55
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PARATHORMONA",
+    "plan": "RUBI",
+    "valor": 13579.31
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PARATHORMONA",
+    "plan": "DORADO",
+    "valor": 13579.31
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PARATHORMONA",
+    "plan": "PARTICULAR",
+    "valor": 16665.51
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PPD-REACCION MANTOUX",
+    "plan": "BASE",
+    "valor": 21946.35
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PPD-REACCION MANTOUX",
+    "plan": "ESMERALDA",
+    "valor": 21031.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PPD-REACCION MANTOUX",
+    "plan": "RUBI",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PPD-REACCION MANTOUX",
+    "plan": "DORADO",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PPD-REACCION MANTOUX",
+    "plan": "PARTICULAR",
+    "valor": 24689.64
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PAROTIDITIS IGG    (PAPERAS)",
+    "plan": "BASE",
+    "valor": 16459.76
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PAROTIDITIS IGG    (PAPERAS)",
+    "plan": "ESMERALDA",
+    "valor": 15773.94
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PAROTIDITIS IGG    (PAPERAS)",
+    "plan": "RUBI",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PAROTIDITIS IGG    (PAPERAS)",
+    "plan": "DORADO",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PAROTIDITIS IGG    (PAPERAS)",
+    "plan": "PARTICULAR",
+    "valor": 18517.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PAROTIDITIS IGM",
+    "plan": "BASE",
+    "valor": 17557.08
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PAROTIDITIS IGM",
+    "plan": "ESMERALDA",
+    "valor": 16825.54
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PAROTIDITIS IGM",
+    "plan": "RUBI",
+    "valor": 16093.99
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PAROTIDITIS IGM",
+    "plan": "DORADO",
+    "valor": 16093.99
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PAROTIDITIS IGM",
+    "plan": "PARTICULAR",
+    "valor": 19751.72
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PEPTIDO C",
+    "plan": "BASE",
+    "valor": 19751.71
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PEPTIDO C",
+    "plan": "ESMERALDA",
+    "valor": 18928.73
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PEPTIDO C",
+    "plan": "RUBI",
+    "valor": 18105.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PEPTIDO C",
+    "plan": "DORADO",
+    "valor": 18105.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PEPTIDO C",
+    "plan": "PARTICULAR",
+    "valor": 22220.68
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PERFIL LIPIDICO",
+    "plan": "BASE",
+    "valor": 14265.12
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PERFIL LIPIDICO",
+    "plan": "ESMERALDA",
+    "valor": 13670.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PERFIL LIPIDICO",
+    "plan": "RUBI",
+    "valor": 13076.36
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PERFIL LIPIDICO",
+    "plan": "DORADO",
+    "valor": 13076.36
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PERFIL LIPIDICO",
+    "plan": "PARTICULAR",
+    "valor": 16048.26
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PIRIDINOLINA EN ORINA- dihidro-",
+    "plan": "BASE",
+    "valor": 30724.89
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PIRIDINOLINA EN ORINA- dihidro-",
+    "plan": "ESMERALDA",
+    "valor": 29444.68
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PIRIDINOLINA EN ORINA- dihidro-",
+    "plan": "RUBI",
+    "valor": 28164.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PIRIDINOLINA EN ORINA- dihidro-",
+    "plan": "DORADO",
+    "valor": 28164.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PIRIDINOLINA EN ORINA- dihidro-",
+    "plan": "PARTICULAR",
+    "valor": 34565.5
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PLAQUETAS RECUENTO DE",
+    "plan": "BASE",
+    "valor": 2194.63
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PLAQUETAS RECUENTO DE",
+    "plan": "ESMERALDA",
+    "valor": 2103.19
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PLAQUETAS RECUENTO DE",
+    "plan": "RUBI",
+    "valor": 2011.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PLAQUETAS RECUENTO DE",
+    "plan": "DORADO",
+    "valor": 2011.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PLAQUETAS RECUENTO DE",
+    "plan": "PARTICULAR",
+    "valor": 2468.96
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PLOMO",
+    "plan": "BASE",
+    "valor": 21946.35
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PLOMO",
+    "plan": "ESMERALDA",
+    "valor": 21031.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PLOMO",
+    "plan": "RUBI",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PLOMO",
+    "plan": "DORADO",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PLOMO",
+    "plan": "PARTICULAR",
+    "valor": 24689.64
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PORFIRINAS EN ORINA",
+    "plan": "BASE",
+    "valor": 16459.76
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PORFIRINAS EN ORINA",
+    "plan": "ESMERALDA",
+    "valor": 15773.94
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PORFIRINAS EN ORINA",
+    "plan": "RUBI",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PORFIRINAS EN ORINA",
+    "plan": "DORADO",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PORFIRINAS EN ORINA",
+    "plan": "PARTICULAR",
+    "valor": 18517.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROGESTERONA",
+    "plan": "BASE",
+    "valor": 12070.5
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROGESTERONA",
+    "plan": "ESMERALDA",
+    "valor": 11567.56
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROGESTERONA",
+    "plan": "RUBI",
+    "valor": 11064.62
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROGESTERONA",
+    "plan": "DORADO",
+    "valor": 11064.62
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROGESTERONA",
+    "plan": "PARTICULAR",
+    "valor": 13579.31
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROLACTINA",
+    "plan": "BASE",
+    "valor": 10973.17
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROLACTINA",
+    "plan": "ESMERALDA",
+    "valor": 10515.96
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROLACTINA",
+    "plan": "RUBI",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROLACTINA",
+    "plan": "DORADO",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROLACTINA",
+    "plan": "PARTICULAR",
+    "valor": 12344.82
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROTEINOGRAMA",
+    "plan": "BASE",
+    "valor": 21946.35
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROTEINOGRAMA",
+    "plan": "ESMERALDA",
+    "valor": 21031.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROTEINOGRAMA",
+    "plan": "RUBI",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROTEINOGRAMA",
+    "plan": "DORADO",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROTEINOGRAMA",
+    "plan": "PARTICULAR",
+    "valor": 24689.64
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROTEINURIA",
+    "plan": "BASE",
+    "valor": 1645.97
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROTEINURIA",
+    "plan": "ESMERALDA",
+    "valor": 1577.39
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROTEINURIA",
+    "plan": "RUBI",
+    "valor": 1508.8
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROTEINURIA",
+    "plan": "DORADO",
+    "valor": 1508.8
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROTEINURIA",
+    "plan": "PARTICULAR",
+    "valor": 1851.71
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROTEINA C REACTIVA (PCR CUALITATIVA)",
+    "plan": "BASE",
+    "valor": 5486.59
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROTEINA C REACTIVA (PCR CUALITATIVA)",
+    "plan": "ESMERALDA",
+    "valor": 5257.98
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROTEINA C REACTIVA (PCR CUALITATIVA)",
+    "plan": "RUBI",
+    "valor": 5029.37
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROTEINA C REACTIVA (PCR CUALITATIVA)",
+    "plan": "DORADO",
+    "valor": 5029.37
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROTEINA C REACTIVA (PCR CUALITATIVA)",
+    "plan": "PARTICULAR",
+    "valor": 6172.41
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROTEINA C REACTIVA ULTRASENSIBLE",
+    "plan": "BASE",
+    "valor": 13198.79
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROTEINA C REACTIVA ULTRASENSIBLE",
+    "plan": "ESMERALDA",
+    "valor": 12648.84
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROTEINA C REACTIVA ULTRASENSIBLE",
+    "plan": "RUBI",
+    "valor": 12098.89
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROTEINA C REACTIVA ULTRASENSIBLE",
+    "plan": "DORADO",
+    "valor": 12098.89
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROTEINA C REACTIVA ULTRASENSIBLE",
+    "plan": "PARTICULAR",
+    "valor": 14848.64
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROTROMBINA TIEMPO DE",
+    "plan": "BASE",
+    "valor": 3291.96
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROTROMBINA TIEMPO DE",
+    "plan": "ESMERALDA",
+    "valor": 3154.79
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROTROMBINA TIEMPO DE",
+    "plan": "RUBI",
+    "valor": 3017.63
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROTROMBINA TIEMPO DE",
+    "plan": "DORADO",
+    "valor": 3017.63
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "PROTROMBINA TIEMPO DE",
+    "plan": "PARTICULAR",
+    "valor": 3703.45
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "RENINA",
+    "plan": "BASE",
+    "valor": 19751.71
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "RENINA",
+    "plan": "ESMERALDA",
+    "valor": 18928.73
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "RENINA",
+    "plan": "RUBI",
+    "valor": 18105.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "RENINA",
+    "plan": "DORADO",
+    "valor": 18105.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "RENINA",
+    "plan": "PARTICULAR",
+    "valor": 22220.68
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ROSSE RAGAN",
+    "plan": "BASE",
+    "valor": 2743.29
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ROSSE RAGAN",
+    "plan": "ESMERALDA",
+    "valor": 2628.99
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ROSSE RAGAN",
+    "plan": "RUBI",
+    "valor": 2514.69
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ROSSE RAGAN",
+    "plan": "DORADO",
+    "valor": 2514.69
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ROSSE RAGAN",
+    "plan": "PARTICULAR",
+    "valor": 3086.2
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "RNP ANTI",
+    "plan": "BASE",
+    "valor": 54865.86
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "RNP ANTI",
+    "plan": "ESMERALDA",
+    "valor": 52579.79
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "RNP ANTI",
+    "plan": "RUBI",
+    "valor": 50293.71
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "RNP ANTI",
+    "plan": "DORADO",
+    "valor": 50293.71
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "RNP ANTI",
+    "plan": "PARTICULAR",
+    "valor": 61724.1
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SANGRE OCULTA EN MATERIA FECAL",
+    "plan": "BASE",
+    "valor": 10973.17
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SANGRE OCULTA EN MATERIA FECAL",
+    "plan": "ESMERALDA",
+    "valor": 10515.96
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SANGRE OCULTA EN MATERIA FECAL",
+    "plan": "RUBI",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SANGRE OCULTA EN MATERIA FECAL",
+    "plan": "DORADO",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SANGRE OCULTA EN MATERIA FECAL",
+    "plan": "PARTICULAR",
+    "valor": 12344.82
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SARAMPION IGG",
+    "plan": "BASE",
+    "valor": 16459.76
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SARAMPION IGG",
+    "plan": "ESMERALDA",
+    "valor": 15773.94
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SARAMPION IGG",
+    "plan": "RUBI",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SARAMPION IGG",
+    "plan": "DORADO",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SARAMPION IGG",
+    "plan": "PARTICULAR",
+    "valor": 18517.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SARAMPION IGM",
+    "plan": "BASE",
+    "valor": 17557.08
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SARAMPION IGM",
+    "plan": "ESMERALDA",
+    "valor": 16825.54
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SARAMPION IGM",
+    "plan": "RUBI",
+    "valor": 16093.99
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SARAMPION IGM",
+    "plan": "DORADO",
+    "valor": 16093.99
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SARAMPION IGM",
+    "plan": "PARTICULAR",
+    "valor": 19751.72
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SCLERODERMIA SCL 70",
+    "plan": "BASE",
+    "valor": 21946.35
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SCLERODERMIA SCL 70",
+    "plan": "ESMERALDA",
+    "valor": 21031.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SCLERODERMIA SCL 70",
+    "plan": "RUBI",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SCLERODERMIA SCL 70",
+    "plan": "DORADO",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SCLERODERMIA SCL 70",
+    "plan": "PARTICULAR",
+    "valor": 24689.64
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SELENIO",
+    "plan": "BASE",
+    "valor": 21946.35
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SELENIO",
+    "plan": "ESMERALDA",
+    "valor": 21031.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SELENIO",
+    "plan": "RUBI",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SELENIO",
+    "plan": "DORADO",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SELENIO",
+    "plan": "PARTICULAR",
+    "valor": 24689.64
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SEROTONINA",
+    "plan": "BASE",
+    "valor": 26335.61
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SEROTONINA",
+    "plan": "ESMERALDA",
+    "valor": 25238.29
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SEROTONINA",
+    "plan": "RUBI",
+    "valor": 24140.97
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SEROTONINA",
+    "plan": "DORADO",
+    "valor": 24140.97
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SEROTONINA",
+    "plan": "PARTICULAR",
+    "valor": 29627.56
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SOMATOTROFINA",
+    "plan": "BASE",
+    "valor": 13167.8
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SOMATOTROFINA",
+    "plan": "ESMERALDA",
+    "valor": 12619.15
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SOMATOTROFINA",
+    "plan": "RUBI",
+    "valor": 12070.49
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SOMATOTROFINA",
+    "plan": "DORADO",
+    "valor": 12070.49
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SOMATOTROFINA",
+    "plan": "PARTICULAR",
+    "valor": 14813.78
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SOMATOMEDINA IGFB 1",
+    "plan": "BASE",
+    "valor": 38406.1
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SOMATOMEDINA IGFB 1",
+    "plan": "ESMERALDA",
+    "valor": 36805.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SOMATOMEDINA IGFB 1",
+    "plan": "RUBI",
+    "valor": 35205.6
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SOMATOMEDINA IGFB 1",
+    "plan": "DORADO",
+    "valor": 35205.6
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "SOMATOMEDINA IGFB 1",
+    "plan": "PARTICULAR",
+    "valor": 43206.87
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "STREPTOTEST   BETA-VAGINAL-ANAL",
+    "plan": "BASE",
+    "valor": 19751.71
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "STREPTOTEST   BETA-VAGINAL-ANAL",
+    "plan": "ESMERALDA",
+    "valor": 18928.73
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "STREPTOTEST   BETA-VAGINAL-ANAL",
+    "plan": "RUBI",
+    "valor": 18105.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "STREPTOTEST   BETA-VAGINAL-ANAL",
+    "plan": "DORADO",
+    "valor": 18105.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "STREPTOTEST   BETA-VAGINAL-ANAL",
+    "plan": "PARTICULAR",
+    "valor": 22220.68
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "T3",
+    "plan": "BASE",
+    "valor": 9875.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "T3",
+    "plan": "ESMERALDA",
+    "valor": 9464.35
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "T3",
+    "plan": "RUBI",
+    "valor": 9052.86
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "T3",
+    "plan": "DORADO",
+    "valor": 9052.86
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "T3",
+    "plan": "PARTICULAR",
+    "valor": 11110.33
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "T4",
+    "plan": "BASE",
+    "valor": 9875.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "T4",
+    "plan": "ESMERALDA",
+    "valor": 9464.35
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "T4",
+    "plan": "RUBI",
+    "valor": 9052.86
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "T4",
+    "plan": "DORADO",
+    "valor": 9052.86
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "T4",
+    "plan": "PARTICULAR",
+    "valor": 11110.33
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "T4 LIBRE",
+    "plan": "BASE",
+    "valor": 9875.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "T4 LIBRE",
+    "plan": "ESMERALDA",
+    "valor": 9464.35
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "T4 LIBRE",
+    "plan": "RUBI",
+    "valor": 9052.86
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "T4 LIBRE",
+    "plan": "DORADO",
+    "valor": 9052.86
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "T4 LIBRE",
+    "plan": "PARTICULAR",
+    "valor": 11110.33
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "T3 LIBRE",
+    "plan": "BASE",
+    "valor": 10973.08
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "T3 LIBRE",
+    "plan": "ESMERALDA",
+    "valor": 10515.87
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "T3 LIBRE",
+    "plan": "RUBI",
+    "valor": 10058.66
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "T3 LIBRE",
+    "plan": "DORADO",
+    "valor": 10058.66
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "T3 LIBRE",
+    "plan": "PARTICULAR",
+    "valor": 12344.72
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TESTOSTERONA",
+    "plan": "BASE",
+    "valor": 12070.5
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TESTOSTERONA",
+    "plan": "ESMERALDA",
+    "valor": 11567.56
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TESTOSTERONA",
+    "plan": "RUBI",
+    "valor": 11064.62
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TESTOSTERONA",
+    "plan": "DORADO",
+    "valor": 11064.62
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TESTOSTERONA",
+    "plan": "PARTICULAR",
+    "valor": 13579.31
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TESTOSTERONA BIODISPONIBLE",
+    "plan": "BASE",
+    "valor": 27432.93
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TESTOSTERONA BIODISPONIBLE",
+    "plan": "ESMERALDA",
+    "valor": 26289.89
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TESTOSTERONA BIODISPONIBLE",
+    "plan": "RUBI",
+    "valor": 25146.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TESTOSTERONA BIODISPONIBLE",
+    "plan": "DORADO",
+    "valor": 25146.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TESTOSTERONA BIODISPONIBLE",
+    "plan": "PARTICULAR",
+    "valor": 30862.05
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TESTOSTERONA LIBRE",
+    "plan": "BASE",
+    "valor": 16459.76
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TESTOSTERONA LIBRE",
+    "plan": "ESMERALDA",
+    "valor": 15773.94
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TESTOSTERONA LIBRE",
+    "plan": "RUBI",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TESTOSTERONA LIBRE",
+    "plan": "DORADO",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TESTOSTERONA LIBRE",
+    "plan": "PARTICULAR",
+    "valor": 18517.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TIROGLOBULINA",
+    "plan": "BASE",
+    "valor": 16459.76
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TIROGLOBULINA",
+    "plan": "ESMERALDA",
+    "valor": 15773.94
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TIROGLOBULINA",
+    "plan": "RUBI",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TIROGLOBULINA",
+    "plan": "DORADO",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TIROGLOBULINA",
+    "plan": "PARTICULAR",
+    "valor": 18517.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOCARA CANIS IGG",
+    "plan": "BASE",
+    "valor": 28530.26
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOCARA CANIS IGG",
+    "plan": "ESMERALDA",
+    "valor": 27341.5
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOCARA CANIS IGG",
+    "plan": "RUBI",
+    "valor": 26152.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOCARA CANIS IGG",
+    "plan": "DORADO",
+    "valor": 26152.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOCARA CANIS IGG",
+    "plan": "PARTICULAR",
+    "valor": 32096.54
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOCARA CANIS IGM",
+    "plan": "BASE",
+    "valor": 32919.52
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOCARA CANIS IGM",
+    "plan": "ESMERALDA",
+    "valor": 31547.87
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOCARA CANIS IGM",
+    "plan": "RUBI",
+    "valor": 30176.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOCARA CANIS IGM",
+    "plan": "DORADO",
+    "valor": 30176.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOCARA CANIS IGM",
+    "plan": "PARTICULAR",
+    "valor": 37034.46
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOPLASMOSIS IFI x elisa",
+    "plan": "BASE",
+    "valor": 6583.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOPLASMOSIS IFI x elisa",
+    "plan": "ESMERALDA",
+    "valor": 6309.58
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOPLASMOSIS IFI x elisa",
+    "plan": "RUBI",
+    "valor": 6035.25
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOPLASMOSIS IFI x elisa",
+    "plan": "DORADO",
+    "valor": 6035.25
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOPLASMOSIS IFI x elisa",
+    "plan": "PARTICULAR",
+    "valor": 7406.9
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOPLASMOSIS- HA (SABIN Y FELDMNAN)",
+    "plan": "BASE",
+    "valor": 4389.26
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOPLASMOSIS- HA (SABIN Y FELDMNAN)",
+    "plan": "ESMERALDA",
+    "valor": 4206.38
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOPLASMOSIS- HA (SABIN Y FELDMNAN)",
+    "plan": "RUBI",
+    "valor": 4023.49
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOPLASMOSIS- HA (SABIN Y FELDMNAN)",
+    "plan": "DORADO",
+    "valor": 4023.49
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOPLASMOSIS- HA (SABIN Y FELDMNAN)",
+    "plan": "PARTICULAR",
+    "valor": 4937.92
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOPLASMOSIS  IGG",
+    "plan": "BASE",
+    "valor": 10973.17
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOPLASMOSIS  IGG",
+    "plan": "ESMERALDA",
+    "valor": 10515.96
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOPLASMOSIS  IGG",
+    "plan": "RUBI",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOPLASMOSIS  IGG",
+    "plan": "DORADO",
+    "valor": 10058.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOPLASMOSIS  IGG",
+    "plan": "PARTICULAR",
+    "valor": 12344.82
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOPLASMOSIS IGM",
+    "plan": "BASE",
+    "valor": 8788.26
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOPLASMOSIS IGM",
+    "plan": "ESMERALDA",
+    "valor": 8422.08
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOPLASMOSIS IGM",
+    "plan": "RUBI",
+    "valor": 8055.9
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOPLASMOSIS IGM",
+    "plan": "DORADO",
+    "valor": 8055.9
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TOXOPLASMOSIS IGM",
+    "plan": "PARTICULAR",
+    "valor": 9886.79
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TSH",
+    "plan": "BASE",
+    "valor": 9875.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TSH",
+    "plan": "ESMERALDA",
+    "valor": 9464.35
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TSH",
+    "plan": "RUBI",
+    "valor": 9052.86
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TSH",
+    "plan": "DORADO",
+    "valor": 9052.86
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TSH",
+    "plan": "PARTICULAR",
+    "valor": 11110.33
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TRANSFERRINA",
+    "plan": "BASE",
+    "valor": 6583.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TRANSFERRINA",
+    "plan": "ESMERALDA",
+    "valor": 6309.58
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TRANSFERRINA",
+    "plan": "RUBI",
+    "valor": 6035.25
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TRANSFERRINA",
+    "plan": "DORADO",
+    "valor": 6035.25
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TRANSFERRINA",
+    "plan": "PARTICULAR",
+    "valor": 7406.9
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TRIGLICERIDOS",
+    "plan": "BASE",
+    "valor": 2743.29
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TRIGLICERIDOS",
+    "plan": "ESMERALDA",
+    "valor": 2628.99
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TRIGLICERIDOS",
+    "plan": "RUBI",
+    "valor": 2514.69
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TRIGLICERIDOS",
+    "plan": "DORADO",
+    "valor": 2514.69
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "TRIGLICERIDOS",
+    "plan": "PARTICULAR",
+    "valor": 3086.2
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "UREAPLASMA + MYCOPLASMA  (25 unidades)",
+    "plan": "BASE",
+    "valor": 38406.1
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "UREAPLASMA + MYCOPLASMA  (25 unidades)",
+    "plan": "ESMERALDA",
+    "valor": 36805.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "UREAPLASMA + MYCOPLASMA  (25 unidades)",
+    "plan": "RUBI",
+    "valor": 35205.6
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "UREAPLASMA + MYCOPLASMA  (25 unidades)",
+    "plan": "DORADO",
+    "valor": 35205.6
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "UREAPLASMA + MYCOPLASMA  (25 unidades)",
+    "plan": "PARTICULAR",
+    "valor": 43206.87
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "UROCULTIVO",
+    "plan": "BASE",
+    "valor": 21946.35
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "UROCULTIVO",
+    "plan": "ESMERALDA",
+    "valor": 21031.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "UROCULTIVO",
+    "plan": "RUBI",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "UROCULTIVO",
+    "plan": "DORADO",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "UROCULTIVO",
+    "plan": "PARTICULAR",
+    "valor": 24689.64
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "UROCULTIVO + ANTIBIOGRAMA",
+    "plan": "BASE",
+    "valor": 31822.8
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "UROCULTIVO + ANTIBIOGRAMA",
+    "plan": "ESMERALDA",
+    "valor": 30496.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "UROCULTIVO + ANTIBIOGRAMA",
+    "plan": "RUBI",
+    "valor": 29170.9
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "UROCULTIVO + ANTIBIOGRAMA",
+    "plan": "DORADO",
+    "valor": 29170.9
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "UROCULTIVO + ANTIBIOGRAMA",
+    "plan": "PARTICULAR",
+    "valor": 35800.64
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VARICELA IGG",
+    "plan": "BASE",
+    "valor": 18654.39
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VARICELA IGG",
+    "plan": "ESMERALDA",
+    "valor": 17877.12
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VARICELA IGG",
+    "plan": "RUBI",
+    "valor": 17099.86
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VARICELA IGG",
+    "plan": "DORADO",
+    "valor": 17099.86
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VARICELA IGG",
+    "plan": "PARTICULAR",
+    "valor": 20986.19
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VARICELA IGM",
+    "plan": "BASE",
+    "valor": 27432.93
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VARICELA IGM",
+    "plan": "ESMERALDA",
+    "valor": 26289.89
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VARICELA IGM",
+    "plan": "RUBI",
+    "valor": 25146.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VARICELA IGM",
+    "plan": "DORADO",
+    "valor": 25146.85
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VARICELA IGM",
+    "plan": "PARTICULAR",
+    "valor": 30862.05
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VDRL",
+    "plan": "BASE",
+    "valor": 4389.26
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VDRL",
+    "plan": "ESMERALDA",
+    "valor": 4206.38
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VDRL",
+    "plan": "RUBI",
+    "valor": 4023.49
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VDRL",
+    "plan": "DORADO",
+    "valor": 4023.49
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VDRL",
+    "plan": "PARTICULAR",
+    "valor": 4937.92
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VITAMINA B 12",
+    "plan": "BASE",
+    "valor": 16459.76
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VITAMINA B 12",
+    "plan": "ESMERALDA",
+    "valor": 15773.94
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VITAMINA B 12",
+    "plan": "RUBI",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VITAMINA B 12",
+    "plan": "DORADO",
+    "valor": 15088.11
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VITAMINA B 12",
+    "plan": "PARTICULAR",
+    "valor": 18517.23
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VITAMINA D 25 OH",
+    "plan": "BASE",
+    "valor": 40600.74
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VITAMINA D 25 OH",
+    "plan": "ESMERALDA",
+    "valor": 38909.04
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VITAMINA D 25 OH",
+    "plan": "RUBI",
+    "valor": 37217.34
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VITAMINA D 25 OH",
+    "plan": "DORADO",
+    "valor": 37217.34
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VITAMINA D 25 OH",
+    "plan": "PARTICULAR",
+    "valor": 45675.83
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VITAMINA D2 + D3",
+    "plan": "BASE",
+    "valor": 43892.69
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VITAMINA D2 + D3",
+    "plan": "ESMERALDA",
+    "valor": 42063.83
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VITAMINA D2 + D3",
+    "plan": "RUBI",
+    "valor": 40234.97
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VITAMINA D2 + D3",
+    "plan": "DORADO",
+    "valor": 40234.97
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "VITAMINA D2 + D3",
+    "plan": "PARTICULAR",
+    "valor": 49379.28
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ZINC",
+    "plan": "BASE",
+    "valor": 21946.35
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ZINC",
+    "plan": "ESMERALDA",
+    "valor": 21031.91
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ZINC",
+    "plan": "RUBI",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ZINC",
+    "plan": "DORADO",
+    "valor": 20117.48
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ZINC",
+    "plan": "PARTICULAR",
+    "valor": 24689.64
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "ALERGISTA ADULTOS",
+    "plan": "BASE",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "ALERGISTA ADULTOS",
+    "plan": "ESMERALDA",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "ALERGISTA ADULTOS",
+    "plan": "RUBI",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "ALERGISTA ADULTOS",
+    "plan": "DORADO",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "ALERGISTA ADULTOS",
+    "plan": "PARTICULAR",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "ALERGISTA PEDIATRICO",
+    "plan": "BASE",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "ALERGISTA PEDIATRICO",
+    "plan": "ESMERALDA",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "ALERGISTA PEDIATRICO",
+    "plan": "RUBI",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "ALERGISTA PEDIATRICO",
+    "plan": "DORADO",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "ALERGISTA PEDIATRICO",
+    "plan": "PARTICULAR",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "CARDIOLOGÍA",
+    "plan": "BASE",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "CARDIOLOGÍA",
+    "plan": "ESMERALDA",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "CARDIOLOGÍA",
+    "plan": "RUBI",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "CARDIOLOGÍA",
+    "plan": "DORADO",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "CARDIOLOGÍA",
+    "plan": "PARTICULAR",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "CIRUGÍA GENERAL",
+    "plan": "BASE",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "CIRUGÍA GENERAL",
+    "plan": "ESMERALDA",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "CIRUGÍA GENERAL",
+    "plan": "RUBI",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "CIRUGÍA GENERAL",
+    "plan": "DORADO",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "CIRUGÍA GENERAL",
+    "plan": "PARTICULAR",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "CLÍNICA MÉDICA",
+    "plan": "BASE",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "CLÍNICA MÉDICA",
+    "plan": "ESMERALDA",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "CLÍNICA MÉDICA",
+    "plan": "RUBI",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "CLÍNICA MÉDICA",
+    "plan": "DORADO",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "CLÍNICA MÉDICA",
+    "plan": "PARTICULAR",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "DERMATOLOGIA",
+    "plan": "BASE",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "DERMATOLOGIA",
+    "plan": "ESMERALDA",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "DERMATOLOGIA",
+    "plan": "RUBI",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "DERMATOLOGIA",
+    "plan": "DORADO",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "DERMATOLOGIA",
+    "plan": "PARTICULAR",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "FLEBOLOGÍA",
+    "plan": "BASE",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "FLEBOLOGÍA",
+    "plan": "ESMERALDA",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "FLEBOLOGÍA",
+    "plan": "RUBI",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "FLEBOLOGÍA",
+    "plan": "DORADO",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "FLEBOLOGÍA",
+    "plan": "PARTICULAR",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "GASTROENTEROLOGÍA",
+    "plan": "BASE",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "GASTROENTEROLOGÍA",
+    "plan": "ESMERALDA",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "GASTROENTEROLOGÍA",
+    "plan": "RUBI",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "GASTROENTEROLOGÍA",
+    "plan": "DORADO",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "GASTROENTEROLOGÍA",
+    "plan": "PARTICULAR",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "GINECOLOGÍA",
+    "plan": "BASE",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "GINECOLOGÍA",
+    "plan": "ESMERALDA",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "GINECOLOGÍA",
+    "plan": "RUBI",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "GINECOLOGÍA",
+    "plan": "DORADO",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "GINECOLOGÍA",
+    "plan": "PARTICULAR",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "MASTOLOGIA",
+    "plan": "BASE",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "MASTOLOGIA",
+    "plan": "ESMERALDA",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "MASTOLOGIA",
+    "plan": "RUBI",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "MASTOLOGIA",
+    "plan": "DORADO",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "MASTOLOGIA",
+    "plan": "PARTICULAR",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEFROLOGÍA",
+    "plan": "BASE",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEFROLOGÍA",
+    "plan": "ESMERALDA",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEFROLOGÍA",
+    "plan": "RUBI",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEFROLOGÍA",
+    "plan": "DORADO",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEFROLOGÍA",
+    "plan": "PARTICULAR",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEUMONOLOGÌA ADULTOS",
+    "plan": "BASE",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEUMONOLOGÌA ADULTOS",
+    "plan": "ESMERALDA",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEUMONOLOGÌA ADULTOS",
+    "plan": "RUBI",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEUMONOLOGÌA ADULTOS",
+    "plan": "DORADO",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEUMONOLOGÌA ADULTOS",
+    "plan": "PARTICULAR",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEUROLOGÍA",
+    "plan": "BASE",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEUROLOGÍA",
+    "plan": "ESMERALDA",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEUROLOGÍA",
+    "plan": "RUBI",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEUROLOGÍA",
+    "plan": "DORADO",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEUROLOGÍA",
+    "plan": "PARTICULAR",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NUTRICIÓN",
+    "plan": "BASE",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NUTRICIÓN",
+    "plan": "ESMERALDA",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NUTRICIÓN",
+    "plan": "RUBI",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NUTRICIÓN",
+    "plan": "DORADO",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NUTRICIÓN",
+    "plan": "PARTICULAR",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "OFTALMOLOGÍA",
+    "plan": "BASE",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "OFTALMOLOGÍA",
+    "plan": "ESMERALDA",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "OFTALMOLOGÍA",
+    "plan": "RUBI",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "OFTALMOLOGÍA",
+    "plan": "DORADO",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "OFTALMOLOGÍA",
+    "plan": "PARTICULAR",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "OTORRINOLARINGOLOGÍA",
+    "plan": "BASE",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "OTORRINOLARINGOLOGÍA",
+    "plan": "ESMERALDA",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "OTORRINOLARINGOLOGÍA",
+    "plan": "RUBI",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "OTORRINOLARINGOLOGÍA",
+    "plan": "DORADO",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "OTORRINOLARINGOLOGÍA",
+    "plan": "PARTICULAR",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PEDIATRÍA",
+    "plan": "BASE",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PEDIATRÍA",
+    "plan": "ESMERALDA",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PEDIATRÍA",
+    "plan": "RUBI",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PEDIATRÍA",
+    "plan": "DORADO",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PEDIATRÍA",
+    "plan": "PARTICULAR",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PROCTOLOGÍA",
+    "plan": "BASE",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PROCTOLOGÍA",
+    "plan": "ESMERALDA",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PROCTOLOGÍA",
+    "plan": "RUBI",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PROCTOLOGÍA",
+    "plan": "DORADO",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PROCTOLOGÍA",
+    "plan": "PARTICULAR",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PSICOPEDAGOGÍA",
+    "plan": "BASE",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PSICOPEDAGOGÍA",
+    "plan": "ESMERALDA",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PSICOPEDAGOGÍA",
+    "plan": "RUBI",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PSICOPEDAGOGÍA",
+    "plan": "DORADO",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PSICOPEDAGOGÍA",
+    "plan": "PARTICULAR",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "TRAUMATOLOGÍA ADULTOS",
+    "plan": "BASE",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "TRAUMATOLOGÍA ADULTOS",
+    "plan": "ESMERALDA",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "TRAUMATOLOGÍA ADULTOS",
+    "plan": "RUBI",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "TRAUMATOLOGÍA ADULTOS",
+    "plan": "DORADO",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "TRAUMATOLOGÍA ADULTOS",
+    "plan": "PARTICULAR",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "TRAUMATOLOGÍA RODILLA",
+    "plan": "BASE",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "TRAUMATOLOGÍA RODILLA",
+    "plan": "ESMERALDA",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "TRAUMATOLOGÍA RODILLA",
+    "plan": "RUBI",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "TRAUMATOLOGÍA RODILLA",
+    "plan": "DORADO",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "TRAUMATOLOGÍA RODILLA",
+    "plan": "PARTICULAR",
+    "valor": 20000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "DIABETOLOGÍA",
+    "plan": "BASE",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "DIABETOLOGÍA",
+    "plan": "ESMERALDA",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "DIABETOLOGÍA",
+    "plan": "RUBI",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "DIABETOLOGÍA",
+    "plan": "DORADO",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "DIABETOLOGÍA",
+    "plan": "PARTICULAR",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "HEMATOLOGÌA",
+    "plan": "BASE",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "HEMATOLOGÌA",
+    "plan": "ESMERALDA",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "HEMATOLOGÌA",
+    "plan": "RUBI",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "HEMATOLOGÌA",
+    "plan": "DORADO",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "HEMATOLOGÌA",
+    "plan": "PARTICULAR",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEUMONOLOGÍA PEDIÁTRICA",
+    "plan": "BASE",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEUMONOLOGÍA PEDIÁTRICA",
+    "plan": "ESMERALDA",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEUMONOLOGÍA PEDIÁTRICA",
+    "plan": "RUBI",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEUMONOLOGÍA PEDIÁTRICA",
+    "plan": "DORADO",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEUMONOLOGÍA PEDIÁTRICA",
+    "plan": "PARTICULAR",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEUROCIRUGIA",
+    "plan": "BASE",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEUROCIRUGIA",
+    "plan": "ESMERALDA",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEUROCIRUGIA",
+    "plan": "RUBI",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEUROCIRUGIA",
+    "plan": "DORADO",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEUROCIRUGIA",
+    "plan": "PARTICULAR",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "ONCOLOGIA",
+    "plan": "BASE",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "ONCOLOGIA",
+    "plan": "ESMERALDA",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "ONCOLOGIA",
+    "plan": "RUBI",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "ONCOLOGIA",
+    "plan": "DORADO",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "ONCOLOGIA",
+    "plan": "PARTICULAR",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PSICOLOGIA",
+    "plan": "BASE",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PSICOLOGIA",
+    "plan": "ESMERALDA",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PSICOLOGIA",
+    "plan": "RUBI",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PSICOLOGIA",
+    "plan": "DORADO",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PSICOLOGIA",
+    "plan": "PARTICULAR",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PSICOLOGIA INFANTIL",
+    "plan": "BASE",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PSICOLOGIA INFANTIL",
+    "plan": "ESMERALDA",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PSICOLOGIA INFANTIL",
+    "plan": "RUBI",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PSICOLOGIA INFANTIL",
+    "plan": "DORADO",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PSICOLOGIA INFANTIL",
+    "plan": "PARTICULAR",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "REUMATOLOGÍA",
+    "plan": "BASE",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "REUMATOLOGÍA",
+    "plan": "ESMERALDA",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "REUMATOLOGÍA",
+    "plan": "RUBI",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "REUMATOLOGÍA",
+    "plan": "DORADO",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "REUMATOLOGÍA",
+    "plan": "PARTICULAR",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "UROLOGÍA",
+    "plan": "BASE",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "UROLOGÍA",
+    "plan": "ESMERALDA",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "UROLOGÍA",
+    "plan": "RUBI",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "UROLOGÍA",
+    "plan": "DORADO",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "UROLOGÍA",
+    "plan": "PARTICULAR",
+    "valor": 24000
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "ENDOCRINOLOGÌA",
+    "plan": "BASE",
+    "valor": 39800
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "ENDOCRINOLOGÌA",
+    "plan": "ESMERALDA",
+    "valor": 39800
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "ENDOCRINOLOGÌA",
+    "plan": "RUBI",
+    "valor": 39800
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "ENDOCRINOLOGÌA",
+    "plan": "DORADO",
+    "valor": 39800
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "ENDOCRINOLOGÌA",
+    "plan": "PARTICULAR",
+    "valor": 39800
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "HEPATÓLOGÍA",
+    "plan": "BASE",
+    "valor": 39800
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "HEPATÓLOGÍA",
+    "plan": "ESMERALDA",
+    "valor": 39800
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "HEPATÓLOGÍA",
+    "plan": "RUBI",
+    "valor": 39800
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "HEPATÓLOGÍA",
+    "plan": "DORADO",
+    "valor": 39800
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "HEPATÓLOGÍA",
+    "plan": "PARTICULAR",
+    "valor": 39800
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEUROLOGÍA INFANTIL",
+    "plan": "BASE",
+    "valor": 39800
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEUROLOGÍA INFANTIL",
+    "plan": "ESMERALDA",
+    "valor": 39800
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEUROLOGÍA INFANTIL",
+    "plan": "RUBI",
+    "valor": 39800
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEUROLOGÍA INFANTIL",
+    "plan": "DORADO",
+    "valor": 39800
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "NEUROLOGÍA INFANTIL",
+    "plan": "PARTICULAR",
+    "valor": 39800
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PSIQUIATRÍA",
+    "plan": "BASE",
+    "valor": 39800
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PSIQUIATRÍA",
+    "plan": "ESMERALDA",
+    "valor": 39800
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PSIQUIATRÍA",
+    "plan": "RUBI",
+    "valor": 39800
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PSIQUIATRÍA",
+    "plan": "DORADO",
+    "valor": 39800
+  },
+  {
+    "tipo": "ESPECIALIDAD",
+    "nombre": "PSIQUIATRÍA",
+    "plan": "PARTICULAR",
+    "valor": 39800
+  }
+]

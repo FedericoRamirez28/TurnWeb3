@@ -1,0 +1,352 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/**
+ * ========= MODELO AFILIADO =========
+ */
+
+model Afiliado {
+  id             String @id @default(uuid())
+  numeroAfiliado String
+  dni            String @unique
+  nombreCompleto String
+
+  domicilio    String?
+  localidad    String?
+  codigoPostal String?
+  partido      String?
+  provincia    String?
+
+  telefono        String?
+  telefonoAlt     String?
+  email           String?
+  fechaNacimiento DateTime?
+
+  esTitular Boolean @default(true)
+  plan      String?
+  activo    Boolean @default(true)
+
+  turnos Turno[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/**
+ * ========= MODELO TURNO =========
+ */
+
+model Turno {
+  id String @id @default(uuid())
+
+  // Fecha en la que se TOMA el turno (la que usa TodaySummary para "Tomado el ...")
+  fechaTomado DateTime @default(now())
+
+  // Fecha REAL del turno (la que usa el calendario / getTurnoDate)
+  fechaReal DateTime?
+
+  // Hora del turno (HH:mm)
+  hora String
+
+  // 'pendiente' | 'tomado' | 'recepcionado' | 'cancelado'
+  estado String
+
+  observaciones String?
+
+  // 'especialidad' | 'laboratorio'
+  tipoAtencion String
+  especialidad String?
+  laboratorio  String?
+
+  plan  String?
+  monto Int // si más adelante querés pasamos a Decimal
+
+  profesional String
+  prestador   String
+
+  // Relación con afiliado
+  afiliadoId String
+  afiliado   Afiliado @relation(fields: [afiliadoId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("turnos")
+}
+
+model CierreCaja {
+  id        String   @id @default(uuid())
+  /// Fecha del cierre en formato ISO (yyyy-mm-dd)
+  fechaISO  String   @unique
+  /// Suma de todos los montos de la caja
+  total     Int
+  /// Snapshot de las filas de la caja (array de objetos CajaRow)
+  rows      Json
+  createdAt DateTime @default(now())
+
+  @@map("cierre_caja")
+}
+
+model User {
+  id           String  @id @default(uuid())
+  username     String  @unique
+  displayName  String
+  passwordHash String
+  role         String  @default("recepcion")
+  activo       Boolean @default(true)
+
+  passwordResets PasswordReset[]
+
+  // ✅ inversa para auditoría de empresas creadas
+  laboralCompaniesCreated LaboralCompany[]
+
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  LaboralTurno             LaboralTurno[]
+  laboralNotes             LaboralNote[]
+  laboralAdicionales       LaboralAdicional[]
+  laboralPortadas          LaboralPortada[]
+  laboralConsultorioTurnos LaboralConsultorioTurno[]
+
+  @@map("users")
+}
+
+model PasswordReset {
+  id        String    @id @default(uuid())
+  token     String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  usedAt    DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("password_resets")
+}
+
+model LaboralCompany {
+  id        String  @id @default(uuid())
+  nombre    String
+  nroSocio  String?
+  cuit      String?
+  contacto  String?
+  telefono  String?
+  email     String?
+  domicilio String?
+  notas     String?
+
+  isActive Boolean @default(true)
+
+  createdByUserId String?
+  createdByUser   User?   @relation(fields: [createdByUserId], references: [id])
+
+  employees LaboralEmployee[]
+  turnos    LaboralTurno[]
+
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime                  @updatedAt
+  LaboralConsultorioTurno LaboralConsultorioTurno[]
+
+  @@index([nombre])
+  @@map("laboral_companies")
+}
+
+model LaboralEmployee {
+  id        String         @id @default(uuid())
+  companyId String
+  company   LaboralCompany @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  dni         String
+  nombre      String
+  nroAfiliado String?
+  puesto      String?
+
+  isActive Boolean @default(true)
+
+  turnos LaboralTurno[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([companyId, dni])
+  @@index([dni])
+  @@map("laboral_employees")
+}
+
+model LaboralTurno {
+  id String @id @default(uuid())
+
+  sede String // 'caba' | 'sanjusto'
+
+  fechaRecepcionISO String
+  fechaTurnoISO     String
+
+  // ✅ NUEVO: hora del turno (HH:mm)
+  horaTurno String?
+
+  tipoExamen String
+
+  // relación a empresa
+  companyId String
+  company   LaboralCompany @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // relación a empleado (padrón)
+  employeeId String
+  employee   LaboralEmployee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  // snapshot
+  nombreSnap      String
+  dniSnap         String
+  nroAfiliadoSnap String?
+  puestoSnap      String?
+
+  createdByUserId String?
+  createdByUser   User?   @relation(fields: [createdByUserId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([fechaTurnoISO])
+  @@index([companyId])
+  @@index([employeeId])
+
+  // ✅ NUEVO: index para agenda
+  @@index([sede, fechaTurnoISO, horaTurno])
+
+  // ✅ NUEVO: 1 solo turno por slot (sede+fecha+hora)
+  @@unique([sede, fechaTurnoISO, horaTurno], name: "uniq_laboral_slot")
+
+  @@map("laboral_turnos")
+}
+
+model LaboralNote {
+  id    String @id @default(uuid())
+  text  String
+  color String // 'mint' | 'sky' | 'lilac' | 'peach' | 'lemon' | 'stone'
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("laboral_notes")
+}
+
+model LaboralAdicional {
+  id     String @id @default(cuid())
+  userId String
+
+  empresa     String
+  nroAfiliado String? // opcional
+  nombre      String
+  dni         String
+  adicional   String
+  fechaISO    String // YYYY-MM-DD (fecha del día en que se registra / rinde)
+  createdAt   DateTime @default(now())
+  User        User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, empresa, dni, adicional, fechaISO, nombre, nroAfiliado], name: "uniq_adicional_no_dup")
+  @@index([userId, fechaISO])
+  @@index([userId, dni])
+  @@index([userId, empresa])
+}
+
+model LaboralPortada {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  apellidoNombre  String
+  nroSocio        String?
+  domicilio       String?
+  fechaNacimiento String? // guardamos YYYY-MM-DD como string para que sea igual al front
+  dni             String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, dni]) // ✅ 1 portada por DNI por usuario (evita duplicados)
+  @@index([userId, apellidoNombre])
+  @@index([userId, dni])
+}
+
+model LaboralConsultorioTurno {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  companyId         String
+  company           LaboralCompany @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  empresaNombreSnap String
+
+  dni           String
+  nombre        String
+  nacimientoISO String? // YYYY-MM-DD
+  motivo        String
+  diagnostico   String
+
+  fechaTurnoISO String // YYYY-MM-DD (fecha real del turno)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, companyId, dni, fechaTurnoISO, motivo], name: "uniq_consultorio_no_dup")
+  @@index([userId, fechaTurnoISO])
+  @@index([userId, companyId])
+  @@index([userId, dni])
+  @@map("laboral_consultorio_turnos")
+}
+enum TurnosPlan {
+  BASE
+  ESMERALDA
+  RUBI
+  DORADO
+  PARTICULAR
+}
+
+enum TurnosPrecioTipo {
+  LABORATORIO
+  ESPECIALIDAD
+}
+
+model TurnosPrecio {
+  id        String          @id @default(cuid())
+  tipo      TurnosPrecioTipo
+  nombre    String
+  plan      TurnosPlan
+  valor     Int
+
+  isActive  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tipo, nombre, plan], name: "uniq_turnos_precio")
+  @@index([tipo, plan])
+  @@map("turnos_precios")
+}
+
+model LaboralPrecio {
+  id          String @id @default(cuid())
+  categoria   String // ej: "concepto" | "lab" | "otros"
+  nombre      String
+  valorSocios Int
+  valorNoSocios Int
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([categoria, nombre], name: "uniq_laboral_precio")
+  @@index([categoria])
+  @@map("laboral_precios")
+}
