@@ -67,7 +67,7 @@ export async function createAffiliate(values: AffiliateFormValues): Promise<Affi
 
   const created = await apiJson<AfiliadoApi>('/afiliados', {
     method: 'POST',
-    body: payload,
+    body: JSON.stringify(payload),
   })
 
   return mapAfiliadoApiToAffiliate(created)
@@ -76,7 +76,7 @@ export async function createAffiliate(values: AffiliateFormValues): Promise<Affi
 export async function bajaAfiliadoApi(id: string): Promise<void> {
   await apiJson('/afiliados/' + id + '/baja', {
     method: 'PATCH',
-    body: { activo: false },
+    body: JSON.stringify({ activo: false }),
   })
 }
 
@@ -100,7 +100,7 @@ export async function updateAffiliateApi(id: string, values: AffiliateFormValues
 
   const updated = await apiJson<AfiliadoApi>(`/afiliados/${id}`, {
     method: 'PUT',
-    body: payload,
+    body: JSON.stringify(payload),
   })
 
   return mapAfiliadoApiToAffiliate(updated)
@@ -168,21 +168,21 @@ export async function saveTurno(payload: SaveAppointmentPayload): Promise<void> 
   if (payload.id) {
     await apiJson(`/turnos/${payload.id}/estado`, {
       method: 'PATCH',
-      body: { estado: payload.estado },
+      body: JSON.stringify({ estado: payload.estado }),
     })
     return
   }
 
   await apiJson('/turnos', {
     method: 'POST',
-    body: payload,
+    body: JSON.stringify(payload),
   })
 }
 
 export async function cancelarTurnoApi(id: string): Promise<void> {
   await apiJson(`/turnos/${id}/estado`, {
     method: 'PATCH',
-    body: { estado: 'cancelado' as AppointmentStatus },
+    body: JSON.stringify({ estado: 'cancelado' as AppointmentStatus }),
   })
 }
 
@@ -229,7 +229,7 @@ export async function fetchCajaEstado(): Promise<CajaEstadoDto> {
 export async function cerrarCajaApi(fechaISO: string): Promise<CierreCajaDto> {
   return apiJson<CierreCajaDto>('/caja/cerrar', {
     method: 'POST',
-    body: { fechaISO },
+    body: JSON.stringify({ fechaISO }),
   })
 }
 
