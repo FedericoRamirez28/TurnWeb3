@@ -1,3 +1,5 @@
+// apps/frontend-turnos/src/api/http.ts
+
 export class ApiError extends Error {
   status: number
   bodyText?: string
@@ -10,32 +12,35 @@ export class ApiError extends Error {
   }
 }
 
-function getEnv(): Record<string, string> {
-  const meta = import.meta as unknown as { env?: Record<string, string> }
-  return meta.env ?? {}
+function stripTrailingSlash(s: string): string {
+  return s.replace(/\/+$/, '')
 }
 
 export function getApiBaseUrl(): string {
-  const env = getEnv()
-  const raw = (env.VITE_API_BASE_URL || '').trim().replace(/\/$/, '')
+  // ✅ usar import.meta.env directo (Vite lo inyecta en build)
+  const raw = String(import.meta.env.VITE_API_BASE_URL ?? '').trim()
 
-  // En prod NO queremos “caer” a localhost nunca.
-  const isProd = (env.MODE || '').toLowerCase() === 'production'
+  if (raw) return stripTrailingSlash(raw)
 
-  if (!raw) {
-    if (isProd) {
-      throw new Error('Falta VITE_API_BASE_URL en producción (build de Render).')
-    }
-    // dev fallback OK
-    return 'http://localhost:4000'
-  }
+  // ✅ fallback SOLO en DEV/local
+  if (import.meta.env.DEV) return 'http://localhost:4000'
 
-  return raw
+  throw new Error('Falta VITE_API_BASE_URL en el build de producción (Render).')
 }
 
-type ApiJsonInit = Omit<RequestInit, 'body'> & { body?: unknown }
+function devHeaders(): Record<string, string> {
+  // ✅ tu backend permite x-user-id (lo usás para dev)
+  if (!import.meta.env.DEV) return {}
+  try {
+    const id = localStorage.getItem('dev_user_id') || ''
+    if (!id.trim()) return {}
+    return { 'x-user-id': id.trim() }
+  } catch {
+    return {}
+  }
+}
 
-export async function apiJson<T>(path: string, init?: ApiJsonInit): Promise<T> {
+export async function apiJson<T>(path: string, init?: RequestInit): Promise<T> {
   const base = getApiBaseUrl()
 
   const url =
@@ -46,10 +51,9 @@ export async function apiJson<T>(path: string, init?: ApiJsonInit): Promise<T> {
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      ...devHeaders(),
       ...(init?.headers ?? {}),
     },
-    body: init?.body === undefined ? undefined : JSON.stringify(init.body),
   })
 
   if (!res.ok) {

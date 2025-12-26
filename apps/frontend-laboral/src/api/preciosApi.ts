@@ -1,4 +1,5 @@
 // apps/frontend-laboral/src/api/preciosApi.ts
+import { apiJson, ApiError } from './http'
 
 export type PlanKey = 'ALL' | 'BASE' | 'ESMERALDA' | 'RUBI' | 'DORADO' | 'PARTICULAR'
 export type PlanClave = Exclude<PlanKey, 'ALL'>
@@ -29,65 +30,6 @@ export type LaboralPrecioRowDB = {
   updatedAt: string
 }
 
-export class ApiError extends Error {
-  status: number
-  bodyText?: string
-  constructor(status: number, message: string, bodyText?: string) {
-    super(message)
-    this.name = 'ApiError'
-    this.status = status
-    this.bodyText = bodyText
-  }
-}
-
-function getApiBase(): string {
-  const base = (import.meta.env.VITE_API_BASE_URL || '').trim()
-  return base.replace(/\/$/, '')
-}
-
-type ApiJsonInit = Omit<RequestInit, 'body'> & {
-  body?: unknown
-  query?: Record<string, string | number | boolean | null | undefined>
-}
-
-async function apiJson<T>(path: string, init?: ApiJsonInit): Promise<T> {
-  const base = getApiBase()
-  if (!base) throw new Error('Falta VITE_API_BASE_URL en el .env del frontend-laboral')
-
-  const url = new URL(`${base}${path}`)
-  const query = init?.query
-  if (query) {
-    for (const [k, v] of Object.entries(query)) {
-      if (v === undefined || v === null) continue
-      url.searchParams.set(k, String(v))
-    }
-  }
-
-  const res = await fetch(url.toString(), {
-    method: init?.method ?? 'GET',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(init?.headers ?? {}),
-    },
-    body: init?.body === undefined ? undefined : JSON.stringify(init.body),
-  })
-
-  if (!res.ok) {
-    const text = await res.text().catch(() => '')
-    let msg = `Error ${res.status}`
-    try {
-      const data = text ? (JSON.parse(text) as { message?: unknown }) : null
-      if (data?.message) msg = Array.isArray(data.message) ? data.message.join(' | ') : String(data.message)
-    } catch {
-      // ignore
-    }
-    throw new ApiError(res.status, msg, text)
-  }
-
-  return (await res.json()) as T
-}
-
 /* =========================
    ENDPOINTS PRECIOS TURNOS
    ========================= */
@@ -101,11 +43,7 @@ export async function listTurnosPrecios(params: {
 }): Promise<ListTurnosPreciosResponse> {
   const q = (params.q ?? '').trim()
   return apiJson<ListTurnosPreciosResponse>('/laboral/precios/turnos/rows', {
-    query: {
-      plan: params.plan,
-      scope: params.scope,
-      q: q || undefined,
-    },
+    query: { plan: params.plan, scope: params.scope, q: q || undefined },
   })
 }
 
@@ -169,3 +107,5 @@ export async function adjustLaboralPrecios(body: {
     body,
   })
 }
+
+export { ApiError }
