@@ -17,13 +17,27 @@ function getEnv(): Record<string, string> {
 
 export function getApiBaseUrl(): string {
   const env = getEnv()
-  const raw = (env.VITE_API_BASE_URL || '').trim()
-  const fallback = 'http://localhost:4000'
-  return (raw || fallback).replace(/\/$/, '')
+  const raw = (env.VITE_API_BASE_URL || '').trim().replace(/\/$/, '')
+
+  // En prod NO queremos “caer” a localhost nunca.
+  const isProd = (env.MODE || '').toLowerCase() === 'production'
+
+  if (!raw) {
+    if (isProd) {
+      throw new Error('Falta VITE_API_BASE_URL en producción (build de Render).')
+    }
+    // dev fallback OK
+    return 'http://localhost:4000'
+  }
+
+  return raw
 }
 
-export async function apiJson<T>(path: string, init?: RequestInit): Promise<T> {
+type ApiJsonInit = Omit<RequestInit, 'body'> & { body?: unknown }
+
+export async function apiJson<T>(path: string, init?: ApiJsonInit): Promise<T> {
   const base = getApiBaseUrl()
+
   const url =
     path.startsWith('http') ? path : `${base}${path.startsWith('/') ? '' : '/'}${path}`
 
@@ -32,8 +46,10 @@ export async function apiJson<T>(path: string, init?: RequestInit): Promise<T> {
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
+      'Accept': 'application/json',
       ...(init?.headers ?? {}),
     },
+    body: init?.body === undefined ? undefined : JSON.stringify(init.body),
   })
 
   if (!res.ok) {
