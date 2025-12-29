@@ -20,7 +20,7 @@ export async function authLogin(
 ): Promise<AuthUser> {
   const r = await apiJson<{ user: AuthUser }>('/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ username, password, remember }),
+    body: { username, password, remember },
   })
   return r.user
 }
@@ -33,7 +33,7 @@ export async function authRegister(
 ): Promise<AuthUser> {
   const r = await apiJson<{ user: AuthUser }>('/auth/register', {
     method: 'POST',
-    body: JSON.stringify({ username, password, displayName, remember }),
+    body: { username, password, displayName, remember },
   })
   return r.user
 }
@@ -45,7 +45,7 @@ export async function authLogout(): Promise<void> {
 export async function requestPasswordReset(username: string): Promise<string> {
   const r = await apiJson<{ ok: true; token: string }>('/auth/password/request', {
     method: 'POST',
-    body: JSON.stringify({ username }),
+    body: { username },
   })
   return r.token
 }
@@ -53,6 +53,6 @@ export async function requestPasswordReset(username: string): Promise<string> {
 export async function resetPassword(token: string, newPassword: string): Promise<void> {
   await apiJson<{ ok: true }>('/auth/password/reset', {
     method: 'POST',
-    body: JSON.stringify({ token, newPassword }),
+    body: { token, newPassword },
   })
 }
