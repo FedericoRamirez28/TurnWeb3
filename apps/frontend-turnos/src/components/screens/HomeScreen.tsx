@@ -44,7 +44,7 @@ const PRESTADORES = [
   'MEDIC',
 ] as const
 
-const MEDIC_PROFESIONALES = ['Dr. Viano', 'Dra. Quevedo'] as const
+const MEDIC_PROFESIONALES = ['Dr. Viano', 'Dra. Quevedo', 'Dra. Ramos'] as const
 
 // === Helpers de fechas/horarios ===
 
@@ -677,30 +677,29 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
   onClose,
   onSave,
   isSlotTaken,
+
+  // ✅ USAR PROPS (no hook adentro)
+  laboratorioOptions,
+  especialidadesOptions,
+  getLaboratorioPrice,
+  getEspecialidadPrice,
+  pricesLoading,
+  pricesError,
 }) => {
   const canRecepcionar = Boolean(appointment)
 
-  const {
-    loading: pricesLoading,
-    error: pricesError,
-    laboratorioOptions,
-    especialidadesOptions,
-    getLaboratorioPrice,
-    getEspecialidadPrice,
-    refresh,
-  } = useTurnosPrices()
-
   const [activeTab, setActiveTab] = useState<'tomar' | 'recepcionar'>(
-    mode === 'recepcionar' && canRecepcionar ? 'recepcionar' : 'tomar'
+    mode === 'recepcionar' && canRecepcionar ? 'recepcionar' : 'tomar',
   )
+
   const [date, setDate] = useState(appointment?.date ?? defaultDate)
   const [controlDate, setControlDate] = useState(
-    appointment?.controlDate ?? appointment?.date ?? defaultDate
+    appointment?.controlDate ?? appointment?.date ?? defaultDate,
   )
   const [time, setTime] = useState(appointment?.time ?? initialTime ?? '10:00')
 
   const [tipoAtencion, setTipoAtencion] = useState<'especialidad' | 'laboratorio'>(
-    appointment?.tipoAtencion ?? 'especialidad'
+    appointment?.tipoAtencion ?? 'especialidad',
   )
 
   const [especialidad, setEspecialidad] = useState(appointment?.especialidad ?? '')
@@ -717,21 +716,37 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
   })
   const [isMontoManual, setIsMontoManual] = useState(false)
 
-  // ✅ Corregido: Se agrega 'refresh' a las dependencias
-  useEffect(() => {
-    void refresh?.({ silent: true })
-  }, [refresh])
+  const isReadOnlyRecep = activeTab === 'recepcionar'
 
-  // --- LÓGICA DE CALCULO DE PRECIO ---
-  // Esta función auxiliar calcula el precio sin necesidad de useEffects
+  // ✅ IDs únicos para evitar que el browser “mezcle” datalists
+  const dlEspId = useMemo(
+    () => `dl-esp-${affiliate.id}-${appointment?.id ?? 'new'}`,
+    [affiliate.id, appointment?.id],
+  )
+  const dlLabId = useMemo(
+    () => `dl-lab-${affiliate.id}-${appointment?.id ?? 'new'}`,
+    [affiliate.id, appointment?.id],
+  )
+
+  const especialidadesList = useMemo(() => {
+    const arr = Array.isArray(especialidadesOptions) ? especialidadesOptions : []
+    return Array.from(new Set(arr.map((s) => String(s).trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b))
+  }, [especialidadesOptions])
+
+  const laboratorioList = useMemo(() => {
+    const arr = Array.isArray(laboratorioOptions) ? laboratorioOptions : []
+    return Array.from(new Set(arr.map((s) => String(s).trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b))
+  }, [laboratorioOptions])
+
   const calculateNewPrice = (
     currentPrestador: string,
     currentTipo: 'especialidad' | 'laboratorio',
     currentEsp: string,
     currentLab: string,
-    currentPlan: string
+    currentPlan: string,
   ) => {
     if (currentPrestador === 'MEDIC') return 0
+
     if (currentTipo === 'especialidad' && currentEsp) {
       return getEspecialidadPrice(currentEsp, currentPlan)
     }
@@ -741,32 +756,18 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
     return 0
   }
 
-  // Wrapper para actualizar el monto automáticamente si no es manual
-  const updateMontoState = (
-    newVal: number,
-    forceUpdate: boolean = false
-  ) => {
-    // Si es MEDIC forzamos la actualización aunque sea manual, y quitamos flag manual
-    // Si no es manual, actualizamos
-    // Si forceUpdate es true, actualizamos
-    if (!isMontoManual || forceUpdate) {
-      setMontoInput(String(newVal))
-    }
+  const updateMontoState = (newVal: number, forceUpdate = false) => {
+    if (!isMontoManual || forceUpdate) setMontoInput(String(newVal))
   }
-
-  // --- HANDLERS (Reemplazan a los useEffects) ---
 
   const handlePrestadorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value
     setPrestador(val)
 
-    // Lógica que estaba en useEffect linea 726:
     if (val !== 'MEDIC') setProfesional('')
 
-    // Lógica que estaba en useEffect linea 741:
     const newPrice = calculateNewPrice(val, tipoAtencion, especialidad, laboratorio, plan)
-    
-    // Si cambiamos a MEDIC, forzamos el precio a 0 y reseteamos el flag manual
+
     if (val === 'MEDIC') {
       setMontoInput('0')
       setIsMontoManual(false)
@@ -778,12 +779,18 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
   const handlePlanChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value
     setPlan(val)
+
     const newPrice = calculateNewPrice(prestador, tipoAtencion, especialidad, laboratorio, val)
     updateMontoState(newPrice)
   }
 
   const handleTipoAtencionChange = (tipo: 'especialidad' | 'laboratorio') => {
     setTipoAtencion(tipo)
+
+    // ✅ opcional pero recomendado: limpiar el otro campo para evitar “arrastre”
+    if (tipo === 'especialidad') setLaboratorio('')
+    else setEspecialidad('')
+
     const newPrice = calculateNewPrice(prestador, tipo, especialidad, laboratorio, plan)
     updateMontoState(newPrice)
   }
@@ -791,20 +798,20 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
   const handleEspecialidadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value
     setEspecialidad(val)
-    // Solo recalculamos si estamos en modo especialidad
+
     if (tipoAtencion === 'especialidad') {
-       const newPrice = calculateNewPrice(prestador, 'especialidad', val, laboratorio, plan)
-       updateMontoState(newPrice)
+      const newPrice = calculateNewPrice(prestador, 'especialidad', val, laboratorio, plan)
+      updateMontoState(newPrice)
     }
   }
 
   const handleLaboratorioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value
     setLaboratorio(val)
-    // Solo recalculamos si estamos en modo laboratorio
+
     if (tipoAtencion === 'laboratorio') {
-       const newPrice = calculateNewPrice(prestador, 'laboratorio', especialidad, val, plan)
-       updateMontoState(newPrice)
+      const newPrice = calculateNewPrice(prestador, 'laboratorio', especialidad, val, plan)
+      updateMontoState(newPrice)
     }
   }
 
@@ -817,7 +824,6 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
       return
     }
     if (!/^\d*\.?\d*$/.test(raw)) return
-
     setMontoInput(raw)
   }
 
@@ -851,14 +857,10 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
 
   const effectiveTurnoDate = controlDate || date
   const slotTaken = effectiveTurnoDate && time ? isSlotTaken(effectiveTurnoDate, time) : false
-  const isReadOnlyRecep = activeTab === 'recepcionar'
 
   const allPlanOptions = Array.from(
-    new Set([plan, affiliate.plan, ...PLAN_OPTIONS].filter((p): p is string => Boolean(p)))
+    new Set([plan, affiliate.plan, ...PLAN_OPTIONS].filter((p): p is string => Boolean(p))),
   )
-
-  const especialidadesList: string[] = Array.isArray(especialidadesOptions) ? especialidadesOptions : []
-  const laboratorioList: string[] = Array.isArray(laboratorioOptions) ? laboratorioOptions : []
 
   return (
     <div className="turno-modal-overlay">
@@ -943,12 +945,7 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
 
             <label className="field">
               <span className="field__label">Plan</span>
-              <select
-                className="input"
-                value={plan}
-                onChange={handlePlanChange}
-                disabled={isReadOnlyRecep}
-              >
+              <select className="input" value={plan} onChange={handlePlanChange} disabled={isReadOnlyRecep}>
                 <option value="">Seleccionar plan…</option>
                 {allPlanOptions.map((p) => (
                   <option key={p} value={p}>
@@ -960,12 +957,7 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
 
             <label className="field">
               <span className="field__label">Prestador</span>
-              <select
-                className="input"
-                value={prestador}
-                onChange={handlePrestadorChange}
-                disabled={isReadOnlyRecep}
-              >
+              <select className="input" value={prestador} onChange={handlePrestadorChange} disabled={isReadOnlyRecep}>
                 {PRESTADORES.map((p) => (
                   <option key={p} value={p}>
                     {p}
@@ -1005,14 +997,14 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
                 <span className="field__label">Especialidad</span>
                 <input
                   className="input"
-                  list="especialidades-list"
+                  list={dlEspId}
                   value={especialidad}
                   onChange={handleEspecialidadChange}
                   placeholder="Buscar especialidad…"
                   disabled={isReadOnlyRecep}
                 />
-                <datalist id="especialidades-list">
-                  {especialidadesList.map((opt: string) => (
+                <datalist id={dlEspId}>
+                  {especialidadesList.map((opt) => (
                     <option key={opt} value={opt} />
                   ))}
                 </datalist>
@@ -1024,14 +1016,14 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
                 <span className="field__label">Laboratorio</span>
                 <input
                   className="input"
-                  list="laboratorio-list"
+                  list={dlLabId}
                   value={laboratorio}
                   onChange={handleLaboratorioChange}
                   placeholder="Buscar práctica de laboratorio…"
                   disabled={isReadOnlyRecep}
                 />
-                <datalist id="laboratorio-list">
-                  {laboratorioList.map((opt: string) => (
+                <datalist id={dlLabId}>
+                  {laboratorioList.map((opt) => (
                     <option key={opt} value={opt} />
                   ))}
                 </datalist>
@@ -1099,5 +1091,6 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
     </div>
   )
 }
+
 
 export { Appointment, Affiliate }
