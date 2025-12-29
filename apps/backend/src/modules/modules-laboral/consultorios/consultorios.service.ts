@@ -73,7 +73,7 @@ export class ConsultoriosService {
     if (to && !isISODateDay(to))
       throw new BadRequestException('to inválido (YYYY-MM-DD)');
 
-    const where: Prisma.LaboralConsultorioTurnoWhereInput = { userId };
+    const where: Prisma.LaboralConsultorioTurnoWhereInput = {};
 
     if (from || to) {
       where.fechaTurnoISO = {};
