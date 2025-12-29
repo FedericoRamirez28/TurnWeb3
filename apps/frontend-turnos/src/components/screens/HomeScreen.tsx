@@ -61,10 +61,7 @@ const getLocalISOString = () => {
   return new Date(d.getTime() - offset).toISOString().slice(0, 10)
 }
 
-const withNextTurno = (
-  affiliates: Affiliate[],
-  appointments: Appointment[],
-): Affiliate[] => {
+const withNextTurno = (affiliates: Affiliate[], appointments: Appointment[]): Affiliate[] => {
   const appointmentsByAffiliate = new Map<string, Appointment[]>()
 
   appointments.forEach((a) => {
@@ -110,20 +107,18 @@ export const HomeScreen: React.FC = () => {
     [affiliates, appointments],
   )
 
-  const [selectedAffiliateForTurno, setSelectedAffiliateForTurno] =
-    useState<Affiliate | null>(null)
-  const [selectedAppointmentForTurno, setSelectedAppointmentForTurno] =
-    useState<Appointment | null>(null)
-  
+  const [selectedAffiliateForTurno, setSelectedAffiliateForTurno] = useState<Affiliate | null>(null)
+  const [selectedAppointmentForTurno, setSelectedAppointmentForTurno] = useState<Appointment | null>(
+    null,
+  )
+
   const [turnoMode, setTurnoMode] = useState<'tomar' | 'recepcionar'>('tomar')
   const [selectedDate, setSelectedDate] = useState<string>(getLocalISOString())
   const [calendarSidebarOpen, setCalendarSidebarOpen] = useState(false)
 
   const [selectedTimeForNewTurno, setSelectedTimeForNewTurno] = useState<string | null>(null)
 
-  const [historyAffiliateId, setHistoryAffiliateId] = useState<string | null>(
-    null,
-  )
+  const [historyAffiliateId, setHistoryAffiliateId] = useState<string | null>(null)
 
   const refreshData = useCallback(async () => {
     setLoading(true)
@@ -152,9 +147,7 @@ export const HomeScreen: React.FC = () => {
 
   const handleUpdateAffiliate = (id: string, values: AffiliateFormValues) => {
     void updateAffiliateApi(id, values)
-      .then((updated) =>
-        setAffiliates((prev) => prev.map((a) => (a.id === id ? updated : a))),
-      )
+      .then((updated) => setAffiliates((prev) => prev.map((a) => (a.id === id ? updated : a))))
       .catch((err) => console.error('Error actualizando afiliado', err))
   }
 
@@ -177,8 +170,7 @@ export const HomeScreen: React.FC = () => {
     const appt = appointments.find((a) => a.id === appointmentId)
     if (!appt) return
 
-    const affiliate =
-      affiliatesWithNext.find((a) => a.id === appt.affiliateId) ?? null
+    const affiliate = affiliatesWithNext.find((a) => a.id === appt.affiliateId) ?? null
 
     setSelectedAffiliateForTurno(affiliate)
     setSelectedAppointmentForTurno(appt)
@@ -263,7 +255,9 @@ export const HomeScreen: React.FC = () => {
     const total = todayAppointments.length
     const cancelados = todayAppointments.filter((a) => a.estado === 'cancelado').length
     const recepcionados = todayAppointments.filter((a) => a.estado === 'recepcionado').length
-    const pendientes = todayAppointments.filter((a) => a.estado === 'pendiente' || a.estado === 'tomado').length
+    const pendientes = todayAppointments.filter(
+      (a) => a.estado === 'pendiente' || a.estado === 'tomado',
+    ).length
 
     return {
       turnosHoy: total,
@@ -278,35 +272,32 @@ export const HomeScreen: React.FC = () => {
     setCalendarSidebarOpen(true)
   }
 
-  const appointmentsForSelectedDay = useMemo(() => 
-    appointments
-      .filter((a) => getTurnoDate(a) === selectedDate && a.estado !== 'cancelado')
-      .sort((a, b) => a.time.localeCompare(b.time)),
-    [appointments, selectedDate]
+  const appointmentsForSelectedDay = useMemo(
+    () =>
+      appointments
+        .filter((a) => getTurnoDate(a) === selectedDate && a.estado !== 'cancelado')
+        .sort((a, b) => a.time.localeCompare(b.time)),
+    [appointments, selectedDate],
   )
 
-  const isSlotTaken = useCallback((date: string, time: string) =>
-    appointments.some(
-      (a) =>
-        getTurnoDate(a) === date && a.time === time && a.estado !== 'cancelado',
-    ), [appointments])
+  const isSlotTaken = useCallback(
+    (date: string, time: string) =>
+      appointments.some(
+        (a) => getTurnoDate(a) === date && a.time === time && a.estado !== 'cancelado',
+      ),
+    [appointments],
+  )
 
   // === LÓGICA PARA GENERAR LOS SLOTS DE LA SIDEBAR ===
   const sidebarSlots = useMemo(() => {
-    // 1. Generar base de 08:00 a 19:30 (intervalos de 30 min)
     const baseSlots = Array.from({ length: 24 }, (_, idx) => {
       const hour = 8 + Math.floor(idx / 2)
       const minute = idx % 2 === 0 ? '00' : '30'
       return `${hour.toString().padStart(2, '0')}:${minute}`
     })
 
-    // 2. Obtener horarios de los turnos que YA existen en el día
-    const existingTimes = appointmentsForSelectedDay.map(a => a.time)
-
-    // 3. Fusionar y quitar duplicados usando Set
+    const existingTimes = appointmentsForSelectedDay.map((a) => a.time)
     const uniqueTimes = new Set([...baseSlots, ...existingTimes])
-
-    // 4. Convertir a array y ordenar cronológicamente
     return Array.from(uniqueTimes).sort()
   }, [appointmentsForSelectedDay])
   // ===================================================
@@ -315,12 +306,16 @@ export const HomeScreen: React.FC = () => {
     ? affiliatesWithNext.find((a) => a.id === historyAffiliateId) ?? null
     : null
 
-  const historyAppointments = useMemo(() => historyAffiliate
-    ? appointments
-        .filter((a) => a.affiliateId === historyAffiliate.id)
-        .slice()
-        .sort((a, b) => compareAppointments(b, a))
-    : [], [historyAffiliate, appointments])
+  const historyAppointments = useMemo(
+    () =>
+      historyAffiliate
+        ? appointments
+            .filter((a) => a.affiliateId === historyAffiliate.id)
+            .slice()
+            .sort((a, b) => compareAppointments(b, a))
+        : [],
+    [historyAffiliate, appointments],
+  )
 
   return (
     <div className="home">
@@ -360,9 +355,7 @@ export const HomeScreen: React.FC = () => {
 
             {loading && (
               <div className="home__loading-overlay">
-                <div className="home__loading-pill">
-                  Cargando datos desde el servidor…
-                </div>
+                <div className="home__loading-pill">Cargando datos desde el servidor…</div>
               </div>
             )}
           </>
@@ -420,11 +413,8 @@ export const HomeScreen: React.FC = () => {
 
             <div className="calendar-sidebar__body">
               <ul className="calendar-sidebar__slots">
-                {/* Iteramos sobre los slots combinados (base + turnos reales) */}
                 {sidebarSlots.map((time) => {
-                  // Buscamos si hay turno en ESTE horario exacto
                   const appt = appointmentsForSelectedDay.find((a) => a.time === time)
-                  // El slot está "ocupado" si encontramos un appointment válido
                   const taken = Boolean(appt)
 
                   return (
@@ -464,7 +454,6 @@ export const HomeScreen: React.FC = () => {
                         ) : (
                           <div className="calendar-sidebar__slot-free-actions">
                             <span className="calendar-sidebar__slot-meta">Libre</span>
-                            {/* BOTÓN PARA TOMAR TURNO RÁPIDO */}
                             <button
                               type="button"
                               className="btn btn--xs btn--outline"
@@ -489,7 +478,10 @@ export const HomeScreen: React.FC = () => {
       {/* MODAL SELECTOR DE AFILIADO (INTERMEDIO) */}
       {selectedTimeForNewTurno && !selectedAffiliateForTurno && (
         <div className="turno-modal-overlay">
-          <div className="turno-modal" style={{ maxWidth: '600px', height: '80vh', display: 'flex', flexDirection: 'column' }}>
+          <div
+            className="turno-modal"
+            style={{ maxWidth: '600px', height: '80vh', display: 'flex', flexDirection: 'column' }}
+          >
             <header className="turno-modal__header">
               <div>
                 <h2 className="turno-modal__title">Seleccionar Afiliado</h2>
@@ -497,15 +489,15 @@ export const HomeScreen: React.FC = () => {
                   Para el turno del <b>{selectedDate}</b> a las <b>{selectedTimeForNewTurno}</b>
                 </p>
               </div>
-              <button 
-                type="button" 
-                className="turno-modal__close" 
+              <button
+                type="button"
+                className="turno-modal__close"
                 onClick={() => setSelectedTimeForNewTurno(null)}
               >
                 ×
               </button>
             </header>
-            
+
             <div style={{ flex: 1, overflow: 'hidden', padding: '1rem', background: '#f8fafc' }}>
               <AffiliatesQuickList
                 affiliates={affiliatesWithNext}
@@ -524,7 +516,7 @@ export const HomeScreen: React.FC = () => {
           mode={turnoMode}
           affiliate={selectedAffiliateForTurno}
           defaultDate={selectedDate}
-          initialTime={selectedTimeForNewTurno} 
+          initialTime={selectedTimeForNewTurno}
           appointment={selectedAppointmentForTurno ?? undefined}
           onClose={handleCloseTurnoModal}
           onSave={handleSaveAppointment}
@@ -584,9 +576,7 @@ const AffiliateHistoryModal: React.FC<AffiliateHistoryModalProps> = ({
 
         <div className="affiliate-history-modal__body">
           {appointments.length === 0 ? (
-            <p className="affiliate-history-modal__empty">
-              Este afiliado aún no tiene turnos cargados.
-            </p>
+            <p className="affiliate-history-modal__empty">Este afiliado aún no tiene turnos cargados.</p>
           ) : (
             <table className="affiliate-history-modal__table">
               <thead>
@@ -640,7 +630,7 @@ interface TurnoModalProps {
   mode: 'tomar' | 'recepcionar'
   affiliate: Affiliate
   defaultDate: string
-  initialTime?: string | null 
+  initialTime?: string | null
   appointment?: Appointment
   onClose: () => void
   onSave: (payload: {
@@ -678,7 +668,6 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
   onSave,
   isSlotTaken,
 
-  // ✅ USAR PROPS (no hook adentro)
   laboratorioOptions,
   especialidadesOptions,
   getLaboratorioPrice,
@@ -718,7 +707,6 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
 
   const isReadOnlyRecep = activeTab === 'recepcionar'
 
-  // ✅ IDs únicos para evitar que el browser “mezcle” datalists
   const dlEspId = useMemo(
     () => `dl-esp-${affiliate.id}-${appointment?.id ?? 'new'}`,
     [affiliate.id, appointment?.id],
@@ -730,12 +718,16 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
 
   const especialidadesList = useMemo(() => {
     const arr = Array.isArray(especialidadesOptions) ? especialidadesOptions : []
-    return Array.from(new Set(arr.map((s) => String(s).trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b))
+    return Array.from(new Set(arr.map((s) => String(s).trim()).filter(Boolean))).sort((a, b) =>
+      a.localeCompare(b),
+    )
   }, [especialidadesOptions])
 
   const laboratorioList = useMemo(() => {
     const arr = Array.isArray(laboratorioOptions) ? laboratorioOptions : []
-    return Array.from(new Set(arr.map((s) => String(s).trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b))
+    return Array.from(new Set(arr.map((s) => String(s).trim()).filter(Boolean))).sort((a, b) =>
+      a.localeCompare(b),
+    )
   }, [laboratorioOptions])
 
   const calculateNewPrice = (
@@ -746,7 +738,6 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
     currentPlan: string,
   ) => {
     if (currentPrestador === 'MEDIC') return 0
-
     if (currentTipo === 'especialidad' && currentEsp) {
       return getEspecialidadPrice(currentEsp, currentPlan)
     }
@@ -787,7 +778,6 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
   const handleTipoAtencionChange = (tipo: 'especialidad' | 'laboratorio') => {
     setTipoAtencion(tipo)
 
-    // ✅ opcional pero recomendado: limpiar el otro campo para evitar “arrastre”
     if (tipo === 'especialidad') setLaboratorio('')
     else setEspecialidad('')
 
@@ -877,7 +867,11 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
 
             {(pricesLoading || pricesError) && (
               <p className="turno-modal__subtitle" style={{ marginTop: 6 }}>
-                {pricesLoading ? 'Cargando precios…' : pricesError ? `Precios: ${pricesError}` : null}
+                {pricesLoading
+                  ? 'Cargando precios…'
+                  : pricesError
+                    ? `Precios: ${pricesError}`
+                    : null}
               </p>
             )}
           </div>
@@ -939,7 +933,9 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
                 disabled={isReadOnlyRecep}
               />
               {slotTaken && !appointment && (
-                <span className="field__hint field__hint--error">Ese horario ya está ocupado para este día.</span>
+                <span className="field__hint field__hint--error">
+                  Ese horario ya está ocupado para este día.
+                </span>
               )}
             </label>
 
@@ -1061,7 +1057,9 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
                 inputMode="decimal"
               />
               {isMontoManual && (
-                <span className="field__hint field__hint--error">Modificar el valor en caso de ser necesario.</span>
+                <span className="field__hint field__hint--error">
+                  Modificar el valor en caso de ser necesario.
+                </span>
               )}
             </label>
 
@@ -1091,6 +1089,5 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
     </div>
   )
 }
-
 
 export { Appointment, Affiliate }
