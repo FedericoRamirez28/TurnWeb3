@@ -35,35 +35,46 @@ export type CompanyPadronPerson = {
   lastTurnoISO: string
 }
 
-export async function listCompanies(input: { q?: string; filter?: 'actives' | 'inactive' | 'all' }) {
-  const params = new URLSearchParams()
-  if (input.q) params.set('q', input.q)
-  if (input.filter) params.set('filter', input.filter)
-
-  return apiJson<{ items: Company[] }>(`/laboral/companies?${params.toString()}`)
-}
-
-export async function createCompany(payload: CompanyDraft) {
-  return apiJson<{ item: Company }>('/laboral/companies', {
-    method: 'POST',
-    body: JSON.stringify(payload),
+export async function listCompanies(input: {
+  q?: string
+  filter?: 'actives' | 'inactive' | 'all'
+}) {
+  return apiJson<{ items: Company[] }>('/laboral/companies', {
+    query: {
+      q: input.q?.trim() || undefined,
+      filter: input.filter || undefined,
+    },
   })
 }
 
-export async function updateCompany(id: string, patch: Partial<CompanyDraft> & { isActive?: boolean }) {
-  return apiJson<{ item: Company }>(`/laboral/companies/${id}`, {
+export async function createCompany(payload: CompanyDraft) {
+  // ✅ NO JSON.stringify acá (apiJson ya serializa)
+  return apiJson<{ item: Company }>('/laboral/companies', {
+    method: 'POST',
+    body: payload,
+  })
+}
+
+export async function updateCompany(
+  id: string,
+  patch: Partial<CompanyDraft> & { isActive?: boolean },
+) {
+  // ✅ encode del id
+  return apiJson<{ item: Company }>(`/laboral/companies/${encodeURIComponent(id)}`, {
     method: 'PATCH',
-    body: JSON.stringify(patch),
+    body: patch,
   })
 }
 
 export async function deleteCompany(id: string) {
-  return apiJson<{ ok: true }>(`/laboral/companies/${id}`, {
+  return apiJson<{ ok: true }>(`/laboral/companies/${encodeURIComponent(id)}`, {
     method: 'DELETE',
   })
 }
 
 /** ✅ padrón sin localStorage */
 export async function getCompanyPadron(companyId: string) {
-  return apiJson<{ items: CompanyPadronPerson[] }>(`/laboral/companies/${companyId}/padron`)
+  return apiJson<{ items: CompanyPadronPerson[] }>(
+    `/laboral/companies/${encodeURIComponent(companyId)}/padron`,
+  )
 }

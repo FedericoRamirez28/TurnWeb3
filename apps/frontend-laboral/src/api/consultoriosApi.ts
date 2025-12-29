@@ -35,16 +35,19 @@ export async function listConsultorios(params: {
 }): Promise<ConsultorioTurno[]> {
   return apiJson<ConsultorioTurno[]>('/laboral/consultorios', {
     query: {
-      from: params.from,
-      to: params.to,
-      q: params.q,
-      companyId: params.companyId,
-      take: params.take,
+      from: params.from?.trim() || undefined,
+      to: params.to?.trim() || undefined,
+      q: params.q?.trim() || undefined,
+      companyId: params.companyId?.trim() || undefined,
+      take: params.take ?? undefined,
     },
   })
 }
 
-export async function createConsultorioTurno(dto: CreateConsultorioTurnoDto): Promise<ConsultorioTurno> {
+export async function createConsultorioTurno(
+  dto: CreateConsultorioTurnoDto,
+): Promise<ConsultorioTurno> {
+  // ✅ body como objeto
   return apiJson<ConsultorioTurno>('/laboral/consultorios', {
     method: 'POST',
     body: dto,

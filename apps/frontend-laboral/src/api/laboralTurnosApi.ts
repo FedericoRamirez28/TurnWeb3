@@ -77,7 +77,7 @@ function mapCreateTurnoToLaborTurno(t: BackendCreateResponse['turno']): LaborTur
 export async function laboralTurnoCreate(input: CreateLaborTurnoInput): Promise<LaborTurno> {
   const r = await apiJson<BackendCreateResponse>('/laboral/turnos', {
     method: 'POST',
-    body: input,
+    body: input, // ✅ objeto (apiJson serializa)
   })
   return mapCreateTurnoToLaborTurno(r.turno)
 }
@@ -96,5 +96,6 @@ export async function laboralTurnosList(params?: {
       month: params?.month?.trim() || undefined,
     },
   })
+
   return Array.isArray(r.turnos) ? r.turnos : []
 }

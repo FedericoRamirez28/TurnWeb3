@@ -15,26 +15,32 @@ export type LaboralAdicional = CreateAdicionalItem & {
   createdAt: string
 }
 
-export function createAdicionalesBatch(items: CreateAdicionalItem[]) {
+export async function createAdicionalesBatch(items: CreateAdicionalItem[]) {
   return apiJson<{ inserted: number }>('/laboral/preocupacional/adicionales/batch', {
     method: 'POST',
-    body: { items },
+    body: { items }, // ✅ objeto
   })
 }
 
-export function listAdicionales(params?: { from?: string; to?: string; q?: string; empresa?: string }) {
+export async function listAdicionales(params?: {
+  from?: string
+  to?: string
+  q?: string
+  empresa?: string
+}) {
   return apiJson<LaboralAdicional[]>('/laboral/preocupacional/adicionales', {
     query: {
-      from: params?.from,
-      to: params?.to,
-      q: params?.q,
-      empresa: params?.empresa,
+      from: params?.from?.trim() || undefined,
+      to: params?.to?.trim() || undefined,
+      q: params?.q?.trim() || undefined,
+      empresa: params?.empresa?.trim() || undefined,
     },
   })
 }
 
-export function deleteAdicional(id: string) {
-  return apiJson<{ ok: true }>(`/laboral/preocupacional/adicionales/${encodeURIComponent(id)}`, {
-    method: 'DELETE',
-  })
+export async function deleteAdicional(id: string) {
+  return apiJson<{ ok: true }>(
+    `/laboral/preocupacional/adicionales/${encodeURIComponent(id)}`,
+    { method: 'DELETE' },
+  )
 }

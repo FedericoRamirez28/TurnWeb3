@@ -29,19 +29,24 @@ export async function laboralNotesList(): Promise<LaboralNote[]> {
 export async function laboralNoteCreate(input: CreateLaboralNoteInput): Promise<LaboralNote> {
   const r = await apiJson<{ item: LaboralNote }>('/laboral/notes', {
     method: 'POST',
-    body: input,
+    body: input, // ✅ objeto
   })
   return r.item
 }
 
-export async function laboralNoteUpdate(id: string, patch: UpdateLaboralNoteInput): Promise<LaboralNote> {
+export async function laboralNoteUpdate(
+  id: string,
+  patch: UpdateLaboralNoteInput,
+): Promise<LaboralNote> {
   const r = await apiJson<{ item: LaboralNote }>(`/laboral/notes/${encodeURIComponent(id)}`, {
     method: 'PATCH',
-    body: patch,
+    body: patch, // ✅ objeto
   })
   return r.item
 }
 
 export async function laboralNoteDelete(id: string): Promise<{ ok: true }> {
-  return apiJson<{ ok: true }>(`/laboral/notes/${encodeURIComponent(id)}`, { method: 'DELETE' })
+  return apiJson<{ ok: true }>(`/laboral/notes/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+  })
 }

@@ -43,7 +43,11 @@ export async function listTurnosPrecios(params: {
 }): Promise<ListTurnosPreciosResponse> {
   const q = (params.q ?? '').trim()
   return apiJson<ListTurnosPreciosResponse>('/laboral/precios/turnos/rows', {
-    query: { plan: params.plan, scope: params.scope, q: q || undefined },
+    query: {
+      plan: params.plan,
+      scope: params.scope,
+      q: q || undefined,
+    },
   })
 }
 
@@ -55,7 +59,7 @@ export async function adjustTurnosPrecios(body: {
 }): Promise<{ updated: number }> {
   return apiJson<{ updated: number }>('/laboral/precios/turnos/adjust', {
     method: 'POST',
-    body,
+    body, // ✅ objeto
   })
 }
 
@@ -104,7 +108,7 @@ export async function adjustLaboralPrecios(body: {
 }): Promise<{ updated: number }> {
   return apiJson<{ updated: number }>('/laboral/precios/laboral/adjust', {
     method: 'POST',
-    body,
+    body, // ✅ objeto
   })
 }
 
