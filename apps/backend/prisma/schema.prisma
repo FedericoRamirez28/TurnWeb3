@@ -45,32 +45,27 @@ model Afiliado {
 model Turno {
   id String @id @default(uuid())
 
-  // Fecha en la que se TOMA el turno (la que usa TodaySummary para "Tomado el ...")
   fechaTomado DateTime @default(now())
-
-  // Fecha REAL del turno (la que usa el calendario / getTurnoDate)
-  fechaReal DateTime?
-
-  // Hora del turno (HH:mm)
-  hora String
-
-  // 'pendiente' | 'tomado' | 'recepcionado' | 'cancelado'
-  estado String
-
+  fechaReal   DateTime?
+  hora        String
+  estado      String
   observaciones String?
 
-  // 'especialidad' | 'laboratorio'
   tipoAtencion String
   especialidad String?
   laboratorio  String?
 
   plan  String?
-  monto Int // si más adelante querés pasamos a Decimal
+  monto Int
+
+  // ✅ NUEVO: Mercado Pago
+  mpPagado Boolean @default(false)
+  mpMonto  Int     @default(0)
+  mpRef    String? // opcional (id operación / comprobante)
 
   profesional String
   prestador   String
 
-  // Relación con afiliado
   afiliadoId String
   afiliado   Afiliado @relation(fields: [afiliadoId], references: [id])
 

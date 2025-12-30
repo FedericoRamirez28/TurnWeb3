@@ -1,3 +1,4 @@
+// apps/frontend-laboral/src/api/turnosApi.ts
 import type { Affiliate, Appointment, AppointmentStatus } from '@/components/screens/homeModels'
 import type { AffiliateFormValues } from '@/components/ui/home/AffiliateQuicklist'
 import { apiJson } from './http'
@@ -123,6 +124,11 @@ type TurnoApi = {
   monto: number
   profesional: string
   estado: AppointmentStatus
+
+  // ✅ NUEVO: Mercado Pago (opcionales)
+  mpPagado?: boolean | null
+  mpMonto?: number | null
+  mpRef?: string | null
 }
 
 const mapTurnoApiToAppointment = (t: TurnoApi): Appointment => ({
@@ -130,9 +136,9 @@ const mapTurnoApiToAppointment = (t: TurnoApi): Appointment => ({
   affiliateId: t.affiliateId,
   affiliateName: t.affiliateName,
   affiliateDni: undefined,
-  date: t.date.slice(0, 10),
-  controlDate: (t.controlDate ?? t.date).slice(0, 10),
-  time: t.time.slice(0, 5),
+  date: String(t.date ?? '').slice(0, 10),
+  controlDate: String((t.controlDate ?? t.date) ?? '').slice(0, 10),
+  time: String(t.time ?? '').slice(0, 5),
   tipoAtencion: t.tipoAtencion,
   especialidad: t.tipoAtencion === 'especialidad' ? t.especialidad ?? undefined : undefined,
   laboratorio: t.tipoAtencion === 'laboratorio' ? t.laboratorio ?? undefined : undefined,
@@ -141,6 +147,11 @@ const mapTurnoApiToAppointment = (t: TurnoApi): Appointment => ({
   monto: t.monto ?? 0,
   profesional: t.profesional ?? '',
   estado: t.estado,
+
+  // ✅ NUEVO
+  mpPagado: Boolean(t.mpPagado),
+  mpMonto: typeof t.mpMonto === 'number' ? t.mpMonto : 0,
+  mpRef: t.mpRef ?? undefined,
 })
 
 export async function fetchTurnos(): Promise<Appointment[]> {
@@ -162,20 +173,39 @@ type SaveAppointmentPayload = {
   monto: number
   profesional: string
   estado: AppointmentStatus
+
+  // ✅ NUEVO
+  mpPagado?: boolean
+  mpMonto?: number
+  mpRef?: string
 }
 
 export async function saveTurno(payload: SaveAppointmentPayload): Promise<void> {
-  if (payload.id) {
-    await apiJson(`/turnos/${payload.id}/estado`, {
-      method: 'PATCH',
-      body: JSON.stringify({ estado: payload.estado }),
-    })
-    return
-  }
-
+  // ✅ IMPORTANTE:
+  // En tu backend actual, POST /turnos sirve para crear *y* actualizar si mandás "id".
+  // No uses PATCH /estado para actualizar monto/fecha/etc (solo cambia estado).
   await apiJson('/turnos', {
     method: 'POST',
-    body: JSON.stringify(payload),
+    body: JSON.stringify({
+      id: payload.id,
+      affiliateId: payload.affiliateId,
+      date: payload.date,
+      controlDate: payload.controlDate,
+      time: payload.time,
+      tipoAtencion: payload.tipoAtencion,
+      especialidad: payload.especialidad,
+      laboratorio: payload.laboratorio,
+      plan: payload.plan,
+      prestador: payload.prestador,
+      monto: payload.monto,
+      profesional: payload.profesional,
+      estado: payload.estado,
+
+      // ✅ NUEVO MP
+      mpPagado: Boolean(payload.mpPagado),
+      mpMonto: Number(payload.mpMonto ?? 0),
+      mpRef: payload.mpRef ?? null,
+    }),
   })
 }
 
@@ -186,12 +216,19 @@ export async function cancelarTurnoApi(id: string): Promise<void> {
   })
 }
 
+export async function updateEstadoTurnoApi(id: string, estado: AppointmentStatus): Promise<void> {
+  await apiJson(`/turnos/${id}/estado`, {
+    method: 'PATCH',
+    body: JSON.stringify({ estado }),
+  })
+}
+
 export async function fetchInitialData(): Promise<{ affiliates: Affiliate[]; appointments: Appointment[] }> {
   const [affs, turnos] = await Promise.all([fetchAffiliates(), fetchTurnos()])
   return { affiliates: affs, appointments: turnos }
 }
 
-/* ================= CAJA (NUEVO) ================= */
+/* ================= CAJA ================= */
 
 /* ================= CAJA (BACKEND DTO -> FRONT DTO) ================= */
 
@@ -287,11 +324,13 @@ export async function fetchCajaEstado(): Promise<CajaEstadoDto> {
   }
 }
 
+// ✅ BACKEND: POST /caja/cerrar?date=YYYY-MM-DD (querystring)
+// (tu código de controller usa @Query('date'))
 export async function cerrarCajaApi(fechaISO: string): Promise<CierreCajaDto> {
-  const raw = await apiJson<{ fechaISO: string; total: number; rows: CajaRowDtoApi[] }>('/caja/cerrar', {
-    method: 'POST',
-    body: JSON.stringify({ fechaISO }),
-  })
+  const raw = await apiJson<{ fechaISO: string; total: number; rows: CajaRowDtoApi[] }>(
+    `/caja/cerrar?date=${encodeURIComponent(fechaISO)}`,
+    { method: 'POST' },
+  )
   return mapCierreCaja(raw)
 }
 

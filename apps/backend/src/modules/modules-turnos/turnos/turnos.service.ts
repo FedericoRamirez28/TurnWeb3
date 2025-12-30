@@ -18,6 +18,9 @@ export interface TurnoDto {
   prestador: string;
   monto: number;
   profesional: string;
+  mpPagado: boolean;
+  mpMonto: number;
+  mpRef?: string | null;
   estado: TurnoEstado;
 }
 
@@ -36,6 +39,9 @@ export interface CreateTurnoInput {
   profesional: string;
   estado: TurnoEstado;
   motivo?: string;
+  mpPagado?: boolean;
+  mpMonto?: number;
+  mpRef?: string;
 }
 
 @Injectable()
@@ -63,6 +69,11 @@ export class TurnosService {
       monto: turno.monto,
       profesional: turno.profesional,
       estado: turno.estado as TurnoEstado,
+
+      // ✅ MP
+      mpPagado: Boolean(turno.mpPagado),
+      mpMonto: Number(turno.mpMonto ?? 0),
+      mpRef: turno.mpRef ?? null,
     };
   }
 
@@ -80,6 +91,14 @@ export class TurnosService {
     const fechaReal = input.controlDate
       ? new Date(`${input.controlDate}T00:00:00`)
       : null;
+    const mpPagado = Boolean(input.mpPagado);
+    const mpMontoRaw = Number(input.mpMonto ?? 0);
+    const mpMonto = Number.isFinite(mpMontoRaw)
+      ? Math.max(0, Math.round(mpMontoRaw))
+      : 0;
+
+    // ✅ regla de negocio: si es MP, caja efectivo debe ser 0
+    const montoEfectivo = mpPagado ? 0 : Number(input.monto ?? 0) || 0;
 
     const data = {
       afiliadoId: input.affiliateId,
@@ -98,9 +117,17 @@ export class TurnosService {
           ? (input.laboratorio ?? null)
           : null,
       plan: input.plan || null,
-      monto: input.monto,
+
+      // ✅ efectivo
+      monto: montoEfectivo,
+
       profesional: input.profesional,
       prestador: input.prestador,
+
+      // ✅ MP
+      mpPagado,
+      mpMonto,
+      mpRef: input.mpRef?.trim() ? input.mpRef.trim() : null,
     } as const;
 
     const turno = input.id

@@ -53,6 +53,9 @@ export interface Appointment {
   monto: number;
   profesional: string;
   estado: AppointmentStatus;
+  mpPagado?: boolean;
+  mpMonto?: number;
+  mpRef?: string;
 }
 
 export const getTurnoDate = (a: Appointment): string =>

@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "turnos" ADD COLUMN     "mpMonto" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "mpPagado" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "mpRef" TEXT;

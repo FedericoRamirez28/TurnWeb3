@@ -1,4 +1,10 @@
-import { IsString, IsOptional, IsNumber, IsIn } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  IsIn,
+  IsBoolean,
+} from 'class-validator';
 import * as turnosTypes from './turnos.types';
 
 export class CreateTurnoDto {
@@ -44,6 +50,17 @@ export class CreateTurnoDto {
 
   @IsString()
   profesional: string;
+  @IsOptional()
+  @IsBoolean()
+  mpPagado?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  mpMonto?: number;
+
+  @IsOptional()
+  @IsString()
+  mpRef?: string;
 }
 
 export class UpdateEstadoDto {
@@ -69,5 +86,8 @@ export type AppointmentResponse = {
   monto: number;
   profesional: string;
 
+  mpPagado?: boolean;
+  mpMonto?: number;
+  mpRef?: string;
   estado: turnosTypes.AppointmentStatus;
 };
