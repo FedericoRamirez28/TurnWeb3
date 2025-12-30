@@ -1,5 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState, useCallback } from 'react'
 import jsPDF from 'jspdf'
+import Swal from 'sweetalert2'
+
+import trashGradient from '@/assets/icons/trash-gradient.png'
 
 type AdicionalItem = {
   id: string
@@ -122,12 +125,13 @@ function monthRange(month: string) {
   return { from, to }
 }
 
-async function apiGet<T>(path: string, params?: Record<string, string | undefined>) {
-const base = import.meta.env.VITE_API_BASE_URL
-
-if (!base) {
-  throw new Error('Falta VITE_API_BASE_URL en .env')
-}
+async function apiRequest<T>(
+  path: string,
+  init?: RequestInit,
+  params?: Record<string, string | undefined>,
+) {
+  const base = import.meta.env.VITE_API_BASE_URL
+  if (!base) throw new Error('Falta VITE_API_BASE_URL en .env')
 
   const qs = new URLSearchParams()
   if (params) {
@@ -139,11 +143,14 @@ if (!base) {
   const url = `${base.replace(/\/$/, '')}${path}${qs.toString() ? `?${qs}` : ''}`
 
   const res = await fetch(url, {
+    ...init,
     headers: {
+      ...(init?.headers || {}),
       // ✅ temporal, hasta que conectemos JWT
       'x-user-id': 'dev-user',
     },
   })
+
   if (!res.ok) throw new Error(`API ${res.status}`)
   return (await res.json()) as T
 }
@@ -166,20 +173,25 @@ export default function AdicionalesScreen() {
     return `${names[Math.max(0, Math.min(11, mm - 1))]} de ${y}`
   }, [month])
 
-  useEffect(() => {
+  const load = useCallback(async () => {
     const { from, to } = monthRange(month)
-    void (async () => {
-      const data = await apiGet<{ items: AdicionalItem[] }>('/laboral/adicionales', {
-        from,
-        to,
-        q: q.trim() || undefined,
-      })
-      setItems(uniqByKey(data.items || []))
-    })()
+    const data = await apiRequest<{ items: AdicionalItem[] }>(
+      '/laboral/adicionales',
+      undefined,
+      { from, to, q: q.trim() || undefined },
+    )
+    setItems(uniqByKey(data.items || []))
   }, [month, q])
 
+  useEffect(() => {
+  const t = window.setTimeout(() => {
+    void load()
+  }, 0)
+  return () => window.clearTimeout(t)
+}, [load])
+
+
   const filtered = useMemo(() => {
-    // ya viene filtrado por mes desde backend (from/to), pero igual dejamos esto por seguridad
     const inMonth = items.filter((x) => monthKeyFromISO(x.fechaISO) === month)
     const qq = normalizeText(q)
     if (!qq) return inMonth
@@ -219,10 +231,43 @@ export default function AdicionalesScreen() {
     })
   }, [filtered])
 
-  function downloadPdf() {
+  const downloadPdf = useCallback(() => {
     const doc = buildPdf(monthLabel, grouped)
     doc.save(`Adicionales_${month}.pdf`)
-  }
+  }, [month, monthLabel, grouped])
+
+  const removeItem = useCallback(async (row: AdicionalItem) => {
+    const res = await Swal.fire({
+      icon: 'warning',
+      title: 'Eliminar adicional',
+      text: `¿Seguro que querés eliminar este adicional de ${row.nombre}?`,
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#d33',
+    })
+
+    if (!res.isConfirmed) return
+
+    try {
+      await apiRequest<{ ok: true }>(`/laboral/adicionales/${encodeURIComponent(row.id)}`, {
+        method: 'DELETE',
+      })
+
+      setItems((prev) => prev.filter((x) => x.id !== row.id))
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Eliminado',
+        text: 'El adicional fue eliminado.',
+        timer: 1300,
+        showConfirmButton: false,
+      })
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Error'
+      Swal.fire({ icon: 'error', title: 'No se pudo eliminar', text: msg })
+    }
+  }, [])
 
   return (
     <div className="adicionales">
@@ -279,6 +324,7 @@ export default function AdicionalesScreen() {
                         <th>DNI</th>
                         <th>N° afiliado</th>
                         <th>Adicional</th>
+                        <th style={{ width: 44 }} />
                       </tr>
                     </thead>
                     <tbody>
@@ -289,6 +335,31 @@ export default function AdicionalesScreen() {
                           <td>{r.dni}</td>
                           <td>{r.nroAfiliado || '-'}</td>
                           <td>{r.adicional}</td>
+
+                          <td style={{ textAlign: 'right' }}>
+                            <button
+                              type="button"
+                              onClick={() => void removeItem(r)}
+                              title="Eliminar"
+                              style={{
+                                width: 36,
+                                height: 36,
+                                borderRadius: 12,
+                                border: '1px solid rgba(148,163,184,.35)',
+                                background: 'rgba(255,255,255,.9)',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              <img
+                                src={trashGradient}
+                                alt="Eliminar"
+                                style={{ width: 18, height: 18, display: 'block' }}
+                              />
+                            </button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>

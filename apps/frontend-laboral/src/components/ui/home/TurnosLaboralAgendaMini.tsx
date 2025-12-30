@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import jsPDF from 'jspdf'
 import Swal from 'sweetalert2'
-import { laboralTurnosList, type LaborTurno } from '@/api/laboralTurnosApi'
+import { laboralTurnosList, laboralTurnoDelete, type LaborTurno } from '@/api/laboralTurnosApi'
 
 const FIXED_TURNO_HORA = '08:00'
 
@@ -39,7 +39,6 @@ function buildMonthMatrix(anchor: Date) {
   const first = new Date(year, month, 1)
   const last = new Date(year, month + 1, 0)
 
-  // lunes=0 ... domingo=6
   const firstDow = (first.getDay() + 6) % 7
   const daysInMonth = last.getDate()
 
@@ -108,7 +107,7 @@ function buildPdfTurnosMes(turnos: LaborTurno[], monthTitle: string) {
     const list = (groups.get(emp) || []).slice().sort((a, b) => {
       const by = dayPart(a.fechaTurnoISO || '').localeCompare(dayPart(b.fechaTurnoISO || ''))
       if (by !== 0) return by
-      return (a.createdAt || '').localeCompare(b.createdAt || '') // ✅ orden llamado
+      return (a.createdAt || '').localeCompare(b.createdAt || '')
     })
 
     ensureSpace(10)
@@ -171,6 +170,9 @@ export function TurnosLaboralAgendaMini() {
     return d
   })
   const [selectedISO, setSelectedISO] = useState<string>(() => isoDay(new Date()))
+  const [cancelMode, setCancelMode] = useState(false)
+
+  const openDayScheduleRef = useRef<(dayISO: string, forceCancelMode?: boolean) => void>(() => {})
 
   const loadMonth = useCallback(async () => {
     const mk = monthKey(anchor)
@@ -218,16 +220,19 @@ export function TurnosLaboralAgendaMini() {
     doc.save(`TurnosLaborales_${monthKey(anchor)}.pdf`)
   }
 
-  function openDaySchedule(dayISO: string) {
+  const openDaySchedule = useCallback(async (dayISO: string, forceCancelMode?: boolean) => {
+    const cm = typeof forceCancelMode === 'boolean' ? forceCancelMode : cancelMode
+
     const dayTurns = turnos
       .filter((t) => dayPart(t.fechaTurnoISO || '') === dayISO)
       .slice()
-      .sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || '')) // ✅ orden llamado
+      .sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''))
 
     const total = dayTurns.length
 
     const rowsHtml = dayTurns
       .map((t, idx) => {
+        const delBtn = cm ? `<button class="qdel" data-id="${escapeHtml(t.id)}" title="Eliminar turno">✕</button>` : ''
         return `
           <div class="queue">
             <div class="queue__pos">#${idx + 1}</div>
@@ -236,6 +241,7 @@ export function TurnosLaboralAgendaMini() {
               <div class="queue__muted">${escapeHtml(t.nombre || '-')} · DNI ${escapeHtml(t.dni || '-')} · ${escapeHtml(t.sede === 'caba' ? 'CABA' : 'San Justo')}</div>
               <div class="queue__muted">${escapeHtml(t.tipoExamen || '-')} · Hora ${escapeHtml(FIXED_TURNO_HORA)}</div>
             </div>
+            ${delBtn}
           </div>
         `
       })
@@ -243,16 +249,22 @@ export function TurnosLaboralAgendaMini() {
 
     const html = `
       <style>
-        .meta { display:flex; gap:10px; flex-wrap:wrap; margin:6px 0 12px; color:#64748b; font-size:.92rem; }
+        .meta { display:flex; gap:10px; flex-wrap:wrap; margin:6px 0 12px; color:#64748b; font-size:.92rem; align-items:center; }
         .meta b { color:#0f172a; }
-        .wrap { max-height: 62vh; overflow:auto; padding-right:6px; }
+        .meta__sp { flex:1; }
+        .wrap { max-height: 62vh; overflow:auto; padding-right:6px; display:flex; flex-direction:column; gap:10px; }
         .wrap::-webkit-scrollbar { width: 10px; }
         .wrap::-webkit-scrollbar-thumb { background: rgba(148,163,184,.35); border-radius: 999px; border: 2px solid rgba(255,255,255,.6); }
 
-        .queue { border:1px solid rgba(148,163,184,.35); border-radius:14px; background:rgba(255,255,255,.92); padding:10px 12px; display:flex; gap:12px; align-items:flex-start; }
+        .queue { border:1px solid rgba(148,163,184,.35); border-radius:14px; background:rgba(255,255,255,.92); padding:10px 12px; display:flex; gap:12px; align-items:flex-start; position:relative; }
         .queue__pos { width:54px; min-width:54px; height:34px; border-radius:999px; display:flex; align-items:center; justify-content:center; font-weight:900; background:#eef2ff; color:#3730a3; border:1px solid #c7d2fe; }
         .queue__title { color:#0f172a; font-size:.98rem; }
         .queue__muted { color:#64748b; font-size:.88rem; margin-top:2px; line-height:1.2; }
+
+        .cmode { display:inline-flex; align-items:center; gap:8px; padding:7px 10px; border-radius:999px; border:1px solid rgba(148,163,184,.4); background:#fff; cursor:pointer; font-size:.9rem; }
+        .cmode--on { border-color: rgba(239,68,68,.45); background: rgba(254,226,226,.7); color:#991b1b; font-weight:700; }
+        .qdel { margin-left:auto; width:34px; height:34px; border-radius:10px; border:1px solid rgba(239,68,68,.35); background: rgba(254,226,226,.9); color:#b91c1c; cursor:pointer; font-weight:900; display:flex; align-items:center; justify-content:center; }
+        .qdel:hover { filter: brightness(0.98); }
       </style>
 
       <div class="meta">
@@ -260,14 +272,18 @@ export function TurnosLaboralAgendaMini() {
         <div>· Turnos: <b>${total}</b></div>
         <div>· Hora fija: <b>${escapeHtml(FIXED_TURNO_HORA)}</b></div>
         <div>· Orden: <b>de llamado</b></div>
+        <div class="meta__sp"></div>
+        <button id="toggleCancel" class="cmode ${cm ? 'cmode--on' : ''}">
+          ${cm ? 'Salir de cancelar' : 'Modo cancelar'}
+        </button>
       </div>
 
-      <div class="wrap">
+      <div class="wrap" id="wrapList">
         ${rowsHtml || '<div style="color:#64748b">Sin turnos para este día.</div>'}
       </div>
     `
 
-    void Swal.fire({
+    await Swal.fire({
       title: 'Turnos del día (orden de llamado)',
       html,
       width: 920,
@@ -275,8 +291,52 @@ export function TurnosLaboralAgendaMini() {
       showCloseButton: true,
       focusConfirm: false,
       customClass: { popup: 'swal-popup', title: 'swal-title', htmlContainer: 'swal-text' },
+      didOpen: () => {
+        const toggle = document.getElementById('toggleCancel')
+        toggle?.addEventListener('click', () => {
+          const next = !cm
+          setCancelMode(next)
+          openDayScheduleRef.current(dayISO, next)
+        })
+
+        const wrap = document.getElementById('wrapList')
+        wrap?.addEventListener('click', async (ev) => {
+          const el = ev.target as HTMLElement | null
+          const btn = el?.closest?.('.qdel') as HTMLElement | null
+          if (!btn) return
+
+          const id = btn.getAttribute('data-id') || ''
+          if (!id) return
+
+          const r = await Swal.fire({
+            icon: 'warning',
+            title: '¿Eliminar turno?',
+            text: 'Se va a borrar el turno de forma permanente.',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+          })
+          if (!r.isConfirmed) return
+
+          try {
+            await laboralTurnoDelete(id)
+            await loadMonth()
+            await Swal.fire({ icon: 'success', title: 'Turno eliminado', timer: 1100, showConfirmButton: false })
+            openDayScheduleRef.current(dayISO, true)
+          } catch (e) {
+            const msg = e instanceof Error ? e.message : 'No se pudo eliminar'
+            Swal.fire({ icon: 'error', title: 'No se pudo eliminar', text: msg })
+          }
+        })
+      },
     })
-  }
+  }, [cancelMode, loadMonth, turnos])
+
+  useEffect(() => {
+    openDayScheduleRef.current = (dayISO: string, forceCancelMode?: boolean) => {
+      void openDaySchedule(dayISO, forceCancelMode)
+    }
+  }, [openDaySchedule])
 
   return (
     <section className="lab-agenda">
@@ -329,7 +389,7 @@ export function TurnosLaboralAgendaMini() {
                 onClick={() => {
                   if (!cell.inMonth) return
                   setSelectedISO(cell.iso)
-                  openDaySchedule(cell.iso)
+                  void openDaySchedule(cell.iso)
                 }}
                 disabled={!cell.inMonth}
               >
