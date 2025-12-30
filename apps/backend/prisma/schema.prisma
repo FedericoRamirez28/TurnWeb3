@@ -219,8 +219,6 @@ model LaboralTurno {
   // ✅ NUEVO: index para agenda
   @@index([sede, fechaTurnoISO, horaTurno])
 
-  // ✅ NUEVO: 1 solo turno por slot (sede+fecha+hora)
-  @@unique([sede, fechaTurnoISO, horaTurno], name: "uniq_laboral_slot")
 
   @@map("laboral_turnos")
 }

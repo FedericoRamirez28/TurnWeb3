@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Swal from 'sweetalert2'
 import escobaPng from '@/assets/icons/escoba.png'
+import { laboralTurnoDelete } from '@/api/laboralTurnosApi'
 
 type SedeKey = 'caba' | 'sanjusto'
 
@@ -47,6 +48,8 @@ type Draft = {
 }
 
 const STORAGE_KEY_PREFILL = 'medic_laboral_preocupacional_prefill_v1'
+const PREOCUPACIONAL_ROUTE = '/preocupacional'
+const FIXED_TURNO_HORA = '08:00'
 
 function savePreocupacionalPrefill(payload: PreocupacionalPrefill) {
   try {
@@ -56,10 +59,12 @@ function savePreocupacionalPrefill(payload: PreocupacionalPrefill) {
   }
 }
 
-const PREOCUPACIONAL_ROUTE = '/preocupacional'
-
 const ADICIONALES_CONCEPTO: string[] = [
-  'Preocupacional, periódico o egreso, Básico de Ley, Masculino y Femenino',
+  'Preocupacional / Basico de ley',
+  'Periódico',
+  'Egreso',
+  'Femenino',
+  'Masculino',
   'Psicotécnico',
   'Psicotécnico para trabajos en Altura / Manejo de Autoelevadores / Clarkista',
   'Evaluación Neurológica (Requiere turno previo)',
@@ -212,22 +217,6 @@ async function listLaborTurnos(params: {
   })
 }
 
-function pad2(n: number) {
-  return String(n).padStart(2, '0')
-}
-
-function buildTimeSlots(fromHH = 8, toHH = 18, stepMin = 30) {
-  const out: string[] = []
-  const start = fromHH * 60
-  const end = toHH * 60
-  for (let m = start; m <= end; m += stepMin) {
-    const hh = Math.floor(m / 60)
-    const mm = m % 60
-    out.push(`${pad2(hh)}:${pad2(mm)}`)
-  }
-  return out
-}
-
 export function TurnosLaboralCard() {
   const navigate = useNavigate()
 
@@ -239,14 +228,12 @@ export function TurnosLaboralCard() {
     dni: '',
     fechaRecepcionISO: isoDay(new Date()),
     fechaTurnoISO: '',
-    horaTurno: '',
+    horaTurno: FIXED_TURNO_HORA,
     puesto: '',
     tipoExamen: '',
   }))
 
-  // Nuevo estado para manejar múltiples exámenes seleccionados
   const [pickedExams, setPickedExams] = useState<string[]>([])
-
   const [busy, setBusy] = useState(false)
 
   const [examQ, setExamQ] = useState('')
@@ -258,28 +245,21 @@ export function TurnosLaboralCard() {
   const [viewerTurnos, setViewerTurnos] = useState<LaborTurno[]>([])
   const [viewerLoading, setViewerLoading] = useState(false)
 
+  const [cancelMode, setCancelMode] = useState(false)
+
   const viewerAbortRef = useRef<AbortController | null>(null)
   const viewerReqSeqRef = useRef(0)
-
-  const [dayTurnos, setDayTurnos] = useState<LaborTurno[]>([])
-  const [dayTurnosLoading, setDayTurnosLoading] = useState(false)
-  const lastWarnedRef = useRef<string>('')
 
   useEffect(() => {
     setServerAdicionales([])
   }, [])
 
-  // Efecto para sincronizar la lista de seleccionados con el string del draft
-  // Se unen con " + " para que se guarde como un solo string en la DB y pase a la otra pantalla
   useEffect(() => {
     setDraft((p) => ({ ...p, tipoExamen: pickedExams.join(' + ') }))
   }, [pickedExams])
 
-  const slotOptions = useMemo(() => buildTimeSlots(8, 18, 30), [])
-
   const examenOptions = useMemo(() => {
     const all = [...ADICIONALES_BASE, ...(serverAdicionales || [])]
-
     const seen = new Set<string>()
     const uniq: string[] = []
     for (const it of all) {
@@ -308,16 +288,12 @@ export function TurnosLaboralCard() {
       dni: '',
       fechaRecepcionISO: isoDay(new Date()),
       fechaTurnoISO: '',
-      horaTurno: '',
+      horaTurno: FIXED_TURNO_HORA,
       puesto: '',
       tipoExamen: '',
     }))
-    // Limpiamos también la lista de multiples
     setPickedExams([])
     setExamQ('')
-    setDayTurnos([])
-    setDayTurnosLoading(false)
-    lastWarnedRef.current = ''
   }
 
   function validate(): string | null {
@@ -326,110 +302,24 @@ export function TurnosLaboralCard() {
     if (!draft.dni.trim()) return 'Completá DNI.'
     if (!draft.fechaRecepcionISO) return 'Completá la fecha de recepción.'
     if (!draft.fechaTurnoISO) return 'Completá la fecha real del turno.'
-    if (!draft.horaTurno) return 'Seleccioná el horario del turno.'
     if (!draft.puesto.trim()) return 'Completá Puesto a ocupar.'
     if (!draft.tipoExamen.trim()) return 'Seleccioná al menos un Tipo de examen.'
     return null
   }
 
-  // Funciones helpers para agregar/quitar exámenes
   const addExam = (val: string) => {
     if (!val) return
-    // Evitamos duplicados exactos
-    if (!pickedExams.includes(val)) {
-      setPickedExams((prev) => [...prev, val])
-    }
+    if (!pickedExams.includes(val)) setPickedExams((prev) => [...prev, val])
   }
 
   const removeExam = (val: string) => {
     setPickedExams((prev) => prev.filter((x) => x !== val))
   }
 
-  const occupiedKey = useMemo(() => {
-    if (!draft.fechaTurnoISO || !draft.horaTurno) return ''
-    return `${draft.fechaTurnoISO}__${draft.horaTurno}__${draft.sede}`
-  }, [draft.fechaTurnoISO, draft.horaTurno, draft.sede])
-
-  const isSlotOccupied = useMemo(() => {
-    if (!draft.fechaTurnoISO || !draft.horaTurno) return false
-    const day = draft.fechaTurnoISO
-    const h = draft.horaTurno
-    return dayTurnos.some((t) => dayPart(t.fechaTurnoISO || '') === day && (t.horaTurno || '') === h && t.sede === draft.sede)
-  }, [dayTurnos, draft.fechaTurnoISO, draft.horaTurno, draft.sede])
-
-  useEffect(() => {
-    const day = draft.fechaTurnoISO
-    if (!day) {
-      setDayTurnos([])
-      setDayTurnosLoading(false)
-      return
-    }
-
-    let alive = true
-    setDayTurnosLoading(true)
-
-    const t = window.setTimeout(() => {
-      void (async () => {
-        try {
-          const r = await listLaborTurnos({ from: day, to: day })
-          const list = Array.isArray(r.turnos) ? r.turnos.slice() : []
-          const dayList = list.filter((x) => dayPart(x.fechaTurnoISO || '') === day)
-          dayList.sort((a, b) => {
-            const ha = (a.horaTurno || '').localeCompare(b.horaTurno || '')
-            if (ha !== 0) return ha
-            return normalizeText(a.empresa || '').localeCompare(normalizeText(b.empresa || ''))
-          })
-          if (alive) setDayTurnos(dayList)
-        } catch {
-          if (alive) setDayTurnos([])
-        } finally {
-          if (alive) setDayTurnosLoading(false)
-        }
-      })()
-    }, 220)
-
-    return () => {
-      alive = false
-      window.clearTimeout(t)
-    }
-  }, [draft.fechaTurnoISO])
-
-  useEffect(() => {
-    if (!occupiedKey) return
-    if (!isSlotOccupied) return
-    if (lastWarnedRef.current === occupiedKey) return
-
-    lastWarnedRef.current = occupiedKey
-    void Swal.fire({
-      icon: 'info',
-      title: 'Horario ocupado',
-      text: 'Ese horario ya tiene un turno cargado. Elegí otro horario.',
-      timer: 2200,
-      showConfirmButton: false,
-    })
-    setField('horaTurno', '')
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [occupiedKey, isSlotOccupied])
-
   async function takeTurno() {
     const err = validate()
     if (err) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Faltan datos',
-        text: err,
-        timer: 2200,
-        showConfirmButton: false,
-      })
-      return
-    }
-
-    if (isSlotOccupied) {
-      Swal.fire({
-        icon: 'info',
-        title: 'Horario ocupado',
-        text: 'Ese horario ya tiene un turno cargado. Elegí otro horario.',
-      })
+      Swal.fire({ icon: 'warning', title: 'Faltan datos', text: err, timer: 2200, showConfirmButton: false })
       return
     }
 
@@ -442,10 +332,10 @@ export function TurnosLaboralCard() {
         dni: draft.dni.trim(),
         nroAfiliado: draft.nroAfiliado.trim() || undefined,
         puesto: draft.puesto.trim(),
-        tipoExamen: draft.tipoExamen.trim(), // Esto ya lleva el string unido "Exam1 + Exam2"
+        tipoExamen: draft.tipoExamen.trim(),
         fechaRecepcionISO: draft.fechaRecepcionISO,
         fechaTurnoISO: draft.fechaTurnoISO,
-        horaTurno: draft.horaTurno,
+        horaTurno: FIXED_TURNO_HORA,
       }
 
       await createLaborTurno(payload)
@@ -453,7 +343,7 @@ export function TurnosLaboralCard() {
       Swal.fire({
         icon: 'success',
         title: 'Turno tomado',
-        text: `Se guardó el turno ${draft.fechaTurnoISO} ${draft.horaTurno} (${draft.sede === 'caba' ? 'CABA' : 'San Justo'}).`,
+        text: `Se guardó el turno ${draft.fechaTurnoISO} ${FIXED_TURNO_HORA} (${draft.sede === 'caba' ? 'CABA' : 'San Justo'}).`,
         timer: 1600,
         showConfirmButton: false,
       })
@@ -465,12 +355,13 @@ export function TurnosLaboralCard() {
         normalizeText(msg).includes('duplicate') ||
         normalizeText(msg).includes('unique') ||
         normalizeText(msg).includes('ya existe') ||
-        normalizeText(msg).includes('exists')
+        normalizeText(msg).includes('exists') ||
+        normalizeText(msg).includes('ocupado')
 
       Swal.fire({
         icon: looksLikeDup ? 'info' : 'error',
-        title: looksLikeDup ? 'Ya existe' : 'Error',
-        text: looksLikeDup ? 'Ese turno laboral ya estaba cargado (evitamos duplicados).' : msg,
+        title: looksLikeDup ? 'No se pudo tomar' : 'Error',
+        text: msg,
       })
     } finally {
       setBusy(false)
@@ -496,8 +387,8 @@ export function TurnosLaboralCard() {
 
     const run = async () => {
       setViewerLoading(true)
-
       let shouldStop = false
+
       try {
         const r = await listLaborTurnos({ q: smartQ, from: viewFrom, to: viewTo })
 
@@ -506,12 +397,11 @@ export function TurnosLaboralCard() {
         } else {
           const items = Array.isArray(r.turnos) ? r.turnos.slice() : []
 
+          // ✅ orden “de llamado” (createdAt ASC) dentro de la fecha
           items.sort((a, b) => {
-            const byDate = dayPart(b.fechaTurnoISO || '').localeCompare(dayPart(a.fechaTurnoISO || ''))
+            const byDate = dayPart(a.fechaTurnoISO || '').localeCompare(dayPart(b.fechaTurnoISO || ''))
             if (byDate !== 0) return byDate
-            const hb = (b.horaTurno || '').localeCompare(a.horaTurno || '')
-            if (hb !== 0) return hb
-            return (b.createdAt || '').localeCompare(a.createdAt || '')
+            return (a.createdAt || '').localeCompare(b.createdAt || '')
           })
 
           setViewerTurnos(items)
@@ -557,7 +447,7 @@ export function TurnosLaboralCard() {
         ' ' +
         normalizeText(t.sede) +
         ' ' +
-        normalizeText(t.horaTurno || '')
+        normalizeText(t.horaTurno || FIXED_TURNO_HORA)
 
       return hay.includes(qq)
     })
@@ -570,6 +460,7 @@ export function TurnosLaboralCard() {
     setViewTo('')
     setSmartQ('')
     setViewerTurnos([])
+    setCancelMode(false)
   }
 
   function goToPreocupacionalFromTurno(t: LaborTurno) {
@@ -579,7 +470,7 @@ export function TurnosLaboralCard() {
       nombre: t.nombre || '',
       dni: t.dni || '',
       puesto: t.puesto || '',
-      examen: t.tipoExamen || '', // Aquí viaja el string unido "Exam1 + Exam2"
+      examen: t.tipoExamen || '',
       examKey: 'preocupacional',
       focusTab: t.tipoExamen ? 'adicionales' : 'planilla',
     }
@@ -588,13 +479,53 @@ export function TurnosLaboralCard() {
     navigate(PREOCUPACIONAL_ROUTE, { state: payload })
   }
 
+  async function cancelTurnoRow(t: LaborTurno) {
+    if (busy) return
+
+    const r = await Swal.fire({
+      icon: 'warning',
+      title: 'Cancelar turno',
+      html: `Se va a <b>borrar</b> el turno:<br/><br/>
+            <b>${dayPart(t.fechaTurnoISO || '')} ${t.horaTurno || FIXED_TURNO_HORA}</b><br/>
+            ${t.empresa} · ${t.nombre} · DNI ${t.dni}<br/>
+            <span style="color:#64748b">${t.tipoExamen}</span>`,
+      showCancelButton: true,
+      confirmButtonText: 'Sí, borrar',
+      cancelButtonText: 'No',
+      confirmButtonColor: '#dc2626',
+    })
+
+    if (!r.isConfirmed) return
+
+    setBusy(true)
+    try {
+      await laboralTurnoDelete(t.id)
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Turno cancelado',
+        text: 'Se borró el turno correctamente.',
+        timer: 1400,
+        showConfirmButton: false,
+      })
+
+      // ✅ refresco rápido: lo saco del estado actual
+      setViewerTurnos((prev) => prev.filter((x) => x.id !== t.id))
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Error'
+      Swal.fire({ icon: 'error', title: 'No se pudo cancelar', text: msg })
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
     <section className="labor-turnos card card--stretch">
       <header className="card__header labor-turnos__header">
         <div>
           <h2 className="card__title">Toma de turnos laborales</h2>
           <p className="card__subtitle">
-            Cargá el turno y presioná <b>Tomar turno</b>.
+            Todos los turnos preocupacionales se toman a las <b>{FIXED_TURNO_HORA}</b>. Se listan por <b>orden de llamado</b>.
           </p>
         </div>
 
@@ -640,58 +571,27 @@ export function TurnosLaboralCard() {
           <div className="labor-turnos__grid">
             <label className="labor-turnos__label">
               Nombre y apellido
-              <input
-                className="input"
-                value={draft.nombre}
-                onChange={(e) => setField('nombre', e.target.value)}
-                placeholder="Ej: Juan Pérez"
-                disabled={busy}
-              />
+              <input className="input" value={draft.nombre} onChange={(e) => setField('nombre', e.target.value)} placeholder="Ej: Juan Pérez" disabled={busy} />
             </label>
 
             <label className="labor-turnos__label">
               Empresa
-              <input
-                className="input"
-                value={draft.empresa}
-                onChange={(e) => setField('empresa', e.target.value)}
-                placeholder="Ej: Implatell"
-                disabled={busy}
-              />
+              <input className="input" value={draft.empresa} onChange={(e) => setField('empresa', e.target.value)} placeholder="Ej: Implatell" disabled={busy} />
             </label>
 
             <label className="labor-turnos__label">
               N° afiliado (opcional)
-              <input
-                className="input"
-                value={draft.nroAfiliado}
-                onChange={(e) => setField('nroAfiliado', e.target.value)}
-                placeholder="Si no tiene, dejar vacío"
-                disabled={busy}
-              />
+              <input className="input" value={draft.nroAfiliado} onChange={(e) => setField('nroAfiliado', e.target.value)} placeholder="Si no tiene, dejar vacío" disabled={busy} />
             </label>
 
             <label className="labor-turnos__label">
               DNI
-              <input
-                className="input"
-                value={draft.dni}
-                onChange={(e) => setField('dni', e.target.value)}
-                placeholder="Documento"
-                inputMode="numeric"
-                disabled={busy}
-              />
+              <input className="input" value={draft.dni} onChange={(e) => setField('dni', e.target.value)} placeholder="Documento" inputMode="numeric" disabled={busy} />
             </label>
 
             <label className="labor-turnos__label">
               Fecha recepcionado
-              <input
-                type="date"
-                className="input"
-                value={draft.fechaRecepcionISO}
-                onChange={(e) => setField('fechaRecepcionISO', e.target.value)}
-                disabled={busy}
-              />
+              <input type="date" className="input" value={draft.fechaRecepcionISO} onChange={(e) => setField('fechaRecepcionISO', e.target.value)} disabled={busy} />
             </label>
 
             <label className="labor-turnos__label">
@@ -702,7 +602,7 @@ export function TurnosLaboralCard() {
                 value={draft.fechaTurnoISO}
                 onChange={(e) => {
                   setField('fechaTurnoISO', e.target.value)
-                  setField('horaTurno', '')
+                  setField('horaTurno', FIXED_TURNO_HORA)
                 }}
                 disabled={busy}
               />
@@ -710,36 +610,15 @@ export function TurnosLaboralCard() {
 
             <label className="labor-turnos__label">
               Horario
-              <select
-                className="input"
-                value={draft.horaTurno}
-                onChange={(e) => setField('horaTurno', e.target.value)}
-                disabled={busy || !draft.fechaTurnoISO}
-              >
-                <option value="">{draft.fechaTurnoISO ? 'Seleccionar…' : 'Elegí fecha primero…'}</option>
-                {slotOptions.map((h) => (
-                  <option key={h} value={h}>
-                    {h}
-                  </option>
-                ))}
-              </select>
-
-              {draft.fechaTurnoISO && (
-                <small className="field__hint" style={{ marginTop: 6, display: 'block', color: 'var(--color-ink-soft)' }}>
-                  {dayTurnosLoading ? 'Chequeando disponibilidad…' : isSlotOccupied ? 'Ocupado' : 'Disponible'}
-                </small>
-              )}
+              <input className="input" value={FIXED_TURNO_HORA} disabled />
+              <small className="field__hint" style={{ marginTop: 6, display: 'block', color: 'var(--color-ink-soft)' }}>
+                Fijo para todos los preocupacionales.
+              </small>
             </label>
 
             <label className="labor-turnos__label labor-turnos__label--full">
               Puesto a ocupar
-              <input
-                className="input"
-                value={draft.puesto}
-                onChange={(e) => setField('puesto', e.target.value)}
-                placeholder="Ej: Operario / Chofer / Administrativo…"
-                disabled={busy}
-              />
+              <input className="input" value={draft.puesto} onChange={(e) => setField('puesto', e.target.value)} placeholder="Ej: Operario / Chofer / Administrativo…" disabled={busy} />
             </label>
 
             <div className="labor-turnos__exam">
@@ -765,20 +644,8 @@ export function TurnosLaboralCard() {
               </div>
 
               <div className="labor-turnos__exam-row">
-                <input
-                  className="input"
-                  value={examQ}
-                  onChange={(e) => setExamQ(e.target.value)}
-                  placeholder="Filtrar lista…"
-                  disabled={busy}
-                />
-
-                <select
-                  className="input"
-                  value="" // Siempre reset para poder agregar otro
-                  onChange={(e) => addExam(e.target.value)}
-                  disabled={busy}
-                >
+                <input className="input" value={examQ} onChange={(e) => setExamQ(e.target.value)} placeholder="Filtrar lista…" disabled={busy} />
+                <select className="input" value="" onChange={(e) => addExam(e.target.value)} disabled={busy}>
                   <option value="">Agregar examen...</option>
                   {examenOptions.map((x) => (
                     <option key={x} value={x}>
@@ -788,7 +655,6 @@ export function TurnosLaboralCard() {
                 </select>
               </div>
 
-              {/* LISTA DE ITEMS SELECCIONADOS (TAGS) */}
               {pickedExams.length > 0 && (
                 <div style={{ marginTop: '0.8rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                   {pickedExams.map((ex) => (
@@ -837,7 +703,7 @@ export function TurnosLaboralCard() {
               <div>
                 <div className="labor-turnos__viewer-title">Ver turnos tomados</div>
                 <div className="labor-turnos__viewer-sub">
-                  Usá rango de fechas o búsqueda (empresa / DNI / nombre). Los resultados aparecen solo si hay coincidencias.
+                  Usá rango de fechas o búsqueda (empresa / DNI / nombre). Se ordenan por <b>orden de llamado</b>.
                 </div>
               </div>
 
@@ -861,19 +727,13 @@ export function TurnosLaboralCard() {
 
               <label className="labor-turnos__label labor-turnos__label--full">
                 Búsqueda inteligente
-                <input
-                  className="input"
-                  value={smartQ}
-                  onChange={(e) => setSmartQ(e.target.value)}
-                  placeholder="Buscar por empresa, DNI, nombre, examen, puesto…"
-                  disabled={busy}
-                />
+                <input className="input" value={smartQ} onChange={(e) => setSmartQ(e.target.value)} placeholder="Buscar por empresa, DNI, nombre, examen, puesto…" disabled={busy} />
               </label>
             </div>
 
             {!hasViewerFilters && (
               <div className="labor-turnos__viewer-empty">
-                Tip: para ver turnos, cargá <b>Desde/Hasta</b> o escribí algo en <b>Búsqueda inteligente</b>. Cuando haya coincidencias, aparecen abajo.
+                Tip: para ver turnos, cargá <b>Desde/Hasta</b> o escribí algo en <b>Búsqueda inteligente</b>.
               </div>
             )}
 
@@ -887,12 +747,19 @@ export function TurnosLaboralCard() {
               <div className="labor-turnos__viewer-results">
                 <div className="labor-turnos__viewer-meta">
                   Coincidencias: <b>{filteredTurnos.length}</b>
+                  {cancelMode && (
+                    <span style={{ marginLeft: 10, color: '#b91c1c', fontWeight: 700 }}>
+                      · Modo cancelar activo
+                    </span>
+                  )}
                 </div>
 
                 <div className="labor-turnos__viewer-tableWrap">
                   <table className="labor-turnos__viewer-table">
                     <thead>
                       <tr>
+                        {cancelMode && <th style={{ width: 72 }}>Cancelar</th>}
+                        <th>#</th>
                         <th>Fecha</th>
                         <th>Hora</th>
                         <th>Empresa</th>
@@ -903,20 +770,54 @@ export function TurnosLaboralCard() {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredTurnos.slice(0, 50).map((t) => (
+                      {filteredTurnos.slice(0, 50).map((t, idx) => (
                         <tr
                           key={t.id}
                           className="labor-turnos__clickRow"
                           role="button"
                           tabIndex={0}
-                          onClick={() => goToPreocupacionalFromTurno(t)}
+                          onClick={() => {
+                            if (cancelMode) return
+                            goToPreocupacionalFromTurno(t)
+                          }}
                           onKeyDown={(e) => {
+                            if (cancelMode) return
                             if (e.key === 'Enter' || e.key === ' ') goToPreocupacionalFromTurno(t)
                           }}
-                          title="Abrir y autorrellenar Preocupacional"
+                          title={cancelMode ? 'Modo cancelar activo' : 'Abrir y autorrellenar Preocupacional'}
+                          style={cancelMode ? { cursor: 'default' } : undefined}
                         >
+                          {cancelMode && (
+                            <td>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault()
+                                  e.stopPropagation()
+                                  void cancelTurnoRow(t)
+                                }}
+                                disabled={busy}
+                                title="Cancelar / borrar turno"
+                                aria-label="Cancelar / borrar turno"
+                                style={{
+                                  width: 34,
+                                  height: 34,
+                                  borderRadius: 999,
+                                  border: '1px solid rgba(220,38,38,.28)',
+                                  background: 'rgba(220,38,38,.08)',
+                                  color: '#b91c1c',
+                                  fontWeight: 900,
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                ✕
+                              </button>
+                            </td>
+                          )}
+
+                          <td>{idx + 1}</td>
                           <td>{dayPart(t.fechaTurnoISO || '')}</td>
-                          <td>{t.horaTurno || '-'}</td>
+                          <td>{t.horaTurno || FIXED_TURNO_HORA}</td>
                           <td>{t.empresa}</td>
                           <td>{t.nombre}</td>
                           <td>{t.dni}</td>
@@ -928,18 +829,28 @@ export function TurnosLaboralCard() {
                   </table>
                 </div>
 
-                {filteredTurnos.length > 50 && (
-                  <div className="labor-turnos__viewer-hint">Mostrando 50 resultados. Ajustá filtros para ver más preciso.</div>
-                )}
+                {filteredTurnos.length > 50 && <div className="labor-turnos__viewer-hint">Mostrando 50 resultados. Ajustá filtros para ver más preciso.</div>}
               </div>
             )}
           </div>
         </div>
 
+        {/* ✅ Footer: agregamos el botón nuevo donde lo marcaste */}
         <div className="labor-turnos__footer">
+          <button
+            type="button"
+            className={'btn btn--outline'}
+            onClick={() => setCancelMode((v) => !v)}
+            disabled={busy || !shouldShowResults}
+            title={shouldShowResults ? 'Activar/desactivar modo cancelar' : 'Primero buscá turnos para poder cancelar'}
+          >
+            {cancelMode ? 'Salir de cancelar' : 'Cancelar turnos'}
+          </button>
+
           <button type="button" className="btn btn--outline" onClick={clearSelection} disabled={busy}>
             Limpiar selección
           </button>
+
           <button type="button" className="btn btn--primary" onClick={takeTurno} disabled={busy}>
             {busy ? 'Procesando…' : 'Tomar turno'}
           </button>

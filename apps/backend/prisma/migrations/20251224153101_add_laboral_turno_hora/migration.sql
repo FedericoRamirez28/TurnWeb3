@@ -10,5 +10,4 @@ ALTER TABLE "laboral_turnos" ADD COLUMN     "horaTurno" TEXT;
 -- CreateIndex
 CREATE INDEX "laboral_turnos_sede_fechaTurnoISO_horaTurno_idx" ON "laboral_turnos"("sede", "fechaTurnoISO", "horaTurno");
 
--- CreateIndex
-CREATE UNIQUE INDEX "laboral_turnos_sede_fechaTurnoISO_horaTurno_key" ON "laboral_turnos"("sede", "fechaTurnoISO", "horaTurno");
+

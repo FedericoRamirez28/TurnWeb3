@@ -3,6 +3,8 @@ import jsPDF from 'jspdf'
 import Swal from 'sweetalert2'
 import { laboralTurnosList, type LaborTurno } from '@/api/laboralTurnosApi'
 
+const FIXED_TURNO_HORA = '08:00'
+
 function isoDay(d = new Date()) {
   const yyyy = d.getFullYear()
   const mm = String(d.getMonth() + 1).padStart(2, '0')
@@ -26,20 +28,7 @@ function addMonths(base: Date, delta: number) {
 }
 
 function monthLabelES(d: Date) {
-  const meses = [
-    'Enero',
-    'Febrero',
-    'Marzo',
-    'Abril',
-    'Mayo',
-    'Junio',
-    'Julio',
-    'Agosto',
-    'Septiembre',
-    'Octubre',
-    'Noviembre',
-    'Diciembre',
-  ]
+  const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
   return `${meses[d.getMonth()]} de ${d.getFullYear()}`
 }
 
@@ -71,43 +60,7 @@ function buildMonthMatrix(anchor: Date) {
 }
 
 function normalizeText(s: string) {
-  return (s || '')
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .trim()
-}
-
-function getTurnoHora(t: LaborTurno): string {
-  const anyT = t as unknown as { horaTurno?: unknown; hora?: unknown; fechaTurnoISO?: unknown }
-  const h1 = typeof anyT.horaTurno === 'string' ? anyT.horaTurno : ''
-  if (h1 && /^\d{2}:\d{2}$/.test(h1)) return h1
-
-  const h2 = typeof anyT.hora === 'string' ? anyT.hora : ''
-  if (h2 && /^\d{2}:\d{2}$/.test(h2)) return h2
-
-  const f = typeof anyT.fechaTurnoISO === 'string' ? anyT.fechaTurnoISO : ''
-  if (f.includes('T')) {
-    const hhmm = f.split('T')[1]?.slice(0, 5) || ''
-    if (/^\d{2}:\d{2}$/.test(hhmm)) return hhmm
-  }
-  return ''
-}
-
-function pad2(n: number) {
-  return String(n).padStart(2, '0')
-}
-
-function buildTimeSlots(fromHH = 8, toHH = 18, stepMin = 30) {
-  const out: string[] = []
-  const start = fromHH * 60
-  const end = toHH * 60
-  for (let m = start; m <= end; m += stepMin) {
-    const hh = Math.floor(m / 60)
-    const mm = m % 60
-    out.push(`${pad2(hh)}:${pad2(mm)}`)
-  }
-  return out
+  return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
 }
 
 function escapeHtml(s: string) {
@@ -132,9 +85,7 @@ function buildPdfTurnosMes(turnos: LaborTurno[], monthTitle: string) {
     groups.get(key)!.push(t)
   }
 
-  const empresas = Array.from(groups.keys()).sort((a, b) =>
-    normalizeText(a).localeCompare(normalizeText(b)),
-  )
+  const empresas = Array.from(groups.keys()).sort((a, b) => normalizeText(a).localeCompare(normalizeText(b)))
 
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(14)
@@ -157,10 +108,7 @@ function buildPdfTurnosMes(turnos: LaborTurno[], monthTitle: string) {
     const list = (groups.get(emp) || []).slice().sort((a, b) => {
       const by = dayPart(a.fechaTurnoISO || '').localeCompare(dayPart(b.fechaTurnoISO || ''))
       if (by !== 0) return by
-      const ha = getTurnoHora(a)
-      const hb = getTurnoHora(b)
-      if (ha !== hb) return ha.localeCompare(hb)
-      return (a.createdAt || '').localeCompare(b.createdAt || '')
+      return (a.createdAt || '').localeCompare(b.createdAt || '') // ✅ orden llamado
     })
 
     ensureSpace(10)
@@ -172,12 +120,13 @@ function buildPdfTurnosMes(turnos: LaborTurno[], monthTitle: string) {
     ensureSpace(8)
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(9.5)
-    doc.text('Fecha', margin, y)
-    doc.text('Hora', margin + 22, y)
-    doc.text('DNI', margin + 38, y)
-    doc.text('Nombre', margin + 62, y)
-    doc.text('Puesto', margin + 118, y)
-    doc.text('Examen', margin + 154, y)
+    doc.text('#', margin, y)
+    doc.text('Fecha', margin + 10, y)
+    doc.text('Hora', margin + 34, y)
+    doc.text('DNI', margin + 50, y)
+    doc.text('Nombre', margin + 74, y)
+    doc.text('Puesto', margin + 130, y)
+    doc.text('Examen', margin + 158, y)
     y += 4
     doc.setDrawColor(210)
     doc.line(margin, y, pageW - margin, y)
@@ -186,23 +135,26 @@ function buildPdfTurnosMes(turnos: LaborTurno[], monthTitle: string) {
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(9.2)
 
+    let idx = 1
     for (const t of list) {
       ensureSpace(7)
 
       const fecha = dayPart(t.fechaTurnoISO || '-') || '-'
-      const hora = getTurnoHora(t) || '-'
+      const hora = FIXED_TURNO_HORA
       const dni = (t.dni || '-').slice(0, 14)
       const nombre = (t.nombre || '-').slice(0, 28)
       const puesto = (t.puesto || '-').slice(0, 18)
       const examen = (t.tipoExamen || '-').slice(0, 20)
 
-      doc.text(fecha, margin, y)
-      doc.text(hora, margin + 22, y)
-      doc.text(dni, margin + 38, y)
-      doc.text(nombre, margin + 62, y)
-      doc.text(puesto, margin + 118, y)
-      doc.text(examen, margin + 154, y)
+      doc.text(String(idx), margin, y)
+      doc.text(fecha, margin + 10, y)
+      doc.text(hora, margin + 34, y)
+      doc.text(dni, margin + 50, y)
+      doc.text(nombre, margin + 74, y)
+      doc.text(puesto, margin + 130, y)
+      doc.text(examen, margin + 158, y)
       y += 6
+      idx++
     }
 
     y += 4
@@ -228,19 +180,12 @@ export function TurnosLaboralAgendaMini() {
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'No se pudieron cargar los turnos del mes'
       console.error(e)
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: msg,
-      })
+      Swal.fire({ icon: 'error', title: 'Error', text: msg })
     }
   }, [anchor])
 
   useEffect(() => {
-    const t = window.setTimeout(() => {
-      void loadMonth()
-    }, 0)
-
+    const t = window.setTimeout(() => void loadMonth(), 0)
     return () => window.clearTimeout(t)
   }, [loadMonth])
 
@@ -266,13 +211,7 @@ export function TurnosLaboralAgendaMini() {
 
   function downloadPdfMes() {
     if (!turnos.length) {
-      Swal.fire({
-        icon: 'info',
-        title: 'Sin turnos',
-        text: 'Este mes no tiene turnos laborales cargados.',
-        timer: 1800,
-        showConfirmButton: false,
-      })
+      Swal.fire({ icon: 'info', title: 'Sin turnos', text: 'Este mes no tiene turnos laborales cargados.', timer: 1800, showConfirmButton: false })
       return
     }
     const doc = buildPdfTurnosMes(turnos, monthTitle)
@@ -283,48 +222,20 @@ export function TurnosLaboralAgendaMini() {
     const dayTurns = turnos
       .filter((t) => dayPart(t.fechaTurnoISO || '') === dayISO)
       .slice()
-      .sort((a, b) => {
-        const ha = getTurnoHora(a)
-        const hb = getTurnoHora(b)
-        if (ha !== hb) return ha.localeCompare(hb)
-        return normalizeText(a.empresa || '').localeCompare(normalizeText(b.empresa || ''))
-      })
+      .sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || '')) // ✅ orden llamado
 
-    const byHour = new Map<string, LaborTurno[]>()
-    for (const t of dayTurns) {
-      const h = getTurnoHora(t) || ''
-      if (!h) continue
-      if (!byHour.has(h)) byHour.set(h, [])
-      byHour.get(h)!.push(t)
-    }
+    const total = dayTurns.length
 
-    const slots = buildTimeSlots(8, 18, 30)
-    const ocupados = slots.filter((h) => (byHour.get(h) || []).length > 0).length
-    const libres = slots.length - ocupados
-
-    const rowsHtml = slots
-      .map((h) => {
-        const list = byHour.get(h) || []
-        const ocupado = list.length > 0
-        const head = ocupado ? list[0] : null
-
-        const extra =
-          ocupado && head
-            ? `<div class="slot__detail">
-                 <div><b>${escapeHtml(head.empresa || 'Sin empresa')}</b></div>
-                 <div class="slot__muted">${escapeHtml(head.nombre || '-')} · DNI ${escapeHtml(head.dni || '-')}</div>
-                 <div class="slot__muted">${escapeHtml(head.tipoExamen || '-')} · ${escapeHtml(head.sede === 'caba' ? 'CABA' : 'San Justo')}</div>
-                 ${list.length > 1 ? `<div class="slot__muted">+${list.length - 1} más</div>` : ''}
-               </div>`
-            : `<div class="slot__detail slot__muted">Disponible</div>`
-
+    const rowsHtml = dayTurns
+      .map((t, idx) => {
         return `
-          <div class="slot ${ocupado ? 'slot--busy' : 'slot--free'}">
-            <div class="slot__time">${escapeHtml(h)}</div>
-            <div class="slot__status">
-              <span class="badge ${ocupado ? 'badge--busy' : 'badge--free'}">${ocupado ? 'Ocupado' : 'Libre'}</span>
+          <div class="queue">
+            <div class="queue__pos">#${idx + 1}</div>
+            <div class="queue__main">
+              <div class="queue__title"><b>${escapeHtml(t.empresa || 'Sin empresa')}</b></div>
+              <div class="queue__muted">${escapeHtml(t.nombre || '-')} · DNI ${escapeHtml(t.dni || '-')} · ${escapeHtml(t.sede === 'caba' ? 'CABA' : 'San Justo')}</div>
+              <div class="queue__muted">${escapeHtml(t.tipoExamen || '-')} · Hora ${escapeHtml(FIXED_TURNO_HORA)}</div>
             </div>
-            <div class="slot__info">${extra}</div>
           </div>
         `
       })
@@ -332,38 +243,32 @@ export function TurnosLaboralAgendaMini() {
 
     const html = `
       <style>
-        .slots { display:flex; flex-direction:column; gap:10px; }
-        .slots__meta { display:flex; gap:10px; flex-wrap:wrap; margin:6px 0 12px; color:#64748b; font-size:.92rem; }
-        .slots__meta b { color:#0f172a; }
-        .slot { border:1px solid rgba(148,163,184,.35); border-radius:14px; background:rgba(255,255,255,.92); padding:10px 12px; display:grid; grid-template-columns:78px 92px 1fr; gap:10px; align-items:start; }
-        .slot--busy { border-color: rgba(244,63,94,.28); }
-        .slot--free { border-color: rgba(0,143,107,.22); }
-        .slot__time { font-weight:800; color:#0f172a; }
-        .badge { display:inline-flex; align-items:center; justify-content:center; padding:4px 10px; border-radius:999px; font-weight:800; font-size:.78rem; border:1px solid transparent; }
-        .badge--busy { background:#fee2e2; color:#991b1b; border-color:#fecaca; }
-        .badge--free { background:rgba(0,143,107,.10); color:rgba(0,143,107,.95); border-color:rgba(0,143,107,.20); }
-        .slot__detail { line-height:1.2; }
-        .slot__muted { color:#64748b; font-size:.88rem; margin-top:2px; }
-        .slots__wrap { max-height: 60vh; overflow:auto; padding-right:6px; }
-        .slots__wrap::-webkit-scrollbar { width: 10px; }
-        .slots__wrap::-webkit-scrollbar-thumb { background: rgba(148,163,184,.35); border-radius: 999px; border: 2px solid rgba(255,255,255,.6); }
+        .meta { display:flex; gap:10px; flex-wrap:wrap; margin:6px 0 12px; color:#64748b; font-size:.92rem; }
+        .meta b { color:#0f172a; }
+        .wrap { max-height: 62vh; overflow:auto; padding-right:6px; }
+        .wrap::-webkit-scrollbar { width: 10px; }
+        .wrap::-webkit-scrollbar-thumb { background: rgba(148,163,184,.35); border-radius: 999px; border: 2px solid rgba(255,255,255,.6); }
+
+        .queue { border:1px solid rgba(148,163,184,.35); border-radius:14px; background:rgba(255,255,255,.92); padding:10px 12px; display:flex; gap:12px; align-items:flex-start; }
+        .queue__pos { width:54px; min-width:54px; height:34px; border-radius:999px; display:flex; align-items:center; justify-content:center; font-weight:900; background:#eef2ff; color:#3730a3; border:1px solid #c7d2fe; }
+        .queue__title { color:#0f172a; font-size:.98rem; }
+        .queue__muted { color:#64748b; font-size:.88rem; margin-top:2px; line-height:1.2; }
       </style>
 
-      <div class="slots">
-        <div class="slots__meta">
-          <div><b>${escapeHtml(dayISO)}</b></div>
-          <div>· Ocupados: <b>${ocupados}</b></div>
-          <div>· Libres: <b>${libres}</b></div>
-        </div>
+      <div class="meta">
+        <div><b>${escapeHtml(dayISO)}</b></div>
+        <div>· Turnos: <b>${total}</b></div>
+        <div>· Hora fija: <b>${escapeHtml(FIXED_TURNO_HORA)}</b></div>
+        <div>· Orden: <b>de llamado</b></div>
+      </div>
 
-        <div class="slots__wrap">
-          ${rowsHtml || '<div style="color:#64748b">Sin horarios.</div>'}
-        </div>
+      <div class="wrap">
+        ${rowsHtml || '<div style="color:#64748b">Sin turnos para este día.</div>'}
       </div>
     `
 
     void Swal.fire({
-      title: 'Horarios del día',
+      title: 'Turnos del día (orden de llamado)',
       html,
       width: 920,
       showConfirmButton: false,
@@ -382,21 +287,13 @@ export function TurnosLaboralAgendaMini() {
         </div>
 
         <div className="lab-agenda__actions">
-          <button
-            type="button"
-            className="btn btn--outline btn--sm"
-            onClick={() => setAnchor(addMonths(anchor, -1))}
-          >
+          <button type="button" className="btn btn--outline btn--sm" onClick={() => setAnchor(addMonths(anchor, -1))}>
             ‹
           </button>
           <button type="button" className="btn btn--outline btn--sm" onClick={goToday}>
             Hoy
           </button>
-          <button
-            type="button"
-            className="btn btn--outline btn--sm"
-            onClick={() => setAnchor(addMonths(anchor, +1))}
-          >
+          <button type="button" className="btn btn--outline btn--sm" onClick={() => setAnchor(addMonths(anchor, +1))}>
             ›
           </button>
           <button type="button" className="btn btn--primary btn--sm" onClick={downloadPdfMes}>
@@ -445,7 +342,7 @@ export function TurnosLaboralAgendaMini() {
       </div>
 
       <div className="lab-agenda__hint" style={{ marginTop: 10, color: 'var(--color-ink-soft)', fontSize: '.9rem' }}>
-        Tip: hacé click en un día para ver el detalle de horarios (libres/ocupados).
+        Tip: hacé click en un día para ver el listado por orden de llamado.
       </div>
     </section>
   )

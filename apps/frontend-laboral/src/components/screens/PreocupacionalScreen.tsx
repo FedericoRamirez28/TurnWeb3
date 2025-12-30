@@ -116,7 +116,11 @@ function normalizeText(s: string) {
 }
 
 const ADICIONALES_CONCEPTO: string[] = [
-  'Preocupacional, periódico o egreso, Básico de Ley, Masculino y Femenino',
+  'Preocupacional / Basico de ley',
+  'Periódico',
+  'Egreso',
+  'Femenino',
+  'Masculino',
   'Psicotécnico',
   'Psicotécnico para trabajos en Altura / Manejo de Autoelevadores / Clarkista',
   'Evaluación Neurológica (Requiere turno previo)',

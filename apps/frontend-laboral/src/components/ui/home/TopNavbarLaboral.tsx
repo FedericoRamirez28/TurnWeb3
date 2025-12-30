@@ -12,7 +12,7 @@ const NAV_ITEMS: { key: NavKeyLaboral; label: string; path: string }[] = [
   { key: 'adicionales', label: 'Adicionales', path: '/adicionales' },
   { key: 'precios', label: 'Precios', path: '/precios' },
   // { key: 'ecg', label: 'ECG Captura', path: '/ecg' },
-  { key: 'config', label: 'Configuración', path: '/config' },
+  // { key: 'config', label: 'Configuración', path: '/config' },
 ]
 
 function getSelected(pathname: string): NavKeyLaboral {

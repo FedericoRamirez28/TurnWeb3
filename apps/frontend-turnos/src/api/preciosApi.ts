@@ -1,3 +1,4 @@
+// src/api/preciosApi.ts  (FRONTEND-TURNOS)
 export type PlanKey = 'ALL' | 'BASE' | 'ESMERALDA' | 'RUBI' | 'DORADO' | 'PARTICULAR'
 export type PlanClave = Exclude<PlanKey, 'ALL'>
 export type ScopeKey = 'laboratorio' | 'especialidad' | 'ambos'
@@ -39,7 +40,7 @@ type ApiJsonInit = Omit<RequestInit, 'body'> & {
 
 async function apiJson<T>(path: string, init?: ApiJsonInit): Promise<T> {
   const base = getApiBase()
-  if (!base) throw new Error('Falta VITE_API_BASE_URL en el .env del frontend-laboral')
+  if (!base) throw new Error('Falta VITE_API_BASE_URL en el .env del frontend-turnos')
 
   const url = new URL(`${base}${path}`)
   const query = init?.query
@@ -82,7 +83,11 @@ async function apiJson<T>(path: string, init?: ApiJsonInit): Promise<T> {
 
 export type ListTurnosPreciosResponse = { rows: TurnosPrecioRowDB[] }
 
-export async function listTurnosPrecios(params: { plan: PlanKey; scope: ScopeKey; q?: string }): Promise<ListTurnosPreciosResponse> {
+export async function listTurnosPrecios(params: {
+  plan: PlanKey
+  scope: ScopeKey
+  q?: string
+}): Promise<ListTurnosPreciosResponse> {
   const q = (params.q ?? '').trim()
   return apiJson<ListTurnosPreciosResponse>('/laboral/precios/turnos/rows', {
     query: {
@@ -93,10 +98,15 @@ export async function listTurnosPrecios(params: { plan: PlanKey; scope: ScopeKey
   })
 }
 
-export async function adjustTurnosPrecios(body: { plan: PlanKey; scope: ScopeKey; mode: ModeKey; percent: number }): Promise<{ updated: number }> {
+export async function adjustTurnosPrecios(body: {
+  plan: PlanKey
+  scope: ScopeKey
+  mode: ModeKey
+  percent: number
+}): Promise<{ updated: number }> {
   return apiJson<{ updated: number }>('/laboral/precios/turnos/adjust', {
     method: 'POST',
-    body,
+    body, // apiJson ya hace JSON.stringify
   })
 }
 
@@ -111,8 +121,65 @@ export type TurnosBundleFromApi = {
 // ✅ alias para que tu hook use el nombre BundleTurnosResponse
 export type BundleTurnosResponse = TurnosBundleFromApi
 
+/* =========================
+   SANITIZACIÓN DEL BUNDLE
+   - Evita que especialidadesOptions traiga laboratorios
+   - Deriva options desde las claves reales de las tarifas
+   ========================= */
+
+function uniqSorted(xs: string[]): string[] {
+  return Array.from(new Set(xs.map((s) => String(s).trim()).filter(Boolean))).sort((a, b) =>
+    a.localeCompare(b),
+  )
+}
+
+function keysUnion(mapByPlan: Record<string, Record<string, unknown>> | undefined): string[] {
+  if (!mapByPlan || typeof mapByPlan !== 'object') return []
+  const out: string[] = []
+  for (const plan of Object.keys(mapByPlan)) {
+    const bucket = mapByPlan[plan]
+    if (!bucket || typeof bucket !== 'object') continue
+    out.push(...Object.keys(bucket))
+  }
+  return uniqSorted(out)
+}
+
+function isProbablyWrongOptions(primary: string[], derived: string[]): boolean {
+  if (primary.length === 0 && derived.length > 0) return true
+  if (primary.length > 0 && derived.length > 0 && primary.length < Math.floor(derived.length * 0.35))
+    return true
+  return false
+}
+
+function sanitizeTurnosBundle(raw: TurnosBundleFromApi): TurnosBundleFromApi {
+  const derivedLabs = keysUnion(raw.laboratoriosTarifas as unknown as Record<string, Record<string, unknown>>)
+  const derivedEsp = keysUnion(raw.especialidadesTarifas as unknown as Record<string, Record<string, unknown>>)
+
+  const primaryLabs = uniqSorted(Array.isArray(raw.laboratorioOptions) ? raw.laboratorioOptions : [])
+  const primaryEsp = uniqSorted(Array.isArray(raw.especialidadesOptions) ? raw.especialidadesOptions : [])
+
+  const fixedLabs = isProbablyWrongOptions(primaryLabs, derivedLabs) ? derivedLabs : primaryLabs
+  const fixedEsp0 = isProbablyWrongOptions(primaryEsp, derivedEsp) ? derivedEsp : primaryEsp
+
+  // Caso típico del bug: especialidadesOptions viene igual a labs
+  const sameAsLabs =
+    fixedEsp0.length > 0 &&
+    fixedLabs.length > 0 &&
+    fixedEsp0.length === fixedLabs.length &&
+    fixedEsp0.every((v, i) => v === fixedLabs[i])
+
+  const fixedEsp = sameAsLabs && derivedEsp.length > 0 ? derivedEsp : fixedEsp0
+
+  return {
+    ...raw,
+    laboratorioOptions: fixedLabs,
+    especialidadesOptions: fixedEsp,
+  }
+}
+
 export async function getTurnosBundle(): Promise<TurnosBundleFromApi> {
-  return apiJson<TurnosBundleFromApi>('/laboral/precios/turnos/bundle')
+  const raw = await apiJson<TurnosBundleFromApi>('/laboral/precios/turnos/bundle')
+  return sanitizeTurnosBundle(raw)
 }
 
 // opcional (si existe en backend)

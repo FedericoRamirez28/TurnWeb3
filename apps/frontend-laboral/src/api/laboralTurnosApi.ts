@@ -1,4 +1,3 @@
-// apps/frontend-laboral/src/api/laboralTurnosApi.ts
 import { apiJson } from './http'
 
 export type SedeKey = 'caba' | 'sanjusto'
@@ -21,6 +20,7 @@ export type LaborTurno = {
   tipoExamen: string
 
   createdAt: string
+  horaTurno?: string
 }
 
 export type CreateLaborTurnoInput = {
@@ -33,6 +33,7 @@ export type CreateLaborTurnoInput = {
   tipoExamen: string
   fechaRecepcionISO: string
   fechaTurnoISO: string
+  horaTurno: string
 }
 
 type BackendCreateResponse = {
@@ -43,6 +44,7 @@ type BackendCreateResponse = {
     fechaTurnoISO: string
     tipoExamen: string
     createdAt: string
+    horaTurno?: string
     company: { id: string; nombre: string }
     employee: {
       id: string
@@ -71,13 +73,14 @@ function mapCreateTurnoToLaborTurno(t: BackendCreateResponse['turno']): LaborTur
     fechaTurnoISO: t.fechaTurnoISO,
     tipoExamen: t.tipoExamen,
     createdAt: t.createdAt,
+    horaTurno: t.horaTurno,
   }
 }
 
 export async function laboralTurnoCreate(input: CreateLaborTurnoInput): Promise<LaborTurno> {
   const r = await apiJson<BackendCreateResponse>('/laboral/turnos', {
     method: 'POST',
-    body: input, // ✅ objeto (apiJson serializa)
+    body: input,
   })
   return mapCreateTurnoToLaborTurno(r.turno)
 }
@@ -86,7 +89,7 @@ export async function laboralTurnosList(params?: {
   q?: string
   from?: string
   to?: string
-  month?: string // YYYY-MM
+  month?: string
 }): Promise<LaborTurno[]> {
   const r = await apiJson<BackendListResponse>('/laboral/turnos', {
     query: {
@@ -98,4 +101,11 @@ export async function laboralTurnosList(params?: {
   })
 
   return Array.isArray(r.turnos) ? r.turnos : []
+}
+
+// ✅ NUEVO: borrar turno
+export async function laboralTurnoDelete(id: string): Promise<void> {
+  await apiJson<{ ok: boolean }>(`/laboral/turnos/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+  })
 }

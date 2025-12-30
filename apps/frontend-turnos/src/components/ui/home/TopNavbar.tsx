@@ -9,7 +9,7 @@ const NAV_ITEMS: { key: NavKey; label: string }[] = [
   { key: 'afiliados', label: 'Afiliados' },
   { key: 'reportes', label: 'Reportes' },
   { key: 'caja', label: 'Cierre de caja' },
-  { key: 'config', label: 'Configuración' },
+  // { key: 'config', label: 'Configuración' },
 ];
 
 interface TopNavbarProps {

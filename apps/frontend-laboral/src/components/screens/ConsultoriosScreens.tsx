@@ -111,7 +111,9 @@ function buildPdfConsultorios(turnosList: ConsultorioTurno[], title: string) {
     byEmpresa.set(k, arr)
   })
 
-  const empresas = Array.from(byEmpresa.keys()).sort((a, b) => normalizeText(a).localeCompare(normalizeText(b)))
+  const empresas = Array.from(byEmpresa.keys()).sort((a, b) =>
+    normalizeText(a).localeCompare(normalizeText(b)),
+  )
 
   let y = margin
   doc.setFont('helvetica', 'bold')
@@ -221,7 +223,6 @@ export default function ConsultoriosScreen() {
   const activeCompanies = useMemo(() => {
     const list = companies.slice()
     list.sort((a, b) => normalizeText(a.nombre).localeCompare(normalizeText(b.nombre)))
-    // en tu API Company esActive
     return list.filter((c) => c.isActive)
   }, [companies])
 
@@ -232,16 +233,22 @@ export default function ConsultoriosScreen() {
   const monthResetKey = useMemo(() => `${year}-${monthIndex0}`, [year, monthIndex0])
   const [selectedDayISO, setSelectedDayISO] = useState<string>('')
 
+  // ✅ NUEVO: filtro de empresa para reportes/listado (independiente del formulario)
+  const [reportCompanyId, setReportCompanyId] = useState<string>('')
+
+  const reportCompany = useMemo(() => {
+    if (!reportCompanyId) return null
+    return activeCompanies.find((c) => c.id === reportCompanyId) || null
+  }, [activeCompanies, reportCompanyId])
+
   const monthStart = useMemo(() => ymd(year, monthIndex0, 1), [year, monthIndex0])
   const monthEnd = useMemo(() => ymd(year, monthIndex0, daysInMonth(year, monthIndex0)), [year, monthIndex0])
 
-  // Cargar empresas
   const loadCompanies = useCallback(async () => {
     setCompaniesLoading(true)
     try {
       const r = await listCompanies({ q: '' })
       setCompanies((r.items || []).filter((c) => c.isActive))
-
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Error'
       Swal.fire({ icon: 'error', title: 'Error al cargar empresas', text: msg })
@@ -250,7 +257,6 @@ export default function ConsultoriosScreen() {
     }
   }, [])
 
-  // Cargar turnos del mes
   const loadMonth = useCallback(async () => {
     try {
       const res = await listConsultorios({ from: monthStart, to: monthEnd, take: 500 })
@@ -308,6 +314,16 @@ export default function ConsultoriosScreen() {
     if (!selectedDayISO) return []
     return monthTurnos.filter((t) => t.fechaTurnoISO === selectedDayISO)
   }, [monthTurnos, selectedDayISO])
+
+  // ✅ NUEVO: aplica filtro de empresa al listado (mes o día)
+  const baseForReport = useMemo(() => {
+    return selectedDayISO ? dayTurnos : monthTurnos
+  }, [selectedDayISO, dayTurnos, monthTurnos])
+
+  const reportTurnos = useMemo(() => {
+    if (!reportCompanyId) return baseForReport
+    return baseForReport.filter((t) => t.empresaId === reportCompanyId)
+  }, [baseForReport, reportCompanyId])
 
   const setField = useCallback(<K extends keyof Draft>(key: K, value: Draft[K]) => {
     setDraft((p) => ({ ...p, [key]: value }))
@@ -397,22 +413,22 @@ export default function ConsultoriosScreen() {
     setMonthIndex0(d.getMonth())
   }, [])
 
-  // --- LOGICA DE DESCARGA PDF DIARIA O MENSUAL ---
   const downloadPdf = useCallback(() => {
-    // Si hay un día seleccionado, imprimimos el reporte diario
+    const empresaLabel = reportCompany?.nombre?.trim() || ''
+    const empresaSuffix = reportCompanyId ? `_Empresa_${(empresaLabel || 'Empresa').replaceAll(' ', '_')}` : ''
+
     if (selectedDayISO) {
-      const title = `Turnos del día ${selectedDayISO}`
-      const doc = buildPdfConsultorios(dayTurnos, title)
-      const file = `Consultorios_Dia_${selectedDayISO}.pdf`
+      const title = `Turnos del día ${selectedDayISO}${empresaLabel ? ` · ${empresaLabel}` : ''}`
+      const doc = buildPdfConsultorios(reportTurnos, title)
+      const file = `Consultorios_Dia_${selectedDayISO}${empresaSuffix}.pdf`
       doc.save(file)
     } else {
-      // Si no hay día, imprimimos el reporte mensual
-      const title = `Turnos Mes: ${monthTitle}`
-      const doc = buildPdfConsultorios(monthTurnos, title)
-      const file = `Consultorios_Mes_${String(monthIndex0 + 1).padStart(2, '0')}-${year}.pdf`
+      const title = `Turnos Mes: ${monthTitle}${empresaLabel ? ` · ${empresaLabel}` : ''}`
+      const doc = buildPdfConsultorios(reportTurnos, title)
+      const file = `Consultorios_Mes_${String(monthIndex0 + 1).padStart(2, '0')}-${year}${empresaSuffix}.pdf`
       doc.save(file)
     }
-  }, [selectedDayISO, dayTurnos, monthTurnos, monthTitle, monthIndex0, year])
+  }, [selectedDayISO, reportTurnos, monthTitle, monthIndex0, year, reportCompany, reportCompanyId])
 
   const grid = useMemo(() => {
     const first = new Date(year, monthIndex0, 1)
@@ -427,10 +443,9 @@ export default function ConsultoriosScreen() {
   }, [year, monthIndex0])
 
   const hasCompanies = !companiesLoading && activeCompanies.length > 0
-  
-  // Variables para controlar el estado del botón PDF
+
   const pdfButtonLabel = selectedDayISO ? 'PDF Día' : 'PDF Mes'
-  const pdfButtonDisabled = selectedDayISO ? dayTurnos.length === 0 : monthTurnos.length === 0
+  const pdfButtonDisabled = reportTurnos.length === 0
 
   return (
     <div className="consultorios">
@@ -541,6 +556,47 @@ export default function ConsultoriosScreen() {
             </div>
           </header>
 
+          {/* ✅ NUEVO: FILTRO DE EMPRESA PARA REPORTES */}
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 10, alignItems: 'flex-end' }}>
+            <label className="consultorios__label" style={{ margin: 0, flex: '1 1 260px' }}>
+              Filtrar por empresa (reporte/listado)
+              <select
+                className="input"
+                value={reportCompanyId}
+                onChange={(e) => setReportCompanyId(e.target.value)}
+              >
+                <option value="">Todas las empresas</option>
+                {activeCompanies.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.nombre}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <button
+              type="button"
+              className="btn btn--outline btn--sm"
+              onClick={() => setReportCompanyId('')}
+              disabled={!reportCompanyId}
+              title={!reportCompanyId ? 'Ya estás viendo todas' : 'Quitar filtro'}
+              style={{ height: 34 }}
+            >
+              Limpiar filtro
+            </button>
+
+            <div style={{ color: 'var(--color-ink-soft)', fontSize: '.9rem', paddingBottom: 6 }}>
+              Mostrando: <b>{reportTurnos.length}</b> turnos
+              {reportCompany ? (
+                <>
+                  {' '}· Empresa: <b>{reportCompany.nombre}</b>
+                </>
+              ) : (
+                <> · Empresa: <b>Todas</b></>
+              )}
+            </div>
+          </div>
+
           <div className="consultorios__calendar">
             <div className="consultorios__dow">
               {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) => (
@@ -585,10 +641,24 @@ export default function ConsultoriosScreen() {
                 {selectedDayISO ? (
                   <>
                     Turnos del día <b>{selectedDayISO}</b>
+                    {reportCompany ? (
+                      <>
+                        {' '}· Empresa: <b>{reportCompany.nombre}</b>
+                      </>
+                    ) : (
+                      <> · Empresa: <b>Todas</b></>
+                    )}
                   </>
                 ) : (
                   <>
-                    Turnos del mes: <b>{monthTurnos.length}</b>
+                    Turnos del mes: <b>{reportTurnos.length}</b>
+                    {reportCompany ? (
+                      <>
+                        {' '}· Empresa: <b>{reportCompany.nombre}</b>
+                      </>
+                    ) : (
+                      <> · Empresa: <b>Todas</b></>
+                    )}
                   </>
                 )}
               </div>
@@ -614,7 +684,7 @@ export default function ConsultoriosScreen() {
                   </tr>
                 </thead>
                 <tbody>
-                  {(selectedDayISO ? dayTurnos : monthTurnos).slice(0, 200).map((t) => (
+                  {reportTurnos.slice(0, 200).map((t) => (
                     <tr key={t.id}>
                       <td>{t.fechaTurnoISO}</td>
                       <td>{t.empresaNombre}</td>
@@ -626,7 +696,7 @@ export default function ConsultoriosScreen() {
                     </tr>
                   ))}
 
-                  {(selectedDayISO ? dayTurnos : monthTurnos).length === 0 && (
+                  {reportTurnos.length === 0 && (
                     <tr>
                       <td colSpan={7} className="consultorios__noRows">
                         No hay turnos para mostrar.
@@ -637,8 +707,8 @@ export default function ConsultoriosScreen() {
               </table>
             </div>
 
-            {(selectedDayISO ? dayTurnos : monthTurnos).length > 200 && (
-              <div className="consultorios__hint">Mostrando 200 resultados. Ajustá el mes/día para ver más preciso.</div>
+            {reportTurnos.length > 200 && (
+              <div className="consultorios__hint">Mostrando 200 resultados. Ajustá el mes/día/filtro para ver más preciso.</div>
             )}
           </div>
         </section>
