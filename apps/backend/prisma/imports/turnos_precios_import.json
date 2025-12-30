@@ -231,7 +231,7 @@
     "tipo": "LABORATORIO",
     "nombre": "ALBUMINURIA EN ORINA",
     "plan": "DORADO",
-    "valor": 12573.43
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -351,7 +351,7 @@
     "tipo": "LABORATORIO",
     "nombre": "AMILASA",
     "plan": "DORADO",
-    "valor": 4023.49
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -891,7 +891,7 @@
     "tipo": "LABORATORIO",
     "nombre": "ANTICUERPO ANTIRECEPTOR DE TSH",
     "plan": "DORADO",
-    "valor": 40234.97
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -951,7 +951,7 @@
     "tipo": "LABORATORIO",
     "nombre": "ANTICUERPO E DE HEPATITIS B",
     "plan": "DORADO",
-    "valor": 15088.11
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -1551,7 +1551,7 @@
     "tipo": "LABORATORIO",
     "nombre": "CALCIO TOTAL ORINA O SANGRE",
     "plan": "DORADO",
-    "valor": 2011.74
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -1611,7 +1611,7 @@
     "tipo": "LABORATORIO",
     "nombre": "CALCIO IONICO",
     "plan": "DORADO",
-    "valor": 4023.49
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -1641,7 +1641,7 @@
     "tipo": "LABORATORIO",
     "nombre": "CARGA VIRAL HIV",
     "plan": "DORADO",
-    "valor": 160939.87
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -1671,7 +1671,7 @@
     "tipo": "LABORATORIO",
     "nombre": "CARGA VIRAL HEPATITIS C",
     "plan": "DORADO",
-    "valor": 186086.64
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -1791,7 +1791,7 @@
     "tipo": "LABORATORIO",
     "nombre": "CHAGAS INMUNOFLUORESCENCIA    IFI",
     "plan": "DORADO",
-    "valor": 14082.23
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -1851,7 +1851,7 @@
     "tipo": "LABORATORIO",
     "nombre": "CLORO ORINA O SANGRE",
     "plan": "DORADO",
-    "valor": 2011.74
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -1941,7 +1941,7 @@
     "tipo": "LABORATORIO",
     "nombre": "COAGULOGRAMA",
     "plan": "DORADO",
-    "valor": 8047.0
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -2181,7 +2181,7 @@
     "tipo": "LABORATORIO",
     "nombre": "CORTISOL LIBRE URINARIO (ORINA DE 24 HS)",
     "plan": "DORADO",
-    "valor": 12070.49
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -2361,7 +2361,7 @@
     "tipo": "LABORATORIO",
     "nombre": "CURVA DE GLUCEMIA ( P75 ) X 2",
     "plan": "DORADO",
-    "valor": 4526.43
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -2661,7 +2661,7 @@
     "tipo": "LABORATORIO",
     "nombre": "ERITROPOYETINA",
     "plan": "DORADO",
-    "valor": 45264.34
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -3471,7 +3471,7 @@
     "tipo": "LABORATORIO",
     "nombre": "GRUPO Y FACTOR",
     "plan": "DORADO",
-    "valor": 5029.37
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -3501,7 +3501,7 @@
     "tipo": "LABORATORIO",
     "nombre": "HEPATITIS A  AC (HVA - IGG) si tuvo hepatitis",
     "plan": "DORADO",
-    "valor": 15088.11
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -3531,7 +3531,7 @@
     "tipo": "LABORATORIO",
     "nombre": "HEPATITIS A AC  (HVA - IGM )si esta cursando hepatitis",
     "plan": "DORADO",
-    "valor": 15088.11
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -3561,7 +3561,7 @@
     "tipo": "LABORATORIO",
     "nombre": "HEPATITIS B AC DE SUPERFICIE  ANTI (HBSAC)",
     "plan": "DORADO",
-    "valor": 20117.48
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -3591,7 +3591,7 @@
     "tipo": "LABORATORIO",
     "nombre": "HEPATITIS B ANTIGENO DE SUPERFICIE (AG. HBS)",
     "plan": "DORADO",
-    "valor": 12069.65
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -3621,7 +3621,7 @@
     "tipo": "LABORATORIO",
     "nombre": "HEPATITIS B AC ANTI CORE IGG (HBC-IGG)",
     "plan": "DORADO",
-    "valor": 15088.11
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -3651,7 +3651,7 @@
     "tipo": "LABORATORIO",
     "nombre": "HEPATITIS B AC ANTI CORE IGM (HBCM)",
     "plan": "DORADO",
-    "valor": 18105.72
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -3681,7 +3681,7 @@
     "tipo": "LABORATORIO",
     "nombre": "HEPATITIS C AC IGG ANTI (HCV AC.IGG)",
     "plan": "DORADO",
-    "valor": 20117.45
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -3711,7 +3711,7 @@
     "tipo": "LABORATORIO",
     "nombre": "HEPATITIS C AC IGM ANTI (HCV AC.IGM)",
     "plan": "DORADO",
-    "valor": 60352.45
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -3855,13 +3855,13 @@
     "tipo": "LABORATORIO",
     "nombre": "HEMOGRAMA",
     "plan": "RUBI",
-    "valor": 5029.37
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
     "nombre": "HEMOGRAMA",
     "plan": "DORADO",
-    "valor": 5029.37
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -3951,7 +3951,7 @@
     "tipo": "LABORATORIO",
     "nombre": "HEPATITIS C",
     "plan": "DORADO",
-    "valor": 20117.48
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -3981,7 +3981,7 @@
     "tipo": "LABORATORIO",
     "nombre": "HIV-WESTERN BLOT",
     "plan": "DORADO",
-    "valor": 100587.42
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -4011,7 +4011,7 @@
     "tipo": "LABORATORIO",
     "nombre": "HOMA (INDICE DE INSULINA RESISTENCIA)",
     "plan": "DORADO",
-    "valor": 14581.58
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -4311,7 +4311,7 @@
     "tipo": "LABORATORIO",
     "nombre": "HIV ELISA",
     "plan": "DORADO",
-    "valor": 11064.62
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -4461,7 +4461,7 @@
     "tipo": "LABORATORIO",
     "nombre": "IONOGRAMA",
     "plan": "DORADO",
-    "valor": 3520.57
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -4551,7 +4551,7 @@
     "tipo": "LABORATORIO",
     "nombre": "INSULINA BASAL X 2",
     "plan": "DORADO",
-    "valor": 11064.62
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -4581,7 +4581,7 @@
     "tipo": "LABORATORIO",
     "nombre": "KPTT (TROMBOPLASTINA TIEMPO DE)",
     "plan": "DORADO",
-    "valor": 3017.63
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -4851,7 +4851,7 @@
     "tipo": "LABORATORIO",
     "nombre": "MAGNESIO",
     "plan": "DORADO",
-    "valor": 2514.69
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -5091,7 +5091,7 @@
     "tipo": "LABORATORIO",
     "nombre": "OXALURIA (AC. OXALICO EN ORINA)",
     "plan": "DORADO",
-    "valor": 15088.11
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -5331,7 +5331,7 @@
     "tipo": "LABORATORIO",
     "nombre": "PIRIDINOLINA EN ORINA- dihidro-",
     "plan": "DORADO",
-    "valor": 28164.48
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -5341,31 +5341,31 @@
   },
   {
     "tipo": "LABORATORIO",
-    "nombre": "PLAQUETAS RECUENTO DE",
+    "nombre": "RECUENTO DE PLAQUETAS",
     "plan": "BASE",
     "valor": 2194.63
   },
   {
     "tipo": "LABORATORIO",
-    "nombre": "PLAQUETAS RECUENTO DE",
+    "nombre": "RECUENTO DE PLAQUETAS",
     "plan": "ESMERALDA",
     "valor": 2103.19
   },
   {
     "tipo": "LABORATORIO",
-    "nombre": "PLAQUETAS RECUENTO DE",
+    "nombre": "RECUENTO DE PLAQUETAS",
     "plan": "RUBI",
     "valor": 2011.74
   },
   {
     "tipo": "LABORATORIO",
-    "nombre": "PLAQUETAS RECUENTO DE",
+    "nombre": "RECUENTO DE PLAQUETAS",
     "plan": "DORADO",
-    "valor": 2011.74
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
-    "nombre": "PLAQUETAS RECUENTO DE",
+    "nombre": "RECUENTO DE PLAQUETAS",
     "plan": "PARTICULAR",
     "valor": 2468.96
   },
@@ -5421,7 +5421,7 @@
     "tipo": "LABORATORIO",
     "nombre": "PORFIRINAS EN ORINA",
     "plan": "DORADO",
-    "valor": 15088.11
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -5511,7 +5511,7 @@
     "tipo": "LABORATORIO",
     "nombre": "PROTEINOGRAMA",
     "plan": "DORADO",
-    "valor": 20117.48
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -5631,7 +5631,7 @@
     "tipo": "LABORATORIO",
     "nombre": "PROTROMBINA TIEMPO DE",
     "plan": "DORADO",
-    "valor": 3017.63
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -6021,7 +6021,7 @@
     "tipo": "LABORATORIO",
     "nombre": "T3",
     "plan": "DORADO",
-    "valor": 9052.86
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -6051,7 +6051,7 @@
     "tipo": "LABORATORIO",
     "nombre": "T4",
     "plan": "DORADO",
-    "valor": 9052.86
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -6081,7 +6081,7 @@
     "tipo": "LABORATORIO",
     "nombre": "T4 LIBRE",
     "plan": "DORADO",
-    "valor": 9052.86
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -6111,7 +6111,7 @@
     "tipo": "LABORATORIO",
     "nombre": "T3 LIBRE",
     "plan": "DORADO",
-    "valor": 10058.66
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -6321,7 +6321,7 @@
     "tipo": "LABORATORIO",
     "nombre": "TOXOPLASMOSIS IFI x elisa",
     "plan": "DORADO",
-    "valor": 6035.25
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -6351,7 +6351,7 @@
     "tipo": "LABORATORIO",
     "nombre": "TOXOPLASMOSIS- HA (SABIN Y FELDMNAN)",
     "plan": "DORADO",
-    "valor": 4023.49
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -6381,7 +6381,7 @@
     "tipo": "LABORATORIO",
     "nombre": "TOXOPLASMOSIS  IGG",
     "plan": "DORADO",
-    "valor": 10058.74
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -6411,7 +6411,7 @@
     "tipo": "LABORATORIO",
     "nombre": "TOXOPLASMOSIS IGM",
     "plan": "DORADO",
-    "valor": 8055.9
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -6441,7 +6441,7 @@
     "tipo": "LABORATORIO",
     "nombre": "TSH",
     "plan": "DORADO",
-    "valor": 9052.86
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -6495,13 +6495,13 @@
     "tipo": "LABORATORIO",
     "nombre": "TRIGLICERIDOS",
     "plan": "RUBI",
-    "valor": 2514.69
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
     "nombre": "TRIGLICERIDOS",
     "plan": "DORADO",
-    "valor": 2514.69
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -6531,7 +6531,7 @@
     "tipo": "LABORATORIO",
     "nombre": "UREAPLASMA + MYCOPLASMA  (25 unidades)",
     "plan": "DORADO",
-    "valor": 35205.6
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -6561,7 +6561,7 @@
     "tipo": "LABORATORIO",
     "nombre": "UROCULTIVO",
     "plan": "DORADO",
-    "valor": 20117.48
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -6591,7 +6591,7 @@
     "tipo": "LABORATORIO",
     "nombre": "UROCULTIVO + ANTIBIOGRAMA",
     "plan": "DORADO",
-    "valor": 29170.9
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -6681,7 +6681,7 @@
     "tipo": "LABORATORIO",
     "nombre": "VDRL",
     "plan": "DORADO",
-    "valor": 4023.49
+    "valor": 0
   },
   {
     "tipo": "LABORATORIO",
@@ -6825,13 +6825,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "ALERGISTA ADULTOS",
     "plan": "RUBI",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "ALERGISTA ADULTOS",
     "plan": "DORADO",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -6855,13 +6855,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "ALERGISTA PEDIATRICO",
     "plan": "RUBI",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "ALERGISTA PEDIATRICO",
     "plan": "DORADO",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -6885,13 +6885,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "CARDIOLOGÍA",
     "plan": "RUBI",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "CARDIOLOGÍA",
     "plan": "DORADO",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -6915,13 +6915,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "CIRUGÍA GENERAL",
     "plan": "RUBI",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "CIRUGÍA GENERAL",
     "plan": "DORADO",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -6945,13 +6945,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "CLÍNICA MÉDICA",
     "plan": "RUBI",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "CLÍNICA MÉDICA",
     "plan": "DORADO",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -6975,13 +6975,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "DERMATOLOGIA",
     "plan": "RUBI",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "DERMATOLOGIA",
     "plan": "DORADO",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7005,13 +7005,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "FLEBOLOGÍA",
     "plan": "RUBI",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "FLEBOLOGÍA",
     "plan": "DORADO",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7035,13 +7035,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "GASTROENTEROLOGÍA",
     "plan": "RUBI",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "GASTROENTEROLOGÍA",
     "plan": "DORADO",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7065,13 +7065,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "GINECOLOGÍA",
     "plan": "RUBI",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "GINECOLOGÍA",
     "plan": "DORADO",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7095,13 +7095,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "MASTOLOGIA",
     "plan": "RUBI",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "MASTOLOGIA",
     "plan": "DORADO",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7125,13 +7125,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "NEFROLOGÍA",
     "plan": "RUBI",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "NEFROLOGÍA",
     "plan": "DORADO",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7155,13 +7155,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "NEUMONOLOGÌA ADULTOS",
     "plan": "RUBI",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "NEUMONOLOGÌA ADULTOS",
     "plan": "DORADO",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7185,13 +7185,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "NEUROLOGÍA",
     "plan": "RUBI",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "NEUROLOGÍA",
     "plan": "DORADO",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7215,13 +7215,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "NUTRICIÓN",
     "plan": "RUBI",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "NUTRICIÓN",
     "plan": "DORADO",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7245,13 +7245,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "OFTALMOLOGÍA",
     "plan": "RUBI",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "OFTALMOLOGÍA",
     "plan": "DORADO",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7275,13 +7275,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "OTORRINOLARINGOLOGÍA",
     "plan": "RUBI",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "OTORRINOLARINGOLOGÍA",
     "plan": "DORADO",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7305,13 +7305,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "PEDIATRÍA",
     "plan": "RUBI",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "PEDIATRÍA",
     "plan": "DORADO",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7335,13 +7335,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "PROCTOLOGÍA",
     "plan": "RUBI",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "PROCTOLOGÍA",
     "plan": "DORADO",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7365,13 +7365,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "PSICOPEDAGOGÍA",
     "plan": "RUBI",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "PSICOPEDAGOGÍA",
     "plan": "DORADO",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7395,13 +7395,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "TRAUMATOLOGÍA ADULTOS",
     "plan": "RUBI",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "TRAUMATOLOGÍA ADULTOS",
     "plan": "DORADO",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7425,13 +7425,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "TRAUMATOLOGÍA RODILLA",
     "plan": "RUBI",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "TRAUMATOLOGÍA RODILLA",
     "plan": "DORADO",
-    "valor": 20000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7455,13 +7455,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "DIABETOLOGÍA",
     "plan": "RUBI",
-    "valor": 24000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "DIABETOLOGÍA",
     "plan": "DORADO",
-    "valor": 24000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7485,13 +7485,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "HEMATOLOGÌA",
     "plan": "RUBI",
-    "valor": 24000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "HEMATOLOGÌA",
     "plan": "DORADO",
-    "valor": 24000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7515,13 +7515,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "NEUMONOLOGÍA PEDIÁTRICA",
     "plan": "RUBI",
-    "valor": 24000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "NEUMONOLOGÍA PEDIÁTRICA",
     "plan": "DORADO",
-    "valor": 24000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7545,13 +7545,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "NEUROCIRUGIA",
     "plan": "RUBI",
-    "valor": 24000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "NEUROCIRUGIA",
     "plan": "DORADO",
-    "valor": 24000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7575,13 +7575,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "ONCOLOGIA",
     "plan": "RUBI",
-    "valor": 24000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "ONCOLOGIA",
     "plan": "DORADO",
-    "valor": 24000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7611,7 +7611,7 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "PSICOLOGIA",
     "plan": "DORADO",
-    "valor": 24000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7641,7 +7641,7 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "PSICOLOGIA INFANTIL",
     "plan": "DORADO",
-    "valor": 24000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7665,13 +7665,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "REUMATOLOGÍA",
     "plan": "RUBI",
-    "valor": 24000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "REUMATOLOGÍA",
     "plan": "DORADO",
-    "valor": 24000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7695,13 +7695,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "UROLOGÍA",
     "plan": "RUBI",
-    "valor": 24000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "UROLOGÍA",
     "plan": "DORADO",
-    "valor": 24000
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7725,13 +7725,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "ENDOCRINOLOGÌA",
     "plan": "RUBI",
-    "valor": 39800
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "ENDOCRINOLOGÌA",
     "plan": "DORADO",
-    "valor": 39800
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7755,13 +7755,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "HEPATÓLOGÍA",
     "plan": "RUBI",
-    "valor": 39800
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "HEPATÓLOGÍA",
     "plan": "DORADO",
-    "valor": 39800
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7785,13 +7785,13 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "NEUROLOGÍA INFANTIL",
     "plan": "RUBI",
-    "valor": 39800
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
     "nombre": "NEUROLOGÍA INFANTIL",
     "plan": "DORADO",
-    "valor": 39800
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",
@@ -7821,7 +7821,7 @@
     "tipo": "ESPECIALIDAD",
     "nombre": "PSIQUIATRÍA",
     "plan": "DORADO",
-    "valor": 39800
+    "valor": 0
   },
   {
     "tipo": "ESPECIALIDAD",

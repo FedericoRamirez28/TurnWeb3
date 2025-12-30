@@ -1,8 +1,5 @@
-/* =========================================================
-   CONTENEDOR PRINCIPAL: ANCLADO AL VIEWPORT
-   ========================================================= */
 /* ================================
-   AFILIADOS — FULL WIDTH/HEIGHT
+   AFILIADOS — FULL RESPONSIVE (SIN SCROLL HORIZONTAL)
    ================================ */
 
 .affiliates-screen {
@@ -15,17 +12,27 @@
   right: 0;
   bottom: 0;
 
-  width: 100vw;
+  width: 100%;
+  max-width: 100%;
   height: calc(100dvh - var(--topbar-h));
 
   display: flex;
   flex-direction: column;
 
-  /* sin scroll global */
+  /* CLAVE: nada de scroll global / nada de overflow horizontal */
   overflow: hidden;
+  overflow-x: hidden;
 
   background: radial-gradient(circle at top, #d4e5dd 0, #e0e5f0 45%, #cbd5e1 100%);
   z-index: 10;
+
+  /* evita que padding + widths rompan el viewport */
+  box-sizing: border-box;
+
+  * {
+    box-sizing: border-box;
+    min-width: 0; /* CLAVE en flex/grid para que no empuje ancho */
+  }
 
   /* =========================
      HEADER
@@ -38,8 +45,8 @@
     gap: 16px;
 
     width: 100%;
+    max-width: 100%;
     padding: 16px 24px;
-    box-sizing: border-box;
   }
 
   &__title {
@@ -55,43 +62,37 @@
   }
 
   &__search {
-    width: min(420px, 100%);
+    width: min(520px, 100%);
+    max-width: 100%;
   }
 
   &__search-input {
     background: #f8fafc;
     width: 100%;
+    max-width: 100%;
   }
 
   /* =========================
      ZONA COLUMNAS (FULL HEIGHT)
+     SIN OVERFLOW-X: WRAP AUTOMÁTICO
      ========================= */
   &__plans-row {
     flex: 1 1 auto;
-    min-height: 0; /* CLAVE para que el overflow interno funcione */
+    min-height: 0;
 
     padding: 0 24px 16px;
-    box-sizing: border-box;
 
     display: grid;
     gap: 16px;
-
-    /* 5 columnas que se estiran en desktop */
-    grid-template-columns: repeat(5, minmax(260px, 1fr));
     align-items: stretch;
 
-    /* si no entra, aparece scroll horizontal */
-    overflow-x: auto;
-    overflow-y: hidden;
+    width: 100%;
+    max-width: 100%;
 
-    /* scrollbar horizontal prolijo */
-    &::-webkit-scrollbar {
-      height: 8px;
-    }
-    &::-webkit-scrollbar-thumb {
-      background: rgba(0, 0, 0, 0.18);
-      border-radius: 999px;
-    }
+    /* ✅ RESPONSIVE REAL: se ajusta a cualquier pantalla sin scroll horizontal */
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+
+    overflow: hidden; /* nada de scroll horizontal acá */
   }
 
   /* =========================
@@ -99,7 +100,7 @@
      ========================= */
   &__plan-column {
     height: 100%;
-    min-height: 0; /* CLAVE para que el body scrollee */
+    min-height: 0;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -135,7 +136,7 @@
   }
 
   /* =========================
-     BODY con scroll vertical
+     BODY con scroll vertical (por columna)
      ========================= */
   &__plan-body {
     flex: 1 1 auto;
@@ -160,7 +161,8 @@
      ========================= */
   &__card.card {
     width: 100%;
-    flex: 0 0 auto; /* no se estira raro */
+    max-width: 100%;
+    flex: 0 0 auto;
     padding: 12px;
 
     border: 1px solid rgba(255,255,255,0.55);
@@ -184,6 +186,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    min-width: 0;
   }
 
   &__avatar {
@@ -307,64 +310,39 @@
     &__header {
       flex-direction: column;
       align-items: stretch;
+      padding: 16px 16px;
     }
 
     &__search {
       width: 100%;
     }
 
-    /* en pantallas chicas, permitimos menos ancho mínimo por columna */
     &__plans-row {
-      grid-template-columns: repeat(5, minmax(240px, 1fr));
       padding: 0 16px 16px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     }
   }
 
   @media (max-width: 520px) {
     &__plans-row {
-      grid-template-columns: repeat(5, minmax(220px, 1fr));
+      grid-template-columns: 1fr; /* en teléfono: 1 columna, cero scroll horizontal */
     }
   }
 }
 
-/* (tu modal de historial puede quedar como lo tenías) */
-
-
-/* El modal se mantiene fuera del flujo, con position fixed y z-index alto */
-.affiliate-history-modal__overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999; /* Máxima prioridad */
-}
-
-/* El modal de historial se mantiene igual ya que es fixed y tiene z-index alto */
-.affiliate-history-modal__overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 50;
-  backdrop-filter: blur(2px);
-}
-/* ... resto de estilos del modal ... */
-
-/* ===== Modal historial: overlay centrado ===== */
+/* =========================================================
+   MODAL HISTORIAL (UNIFICADO, SIN DUPLICADOS)
+   ========================================================= */
 
 .affiliate-history-modal__overlay {
   position: fixed;
   inset: 0;
   background: rgba(15, 23, 42, 0.38);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 40;
+  z-index: 9999;
 }
 
 .affiliate-history-modal {
@@ -443,29 +421,4 @@
 .affiliate-history-modal__footer {
   display: flex;
   justify-content: flex-end;
-}
-
-/* ===== Breakpoints ===== */
-
-@media (max-width: 960px) {
-  .affiliates-screen {
-    padding: 16px 16px 32px;
-  }
-
-  .affiliates-screen__header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .affiliates-screen__search {
-    width: 100%;
-  }
-
-  .affiliates-screen__card-body {
-    flex-direction: column; 
-  }
-
-  .affiliates-screen__turnos {
-    grid-template-columns: 1fr; 
-  }
 }

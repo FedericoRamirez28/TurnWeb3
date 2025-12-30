@@ -187,8 +187,8 @@ async function generateCajaPdf(
   for (const row of rows) {
     total += Number(row.monto || 0)
 
-    const cellLines = cols.map((c) =>
-      doc.splitTextToSize(c.value(row), c.width - padX * 2) as string[]
+    const cellLines = cols.map(
+      (c) => doc.splitTextToSize(c.value(row), c.width - padX * 2) as string[]
     )
 
     const maxLines = Math.max(...cellLines.map((l) => l.length))
@@ -291,10 +291,7 @@ export const CierreCajaScreen: React.FC<Props> = () => {
   }, [historyDates, historyQuery])
 
   const rowsHoy = useMemo(() => estado?.hoy?.rows ?? [], [estado?.hoy?.rows])
-  const totalHoy = useMemo(
-    () => rowsHoy.reduce((acc, r) => acc + Number(r.monto || 0), 0),
-    [rowsHoy]
-  )
+  const totalHoy = useMemo(() => rowsHoy.reduce((acc, r) => acc + Number(r.monto || 0), 0), [rowsHoy])
 
   const cajaAyer = estado?.ayer ?? null
 
@@ -304,7 +301,7 @@ export const CierreCajaScreen: React.FC<Props> = () => {
   const handleDownloadForDate = async (dateISO: string) => {
     try {
       const caja: CierreCajaDto = await fetchCajaByDate(dateISO)
-      void generateCajaPdf(dateISO, caja.rows as CajaRow[], 'download')
+      void generateCajaPdf(dateISO, caja.rows, 'download')
     } catch (err) {
       console.error('Error descargando caja', err)
     }
@@ -313,7 +310,7 @@ export const CierreCajaScreen: React.FC<Props> = () => {
   const handlePreviewForDate = async (dateISO: string) => {
     try {
       const caja: CierreCajaDto = await fetchCajaByDate(dateISO)
-      const url = await generateCajaPdf(dateISO, caja.rows as CajaRow[], 'preview')
+      const url = await generateCajaPdf(dateISO, caja.rows, 'preview')
       if (url) {
         setPreviewUrl(url)
         setShowPreview(true)
@@ -333,6 +330,7 @@ export const CierreCajaScreen: React.FC<Props> = () => {
       })
       return
     }
+
     let cajaLive: CierreCajaDto | null = null
     try {
       cajaLive = await fetchCajaByDate(fechaISOToClose)
@@ -340,7 +338,7 @@ export const CierreCajaScreen: React.FC<Props> = () => {
       cajaLive = null
     }
 
-    const rows = (cajaLive?.rows ?? []) as CajaRow[]
+    const rows = cajaLive?.rows ?? []
     const total = rows.reduce((acc, r) => acc + Number(r.monto || 0), 0)
 
     if (!rows.length) {
@@ -376,11 +374,12 @@ export const CierreCajaScreen: React.FC<Props> = () => {
       setClosing(true)
       const cierre = await cerrarCajaApi(fechaISOToClose)
 
-      const url = await generateCajaPdf(cierre.fechaISO, cierre.rows as CajaRow[], 'preview')
+      const url = await generateCajaPdf(cierre.fechaISO, cierre.rows, 'preview')
       if (url) {
         setPreviewUrl(url)
         setShowPreview(true)
       }
+
       setEstado((prev) => {
         if (!prev) return prev
 
@@ -397,7 +396,7 @@ export const CierreCajaScreen: React.FC<Props> = () => {
           historial: nextHistorial,
           ...(isClosingHoy
             ? {
-                hoy: { fechaISO: prev.hoy.fechaISO, rows: [] },
+                hoy: { ...prev.hoy, rows: [] },
                 ayer: { fechaISO: cierre.fechaISO, total: cierre.total, rows: cierre.rows },
               }
             : isClosingAyer
@@ -407,6 +406,7 @@ export const CierreCajaScreen: React.FC<Props> = () => {
               : {}),
         }
       })
+
       await loadEstado()
 
       await swal.fire({
@@ -499,11 +499,7 @@ export const CierreCajaScreen: React.FC<Props> = () => {
                     title="Previsualizar"
                   >
                     <span className="cierre-caja__pdf-tag">
-                      {pdfIcon ? (
-                        <img src={pdfIcon} alt="PDF" className="cierre-caja__pdf-icon" />
-                      ) : (
-                        'PDF'
-                      )}
+                      {pdfIcon ? <img src={pdfIcon} alt="PDF" className="cierre-caja__pdf-icon" /> : 'PDF'}
                     </span>
                     <span className="cierre-caja-history__date">{formatDateDisplay(dateISO)}</span>
                   </button>
@@ -538,7 +534,11 @@ export const CierreCajaScreen: React.FC<Props> = () => {
             <div style={{ marginTop: 14 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                 <strong>Previsualización</strong>
-                <button type="button" className="btn btn--ghost btn--sm" onClick={() => setPreviewUrl(null)}>
+                <button
+                  type="button"
+                  className="btn btn--ghost btn--sm"
+                  onClick={() => setPreviewUrl(null)}
+                >
                   limpiar
                 </button>
               </div>
@@ -578,7 +578,7 @@ export const CierreCajaScreen: React.FC<Props> = () => {
               disabled={!estado || rowsHoy.length === 0}
               onClick={async () => {
                 if (!estado) return
-                const url = await generateCajaPdf(estado.hoy.fechaISO, rowsHoy as CajaRow[], 'preview')
+                const url = await generateCajaPdf(estado.hoy.fechaISO, rowsHoy, 'preview')
                 if (url) {
                   setPreviewUrl(url)
                   setShowPreview(true)
@@ -601,6 +601,7 @@ export const CierreCajaScreen: React.FC<Props> = () => {
             </button>
           </div>
         </header>
+
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginTop: 10 }}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <span style={{ fontSize: 13, color: 'var(--color-ink-soft)' }}>Cerrar caja por fecha:</span>
@@ -647,7 +648,10 @@ export const CierreCajaScreen: React.FC<Props> = () => {
             {loading && <p className="cierre-caja__empty">Cargando cierre de caja…</p>}
 
             {rowsHoy.map((r, idx) => (
-              <div key={`${estado?.hoy?.fechaISO ?? 'hoy'}-${r.numeroAfiliado}-${idx}`} className="cierre-caja__row">
+              <div
+                key={`${estado?.hoy?.fechaISO ?? 'hoy'}-${r.numeroAfiliado}-${idx}`}
+                className="cierre-caja__row"
+              >
                 <span>{r.fechaDisplay}</span>
                 <span>{r.numeroAfiliado || '—'}</span>
                 <span>{r.dni || '—'}</span>
@@ -671,7 +675,11 @@ export const CierreCajaScreen: React.FC<Props> = () => {
           <div style={{ marginTop: 14 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
               <strong>Previsualización</strong>
-              <button type="button" className="btn btn--ghost btn--sm" onClick={() => setPreviewUrl(null)}>
+              <button
+                type="button"
+                className="btn btn--ghost btn--sm"
+                onClick={() => setPreviewUrl(null)}
+              >
                 limpiar
               </button>
             </div>
@@ -691,7 +699,6 @@ export const CierreCajaScreen: React.FC<Props> = () => {
         )}
       </div>
 
-      {/* Caja “de ayer” */}
       <div className="cierre-caja__yesterday card">
         <div className="cierre-caja__yesterday-row">
           <div className="cierre-caja__yesterday-info">
@@ -702,16 +709,10 @@ export const CierreCajaScreen: React.FC<Props> = () => {
                 <button
                   type="button"
                   className="cierre-caja__yesterday-btn"
-                  onClick={() =>
-                    void generateCajaPdf(cajaAyer.fechaISO, cajaAyer.rows as CajaRow[], 'download')
-                  }
+                  onClick={() => void generateCajaPdf(cajaAyer.fechaISO, cajaAyer.rows, 'download')}
                 >
                   <span className="cierre-caja__pdf-tag">
-                    {pdfIcon ? (
-                      <img src={pdfIcon} alt="PDF" className="cierre-caja__pdf-icon" />
-                    ) : (
-                      'PDF'
-                    )}
+                    {pdfIcon ? <img src={pdfIcon} alt="PDF" className="cierre-caja__pdf-icon" /> : 'PDF'}
                   </span>
                   <span className="cierre-caja__yesterday-date">{formatDateDisplay(cajaAyer.fechaISO)}</span>
                 </button>
@@ -720,7 +721,7 @@ export const CierreCajaScreen: React.FC<Props> = () => {
                   type="button"
                   className="btn btn--outline btn--sm"
                   onClick={async () => {
-                    const url = await generateCajaPdf(cajaAyer.fechaISO, cajaAyer.rows as CajaRow[], 'preview')
+                    const url = await generateCajaPdf(cajaAyer.fechaISO, cajaAyer.rows, 'preview')
                     if (url) {
                       setPreviewUrl(url)
                       setShowPreview(true)

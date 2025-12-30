@@ -193,6 +193,8 @@ export async function fetchInitialData(): Promise<{ affiliates: Affiliate[]; app
 
 /* ================= CAJA (NUEVO) ================= */
 
+/* ================= CAJA (BACKEND DTO -> FRONT DTO) ================= */
+
 export type CajaRow = {
   fechaDisplay: string
   numeroAfiliado: string
@@ -203,36 +205,97 @@ export type CajaRow = {
   monto: number
 }
 
+// DTO real del backend (CajaRowDto)
+type CajaRowDtoApi = {
+  fecha: string
+  numeroAfiliado: string
+  dni: string
+  nombreCompleto: string
+  prestador: string
+  especialidadOLaboratorio: string
+  monto: number
+}
+
 export type CierreCajaDto = {
   fechaISO: string
   total: number
   rows: CajaRow[]
 }
 
-export type CajaEstadoDto = {
+// DTO real del backend (CajaEstadoDto)
+type CajaEstadoDtoApi = {
   hoyFechaISO: string
   hoy: {
     fechaISO: string
-    rows: CajaRow[]
+    total: number
+    rows: CajaRowDtoApi[]
   }
-  ayer: CierreCajaDto | null
-  historial: Array<{
+  ayerFechaISO: string
+  ayer: {
     fechaISO: string
     total: number
-  }>
+    rows: CajaRowDtoApi[]
+  }
+  historial: Array<{ fechaISO: string; total: number }>
 }
 
+export type CajaEstadoDto = {
+  hoyFechaISO: string
+  hoy: CierreCajaDto
+  ayerFechaISO: string
+  ayer: CierreCajaDto
+  historial: Array<{ fechaISO: string; total: number }>
+}
+
+const toNumber = (v: unknown): number => {
+  if (typeof v === 'number') return Number.isFinite(v) ? v : 0
+  if (typeof v === 'string') {
+    const n = Number(v.replace(',', '.'))
+    return Number.isFinite(n) ? n : 0
+  }
+  return 0
+}
+
+const mapCajaRow = (r: CajaRowDtoApi): CajaRow => ({
+  fechaDisplay: r.fecha ?? '—',
+  numeroAfiliado: r.numeroAfiliado ?? '—',
+  dni: r.dni ?? '—',
+  nombre: r.nombreCompleto ?? '—',
+  prestador: r.prestador ?? '—',
+  practica: r.especialidadOLaboratorio ?? '—',
+  monto: toNumber(r.monto),
+})
+
+const mapCierreCaja = (c: { fechaISO: string; total: number; rows: CajaRowDtoApi[] }): CierreCajaDto => ({
+  fechaISO: String(c?.fechaISO ?? ''),
+  total: toNumber(c?.total),
+  rows: Array.isArray(c?.rows) ? c.rows.map(mapCajaRow) : [],
+})
+
 export async function fetchCajaEstado(): Promise<CajaEstadoDto> {
-  return apiJson<CajaEstadoDto>('/caja/estado')
+  const raw = await apiJson<CajaEstadoDtoApi>('/caja/estado')
+
+  return {
+    hoyFechaISO: raw.hoyFechaISO,
+    hoy: mapCierreCaja(raw.hoy),
+    ayerFechaISO: raw.ayerFechaISO,
+    ayer: mapCierreCaja(raw.ayer),
+    historial: (raw.historial ?? []).map((h) => ({
+      fechaISO: h.fechaISO,
+      total: toNumber(h.total),
+    })),
+  }
 }
 
 export async function cerrarCajaApi(fechaISO: string): Promise<CierreCajaDto> {
-  return apiJson<CierreCajaDto>('/caja/cerrar', {
+  const raw = await apiJson<{ fechaISO: string; total: number; rows: CajaRowDtoApi[] }>('/caja/cerrar', {
     method: 'POST',
     body: JSON.stringify({ fechaISO }),
   })
+  return mapCierreCaja(raw)
 }
 
 export async function fetchCajaByDate(fechaISO: string): Promise<CierreCajaDto> {
-  return apiJson<CierreCajaDto>(`/caja/${fechaISO}`)
+  const raw = await apiJson<{ fechaISO: string; total: number; rows: CajaRowDtoApi[] }>(`/caja/${fechaISO}`)
+  return mapCierreCaja(raw)
 }
