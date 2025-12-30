@@ -44,11 +44,19 @@ const PRESTADORES = [
 
 const normalizePlan = (planRaw?: string | null): PlanClave | 'OTROS' | null => {
   if (!planRaw) return null;
-  const up = planRaw.toUpperCase();
+
+  const up = planRaw
+    .toUpperCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
+
   if (up.includes('RUBI')) return 'RUBI';
   if (up.includes('ESMERALDA')) return 'ESMERALDA';
   if (up.includes('BASE')) return 'BASE';
   if (up.includes('PART')) return 'PARTICULAR';
+  if (up.includes('DORADO')) return 'DORADO';
+
   return 'OTROS';
 };
 
