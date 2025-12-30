@@ -1,0 +1,142 @@
+.kb-wrap {
+  margin-top: 8px;
+}
+
+/* ===== Layout columnas ===== */
+.kb-grid {
+  display: flex;
+  gap: var(--space);
+  align-items: flex-start;
+}
+
+.kb-col {
+  width: 150%;
+  max-width: 360px;
+}
+
+/* ===== Header columna ===== */
+.kb-colhead h3 {
+  margin: 0 0 8px;
+  background: var(--color-ink);
+  color: #fff;
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.kb-count {
+  margin-left: 8px;
+  font-size: 0.75rem;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+/* ===== Lista ===== */
+.kb-list {
+  min-height: 180px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 10px;
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ===== Tarjeta ===== */
+.kb-card {
+  background: var(--color-primary);
+  color: #fff;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  transition: transform var(--transition-fast);
+}
+
+.kb-card:hover {
+  transform: translateY(-1px);
+}
+
+/* Prioridad */
+.kb-card.prio-baja {
+  background: var(--color-success);
+}
+
+.kb-card.prio-alta {
+  background: var(--color-warn);
+  color: var(--color-ink);
+}
+
+.kb-card.prio-urgente {
+  background: var(--color-danger);
+}
+
+/* ===== Contenido ===== */
+.kb-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+}
+
+.kb-tag {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.kb-note {
+  font-size: 0.85rem;
+}
+
+.kb-tasks {
+  display: grid;
+  gap: 4px;
+}
+
+.kb-task.done {
+  text-decoration: line-through;
+  opacity: 0.85;
+}
+
+/* ===== Acciones ===== */
+.kb-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.kb-actions button {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* ===== Eliminar ===== */
+.kb-del {
+  border: none;
+  background: transparent;
+  color: var(--color-danger);
+  font-size: 1.1rem;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateX(6px);
+  transition: all var(--transition-fast);
+}
+
+.kb-wrap.modo-eliminar .kb-del {
+  opacity: 1;
+  transform: translateX(0);
+}

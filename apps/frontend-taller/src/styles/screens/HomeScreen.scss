@@ -1,0 +1,194 @@
+/* HomeScreen.scss (migrado a tokens monorepo) */
+
+.ts-home {
+  background: var(--app-bg, #f5f7fb);
+  color: var(--ink, #0f172a);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.top-actions {
+  display: flex;
+  gap: var(--space-md, 12px);
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-lg, 16px) var(--space-xl, 20px) var(--space-sm, 8px);
+  flex-wrap: wrap;
+}
+
+.segmented {
+  display: flex;
+  gap: var(--space-sm, 8px);
+  flex-wrap: wrap;
+}
+
+.actions-right {
+  display: flex;
+  gap: var(--space-sm, 10px);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Botones pills */
+.pill {
+  appearance: none;
+  border: 1px solid transparent;
+  background: var(--brand, #2f6fed);
+  color: var(--brand-ink, #fff);
+  padding: 10px 16px;
+  border-radius: var(--radius-md, 10px);
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--shadow-1, 0 2px 8px rgba(0, 0, 0, 0.08));
+}
+
+.pill-toggle {
+  appearance: none;
+  border: 1px solid var(--color-border, #cbd5e1);
+  background: var(--surface, #fff);
+  color: var(--ink, #0f172a);
+  padding: 8px 14px;
+  border-radius: var(--radius-md, 10px);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pill-toggle.active {
+  background: var(--brand, #2f6fed);
+  color: var(--brand-ink, #fff);
+  border-color: color-mix(in oklab, var(--brand, #2f6fed) 70%, #000 10%);
+}
+
+.list {
+  padding: var(--space-md, 10px) var(--space-xl, 24px) 40px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md, 14px);
+}
+
+.card {
+  position: relative;
+  border: 1px solid var(--color-border, #cbd5e1);
+  background: var(--surface-2, #eef3fb);
+  border-radius: var(--radius-lg, 12px);
+  cursor: pointer;
+  min-height: 130px;
+  overflow: hidden;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-2, 0 10px 26px rgba(0, 0, 0, 0.12));
+}
+
+.card.has-ambulance::before {
+  content: "";
+  position: absolute;
+  inset: 8px 14px;
+  background-image: var(--card-img);
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: auto 92%;
+  opacity: 0.78;
+  filter: saturate(0.95) contrast(1.03);
+  pointer-events: none;
+}
+
+.num-badge {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--ink, #0f172a) 85%, #000 15%);
+  color: #fff;
+  font-weight: 800;
+  font-size: 15px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+/* Stripe estado */
+.stripe {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 6px;
+  background: color-mix(in oklab, var(--muted, #94a3b8) 75%, #000 10%);
+}
+.stripe.ok {
+  background: var(--success, #22c55e);
+}
+.stripe.warn {
+  background: var(--warn, #f59e0b);
+}
+.stripe.alert {
+  background: var(--danger, #ef4444);
+}
+
+.search {
+  min-width: 260px;
+  max-width: 340px;
+  width: 32vw;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border, #cbd5e1);
+  border-radius: var(--radius-md, 10px);
+  background: var(--surface, #fff);
+  color: var(--ink, #0f172a);
+  font: inherit;
+}
+
+/* Prioridad por borde */
+.card-movil {
+  border: 3px solid transparent;
+  border-radius: var(--radius-lg, 12px);
+}
+.card-movil.prio-baja {
+  border-color: var(--success, #22c55e);
+}
+.card-movil.prio-alta {
+  border-color: var(--warn, #f59e0b);
+}
+.card-movil.prio-urgente {
+  border-color: var(--danger, #ef4444);
+}
+
+.card .meta {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: grid;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: var(--radius-md, 10px);
+  background: color-mix(in oklab, var(--surface, #fff) 85%, transparent);
+  backdrop-filter: blur(2px);
+  text-align: right;
+  max-width: 60%;
+  box-shadow: var(--shadow-1, 0 2px 8px rgba(0, 0, 0, 0.08));
+}
+
+.meta-line {
+  line-height: 1.1;
+  font-weight: 800;
+  color: var(--ink, #0f172a);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta-tamano {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.meta-modelo {
+  font-size: 15px;
+}
+
+/* ✅ Sacamos los estilos del modal acá:
+   Usá los modales compartidos: styles/components/modales/_modalBase.scss */

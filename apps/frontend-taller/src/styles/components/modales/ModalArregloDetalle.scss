@@ -1,0 +1,7 @@
+@use "../../tokens/modalBase";
+
+/* ajustes específicos opcionales */
+.modal p {
+  margin: 8px 0;
+  color: var(--ink);
+}

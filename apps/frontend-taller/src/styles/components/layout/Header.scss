@@ -1,0 +1,22 @@
+.ts-header {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ts-header .title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--color-ink);
+}
+
+.ts-header .icon-btn {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  width: 48px;
+  height: 48px;
+}
