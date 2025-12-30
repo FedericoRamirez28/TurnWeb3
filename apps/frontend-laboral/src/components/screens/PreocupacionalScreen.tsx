@@ -3,6 +3,9 @@ import { useLocation } from 'react-router-dom'
 import jsPDF from 'jspdf'
 import Swal from 'sweetalert2'
 
+// ✅ logo HD (ajustá el path si tu asset está en otro lugar)
+import logoMedic from '@/assets/logo-medic-hd.png'
+
 type ExamKey = 'preocupacional' | 'periodico' | 'egreso'
 type ViewKey = 'planilla' | 'adicionales' | 'clasificacion'
 type ClasifKey = 'A' | 'B' | 'C' | 'D' | 'E'
@@ -17,7 +20,6 @@ type Draft = {
 
   clasificacion: ClasifKey
   observaciones: string[]
-  notificado: boolean
 
   adicionalesSelected: string[]
 }
@@ -49,7 +51,7 @@ type TurnoLaboralNavState =
       turno?: TurnoLaboral
     }
 
-const STORAGE_KEY_DRAFT = 'medic_laboral_preocupacional_draft_v3'
+const STORAGE_KEY_DRAFT = 'medic_laboral_preocupacional_draft_v4'
 const STORAGE_KEY_PREFILL = 'medic_laboral_preocupacional_prefill_v1'
 
 function getApiBase(): string {
@@ -70,7 +72,6 @@ function loadDraft(): Draft {
 
     clasificacion: 'C',
     observaciones: [''],
-    notificado: false,
 
     adicionalesSelected: [],
   }
@@ -88,7 +89,6 @@ function loadDraft(): Draft {
           ? parsed.observaciones
           : fallback.observaciones,
       clasificacion: (parsed.clasificacion as ClasifKey) || fallback.clasificacion,
-      notificado: Boolean(parsed.notificado),
       adicionalesSelected: Array.isArray(parsed.adicionalesSelected) ? parsed.adicionalesSelected : [],
     }
   } catch {
@@ -156,6 +156,27 @@ const ADICIONALES_LAB: string[] = [
 
 const ADICIONALES_ALL = [...ADICIONALES_CONCEPTO, ...ADICIONALES_LAB]
 
+// ====== helpers imagen -> dataURL (para que addImage no rompa TS y no estire) ======
+async function urlToDataUrl(url: string): Promise<string> {
+  const res = await fetch(url)
+  const blob = await res.blob()
+  return await new Promise<string>((resolve, reject) => {
+    const r = new FileReader()
+    r.onload = () => resolve(String(r.result || ''))
+    r.onerror = () => reject(new Error('No se pudo leer la imagen'))
+    r.readAsDataURL(blob)
+  })
+}
+
+async function getImageSize(dataUrl: string): Promise<{ w: number; h: number }> {
+  return await new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => resolve({ w: img.naturalWidth || img.width, h: img.naturalHeight || img.height })
+    img.onerror = () => reject(new Error('No se pudo cargar la imagen'))
+    img.src = dataUrl
+  })
+}
+
 function drawCheckbox(doc: jsPDF, x: number, y: number, label: string, checked: boolean) {
   doc.rect(x, y, 6, 6)
   if (checked) {
@@ -166,21 +187,91 @@ function drawCheckbox(doc: jsPDF, x: number, y: number, label: string, checked: 
   doc.text(label, x + 9, y + 5)
 }
 
-function buildPdfPlanilla(draft: Draft) {
-  const doc = new jsPDF({ unit: 'mm', format: 'a4' })
+function drawHeader(
+  doc: jsPDF,
+  opts: {
+    logoDataUrl: string
+    logoW: number
+    logoH: number
+    dateText: string
+  },
+) {
   const pageW = doc.internal.pageSize.getWidth()
   const margin = 16
 
+  // banderas rectas con gap central para el logo
+  const gapW = 62
+  const centerX = pageW / 2
+  // const leftX = 0
+  // const rightX = pageW
+  // const leftEnd = centerX - gapW / 2
+  // const rightStart = centerX + gapW / 2
+
+  // const yTop = 0
+  // const h = 10
+
+//   // rojo
+//   doc.setFillColor(220, 38, 38)
+//   doc.rect(leftX, yTop, Math.max(0, leftEnd - leftX), h, 'F')
+//   doc.rect(rightStart, yTop, Math.max(0, rightX - rightStart), h, 'F')
+
+//   // azul (debajo)
+//   doc.setFillColor(22, 163, 74) // verde
+//   doc.rect(leftX, yTop + 7, Math.max(0, leftEnd - leftX), h, 'F')
+//   doc.rect(rightStart, yTop + 7, Math.max(0, rightX - rightStart), h, 'F')
+
+//   // verde (en el medio)
+//  doc.setFillColor(37, 99, 235)
+// doc.rect(leftX, yTop + 3.5, leftEnd - leftX, h, 'F')
+// doc.rect(rightStart, yTop + 3.5, rightX - rightStart, h, 'F')
+
+  // logo centrado, sin estirar (fit dentro del gap)
+  const maxLogoW = gapW - 6
+  const maxLogoH = 48
+  const ar = opts.logoW / Math.max(1, opts.logoH)
+
+  let drawW = maxLogoW
+  let drawH = drawW / ar
+  if (drawH > maxLogoH) {
+    drawH = maxLogoH
+    drawW = drawH * ar
+  }
+
+  const logoX = centerX - drawW / 2
+  const logoY =  -4
+
+  doc.addImage(opts.logoDataUrl, 'PNG', logoX, logoY, drawW, drawH)
+
+  // Título y fecha
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(12)
-  doc.text('EXAMEN MEDICO', margin, 18)
+  doc.setTextColor(15, 23, 42)
+  doc.text('EXAMEN MEDICO', margin, 36)
 
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(10)
-  doc.text(fmtDate(new Date()), pageW - margin, 18, { align: 'right' })
+  doc.text(opts.dateText, pageW - margin, 36, { align: 'right' })
+}
 
-  const y0 = 30
+function buildPdfCompleto(
+  draft: Draft,
+  logoDataUrl: string,
+  logoSize: { w: number; h: number },
+  dateText: string,
+) {
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' })
+  const pageW = doc.internal.pageSize.getWidth()
+  const pageH = doc.internal.pageSize.getHeight()
+  const margin = 16
+
+  // ===== HEADER (sublimado recto + logo sin estirar) =====
+  drawHeader(doc, { logoDataUrl, logoW: logoSize.w, logoH: logoSize.h, dateText })
+
+  // ===== PLANILLA (arriba) =====
+  const y0 = 52
+  doc.setFont('helvetica', 'normal')
   doc.setFontSize(10)
+  doc.setTextColor(15, 23, 42)
 
   doc.text('EMPRESA:', margin, y0)
   doc.text(draft.empresa || ' ', margin + 26, y0)
@@ -197,38 +288,19 @@ function buildPdfPlanilla(draft: Draft) {
   doc.text('PUESTO A OCUPAR:', margin, y0 + 24)
   doc.text(draft.puesto || ' ', margin + 36, y0 + 24)
 
-  const cy = y0 + 46
-  doc.setFontSize(10)
+  const cy = y0 + 44
   drawCheckbox(doc, margin, cy, 'Examen Preocupacional', draft.checks.preocupacional)
   drawCheckbox(doc, margin + 70, cy, 'Examen Periodico', draft.checks.periodico)
   drawCheckbox(doc, margin + 132, cy, 'Examen Egreso', draft.checks.egreso)
 
-  const sy = 255
-  doc.setDrawColor(0)
-  doc.line(margin, sy, margin + 70, sy)
-  doc.line(pageW - margin - 70, sy, pageW - margin, sy)
-
-  doc.setFontSize(10)
-  doc.text('FIRMA DEL TRABAJADOR', margin + 35, sy + 8, { align: 'center' })
-  doc.text('FIRMA DEL MEDICO', pageW - margin - 35, sy + 8, { align: 'center' })
-
-  return doc
-}
-
-function buildPdfClasificacion(draft: Draft) {
-  const doc = new jsPDF({ unit: 'mm', format: 'a4' })
-  const pageW = doc.internal.pageSize.getWidth()
-  const margin = 16
-
+  // ===== CLASIFICACIÓN (debajo, misma hoja) =====
+  const yClasifTop = cy + 18
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(12)
-  doc.text('CLASIFICACION', margin, 18)
+  doc.text('CLASIFICACION', margin, yClasifTop)
 
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(10)
-  doc.text(fmtDate(new Date()), pageW - margin, 18, { align: 'right' })
+  const y = yClasifTop + 12
 
-  const y = 36
   const items: { k: ClasifKey; title: string; sub: string }[] = [
     { k: 'A', title: 'A', sub: 'SIN INCAPACIDAD' },
     { k: 'B', title: 'B', sub: 'SIN INCAPACIDAD' },
@@ -237,69 +309,102 @@ function buildPdfClasificacion(draft: Draft) {
     { k: 'E', title: 'E', sub: 'NO APTO' },
   ]
 
-  const boxW = (pageW - margin * 2 - 8 * 4) / 5
+  const gap = 6
+  const boxW = (pageW - margin * 2 - gap * 4) / 5
   let x = margin
+
   items.forEach((it, idx) => {
+    doc.setDrawColor(148, 163, 184)
     doc.rect(x, y, boxW, 22)
+
     doc.setFont('helvetica', 'bold')
+    doc.setFontSize(11)
+    doc.setTextColor(15, 23, 42)
     doc.text(it.title, x + 4, y + 7)
 
     doc.setFont('helvetica', 'normal')
-    doc.setFontSize(9)
+    doc.setFontSize(8.8)
+    doc.setTextColor(100, 116, 139)
     doc.text(it.sub, x + boxW / 2, y + 18, { align: 'center' })
 
+    doc.setFont('helvetica', 'bold')
     doc.setFontSize(11)
+    doc.setTextColor(15, 23, 42)
     const mark = draft.clasificacion === it.k ? 'X' : '-'
     doc.text(`( ${mark} )`, x + boxW - 14, y + 7)
 
-    x += boxW + (idx < 4 ? 8 : 0)
+    x += boxW + (idx < 4 ? gap : 0)
   })
 
+  // ===== OBSERVACIONES =====
+  const obsTitleY = y + 34
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(11)
-  doc.text('Observaciones:', margin, 72)
+  doc.setTextColor(15, 23, 42)
+  doc.text('Observaciones:', margin, obsTitleY)
 
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(10)
+  doc.setTextColor(15, 23, 42)
 
   const obs = draft.observaciones.map((s) => s.trim()).filter(Boolean)
-  let oy = 82
   const maxW = pageW - margin * 2
+
+  // Reservamos el fondo de página: ley + firmas al final SIEMPRE
+  const signatureY = pageH - 22 // líneas de firma
+  const legendMaxBottom = signatureY - 10
+  const obsStartY = obsTitleY + 10
+  const maxObsBottom = legendMaxBottom - 28 // espacio para ley
+
+  let oy = obsStartY
+
   if (!obs.length) {
+    doc.setTextColor(100, 116, 139)
     doc.text('-', margin, oy)
+    doc.setTextColor(15, 23, 42)
     oy += 6
   } else {
-    obs.forEach((line) => {
+    for (let i = 0; i < obs.length; i++) {
+      const line = obs[i]
       const wrapped = doc.splitTextToSize(`• ${line}`, maxW)
+      const needed = wrapped.length * 5 + 1
+
+      if (oy + needed > maxObsBottom) {
+        doc.setTextColor(100, 116, 139)
+        doc.text('• …', margin, oy)
+        doc.setTextColor(15, 23, 42)
+        oy += 6
+        break
+      }
+
       doc.text(wrapped, margin, oy)
-      oy += wrapped.length * 5 + 1
-    })
+      oy += needed
+    }
   }
 
+  // ===== LEY (SIEMPRE, sin "Notificado/Conforme") =====
   const legend =
     'Por la presente me notifico de mis afecciones detectadas en el presente examen en un total acuerdo al art. 6 inc. 3 de la Ley 24557 de Accidentes de Trabajo.'
   const legendLines = doc.splitTextToSize(legend, maxW)
-  const ly = Math.max(oy + 10, 210)
 
-  doc.setFontSize(9.5)
-  doc.text(legendLines, margin, ly)
+  // Si las observaciones crecieron mucho, igual fijamos la ley arriba de las firmas
+  const legendY = Math.min(Math.max(oy + 6, legendMaxBottom - legendLines.length * 5 - 10), legendMaxBottom - legendLines.length * 5 - 10)
 
-  doc.rect(margin, ly + legendLines.length * 5 + 6, 6, 6)
-  if (draft.notificado) {
-    doc.setFont('helvetica', 'bold')
-    doc.text('X', margin + 1.6, ly + legendLines.length * 5 + 11)
-    doc.setFont('helvetica', 'normal')
-  }
+  doc.setFontSize(9.6)
+  doc.setTextColor(15, 23, 42)
+  doc.text(legendLines, margin, legendY)
+
+  // ===== FIRMAS ABAJO DEL TODO (después de la ley) =====
+  const lineY = signatureY
+  doc.setDrawColor(15, 23, 42)
+  doc.line(margin, lineY, margin + 80, lineY)
+  doc.line(pageW - margin - 80, lineY, pageW - margin, lineY)
+
+  doc.setFont('helvetica', 'normal')
   doc.setFontSize(10)
-  doc.text('Notificado / Conforme', margin + 10, ly + legendLines.length * 5 + 11)
-
-  const sy = 275
-  doc.setDrawColor(0)
-  doc.line(margin, sy, margin + 80, sy)
-  doc.line(pageW - margin - 80, sy, pageW - margin, sy)
-  doc.setFontSize(10)
-  doc.text('FIRMA DEL TRABAJADOR', margin + 40, sy + 7, { align: 'center' })
-  doc.text('FIRMA DEL MEDICO', pageW - margin - 40, sy + 7, { align: 'center' })
+  doc.setTextColor(15, 23, 42)
+  doc.text('FIRMA DEL TRABAJADOR', margin + 40, lineY + 7, { align: 'center' })
+  doc.text('FIRMA DEL MEDICO', pageW - margin - 40, lineY + 7, { align: 'center' })
 
   return doc
 }
@@ -322,12 +427,6 @@ function isPreocupacionalPrefill(x: unknown): x is PreocupacionalPrefill {
 export default function PreocupacionalScreen() {
   const location = useLocation()
 
-  useEffect(() => {
-  // ✅ si el componente no se desmonta entre navegaciones, permitimos re-aplicar
-  prefillAppliedRef.current = false
-}, [location.key])
-
-
   const [draft, setDraft] = useState<Draft>(loadDraft)
   const [view, setView] = useState<ViewKey>('planilla')
 
@@ -340,11 +439,25 @@ export default function PreocupacionalScreen() {
   const today = useMemo(() => fmtDate(new Date()), [])
   const todayISO = useMemo(() => isoDay(new Date()), [])
 
-  const currentDoc = useCallback(() => {
-    return view === 'clasificacion' ? buildPdfClasificacion(draft) : buildPdfPlanilla(draft)
-  }, [draft, view])
+  // logo cache
+  const logoCacheRef = useRef<{ dataUrl: string; w: number; h: number } | null>(null)
 
-  const setPdfPreview = useCallback((doc: jsPDF) => {
+  const ensureLogo = useCallback(async () => {
+    if (logoCacheRef.current) return logoCacheRef.current
+    const dataUrl = await urlToDataUrl(logoMedic)
+    const size = await getImageSize(dataUrl)
+    const payload = { dataUrl, w: size.w, h: size.h }
+    logoCacheRef.current = payload
+    return payload
+  }, [])
+
+  const currentDoc = useCallback(async () => {
+    const logo = await ensureLogo()
+    return buildPdfCompleto(draft, logo.dataUrl, { w: logo.w, h: logo.h }, today)
+  }, [draft, today, ensureLogo])
+
+  const setPdfPreview = useCallback(async (docPromise: Promise<jsPDF>) => {
+    const doc = await docPromise
     try {
       const blob = doc.output('blob')
       const url = URL.createObjectURL(blob)
@@ -364,7 +477,7 @@ export default function PreocupacionalScreen() {
 
   const openPreview = useCallback(() => {
     setPreviewOpen(true)
-    setPdfPreview(currentDoc())
+    void setPdfPreview(currentDoc())
   }, [currentDoc, setPdfPreview])
 
   const closePreview = useCallback(() => {
@@ -381,18 +494,23 @@ export default function PreocupacionalScreen() {
     else openPreview()
   }, [previewOpen, closePreview, openPreview])
 
-  const handleDownload = useCallback(() => {
-    const doc = currentDoc()
-    const suffix = view === 'clasificacion' ? 'Clasificacion' : 'Planilla'
-    const safeName =
-      (draft.nombre || 'examen')
-        .trim()
-        .replace(/\s+/g, '_')
-        .replace(/[^\w-]/g, '')
-        .slice(0, 40) || 'examen'
+  const handleDownloadCompleto = useCallback(async () => {
+    try {
+      const doc = await currentDoc()
 
-    doc.save(`${suffix}_${safeName}_${new Date().toISOString().slice(0, 10)}.pdf`)
-  }, [currentDoc, view, draft.nombre])
+      const safeName =
+        (draft.nombre || 'examen')
+          .trim()
+          .replace(/\s+/g, '_')
+          .replace(/[^\w-]/g, '')
+          .slice(0, 40) || 'examen'
+
+      doc.save(`Completo_${safeName}_${new Date().toISOString().slice(0, 10)}.pdf`)
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Error'
+      Swal.fire({ icon: 'error', title: 'No se pudo descargar', text: msg })
+    }
+  }, [currentDoc, draft.nombre])
 
   useEffect(() => {
     try {
@@ -402,9 +520,12 @@ export default function PreocupacionalScreen() {
     }
   }, [draft])
 
+  // preview live
   useEffect(() => {
     if (!previewOpen) return
-    const t = window.setTimeout(() => setPdfPreview(currentDoc()), 200)
+    const t = window.setTimeout(() => {
+      void setPdfPreview(currentDoc())
+    }, 200)
     return () => window.clearTimeout(t)
   }, [draft, previewOpen, view, currentDoc, setPdfPreview])
 
@@ -455,11 +576,14 @@ export default function PreocupacionalScreen() {
       ...p,
       clasificacion: 'C',
       observaciones: [''],
-      notificado: false,
     }))
   }
 
+  // ✅ re-aplicar prefill si el componente no se desmonta
   const prefillAppliedRef = useRef(false)
+  useEffect(() => {
+    prefillAppliedRef.current = false
+  }, [location.key])
 
   const safeReadPrefillFromStorage = useCallback((): PreocupacionalPrefill | null => {
     try {
@@ -483,9 +607,7 @@ export default function PreocupacionalScreen() {
 
   const coercePrefill = useCallback((state: unknown): PreocupacionalPrefill | null => {
     if (!state) return null
-
     if (isPreocupacionalPrefill(state)) return state
-
     if (typeof state !== 'object') return null
     const maybe = state as { turno?: TurnoLaboral }
     if (!maybe.turno) return null
@@ -534,22 +656,21 @@ export default function PreocupacionalScreen() {
         })()
 
         const pick = (incoming: unknown, prev: string) => {
-  if (typeof incoming !== 'string') return prev
-  const v = incoming.trim()
-  return v ? v : prev
-}
+          if (typeof incoming !== 'string') return prev
+          const v = incoming.trim()
+          return v ? v : prev
+        }
 
-return {
-  ...p,
-  empresa: pick(payload.empresa, p.empresa),
-  nroAfiliado: pick(payload.nroAfiliado, p.nroAfiliado),
-  nombre: pick(payload.nombre, p.nombre),
-  dni: pick(payload.dni, p.dni),
-  puesto: pick(payload.puesto, p.puesto),
-  checks: nextChecks,
-  adicionalesSelected: mergedAdicionales,
-}
-
+        return {
+          ...p,
+          empresa: pick(payload.empresa, p.empresa),
+          nroAfiliado: pick(payload.nroAfiliado, p.nroAfiliado),
+          nombre: pick(payload.nombre, p.nombre),
+          dni: pick(payload.dni, p.dni),
+          puesto: pick(payload.puesto, p.puesto),
+          checks: nextChecks,
+          adicionalesSelected: mergedAdicionales,
+        }
       })
 
       if (payload.focusTab) setView(payload.focusTab)
@@ -722,11 +843,7 @@ return {
 
                 <label className="preocupacional__label">
                   Número de afiliado
-                  <input
-                    className="input"
-                    value={draft.nroAfiliado}
-                    onChange={(e) => updateField('nroAfiliado', e.target.value)}
-                  />
+                  <input className="input" value={draft.nroAfiliado} onChange={(e) => updateField('nroAfiliado', e.target.value)} />
                 </label>
               </div>
 
@@ -871,16 +988,6 @@ return {
                     Por la presente me notifico de mis afecciones detectadas en el presente examen en un total acuerdo al art. 6 inc. 3 de la Ley
                     24557 de Accidentes de Trabajo.
                   </p>
-
-                  <div
-                    className="preocupacional__legend-check"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => setDraft((p) => ({ ...p, notificado: !p.notificado }))}
-                  >
-                    <span className="legend-box">{draft.notificado ? 'X' : ''}</span>
-                    <span>Notificado / Conforme</span>
-                  </div>
                 </div>
 
                 <div className="preocupacional__signs">
@@ -903,8 +1010,10 @@ return {
           <button className="btn btn--outline" type="button" onClick={togglePreview}>
             {previewOpen ? 'Cerrar previsualización' : 'Previsualizar'}
           </button>
-          <button className="btn btn--primary" type="button" onClick={handleDownload}>
-            Descargar PDF
+
+          {/* ✅ Un solo PDF, una sola hoja: planilla arriba + clasificación abajo */}
+          <button className="btn btn--primary" type="button" onClick={() => void handleDownloadCompleto()}>
+            Descargar PDF (Completo)
           </button>
         </div>
       </div>
