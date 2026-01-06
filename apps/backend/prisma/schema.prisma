@@ -178,25 +178,18 @@ model LaboralEmployee {
 model LaboralTurno {
   id String @id @default(uuid())
 
-  sede String // 'caba' | 'sanjusto'
-
+  sede String
   fechaRecepcionISO String
   fechaTurnoISO     String
-
-  // ✅ NUEVO: hora del turno (HH:mm)
   horaTurno String?
-
   tipoExamen String
 
-  // relación a empresa
   companyId String
   company   LaboralCompany @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  // relación a empleado (padrón)
   employeeId String
   employee   LaboralEmployee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
-  // snapshot
   nombreSnap      String
   dniSnap         String
   nroAfiliadoSnap String?
@@ -211,12 +204,13 @@ model LaboralTurno {
   @@index([companyId])
   @@index([employeeId])
 
-  // ✅ NUEVO: index para agenda
   @@index([sede, fechaTurnoISO, horaTurno])
 
+  @@unique([employeeId, sede, fechaTurnoISO, horaTurno, tipoExamen], name: "uniq_laboral_turno_employee")
 
   @@map("laboral_turnos")
 }
+
 
 model LaboralNote {
   id    String @id @default(uuid())

@@ -6,7 +6,6 @@ import {
   Param,
   Post,
   Query,
-  Req,
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { LaboralTurnosService } from './laboral-turnos.service';
@@ -29,7 +28,7 @@ export class LaboralTurnosController {
   constructor(private service: LaboralTurnosService) {}
 
   @Post()
-  async create(@Body() dto: CreateLaboralTurnoDto, @Req() req: Request) {
+  async create(@Body() dto: CreateLaboralTurnoDto) {
     const createdByUserId = undefined;
     return this.service.create(dto, createdByUserId);
   }
