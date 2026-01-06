@@ -4,6 +4,7 @@ import Swal from 'sweetalert2'
 import { laboralTurnosList, laboralTurnoDelete, type LaborTurno } from '@/api/laboralTurnosApi'
 
 const FIXED_TURNO_HORA = '08:00'
+const AR_TZ = 'America/Argentina/Buenos_Aires'
 
 function isoDay(d = new Date()) {
   const yyyy = d.getFullYear()
@@ -71,6 +72,24 @@ function escapeHtml(s: string) {
     .replaceAll("'", '&#039;')
 }
 
+/** ✅ Formatea YYYY-MM-DD como fecha de Buenos Aires (dd/mm/aaaa) */
+function formatDayAR(isoYYYYMMDD: string) {
+  const iso = dayPart(isoYYYYMMDD)
+  if (!iso) return ''
+  const [y, m, d] = iso.split('-').map(Number)
+  if (!y || !m || !d) return iso
+
+  // Fijamos mediodía UTC para evitar corrimientos por TZ al convertir a Date
+  const dt = new Date(Date.UTC(y, m - 1, d, 12, 0, 0))
+
+  return new Intl.DateTimeFormat('es-AR', {
+    timeZone: AR_TZ,
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(dt)
+}
+
 function buildPdfTurnosMes(turnos: LaborTurno[], monthTitle: string) {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' })
   const margin = 14
@@ -93,7 +112,10 @@ function buildPdfTurnosMes(turnos: LaborTurno[], monthTitle: string) {
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(10)
   doc.text(monthTitle, margin, 22)
-  doc.text(new Date().toLocaleDateString(), pageW - margin, 16, { align: 'right' })
+
+  // ✅ fecha de impresión en AR
+  const printed = new Intl.DateTimeFormat('es-AR', { timeZone: AR_TZ }).format(new Date())
+  doc.text(printed, pageW - margin, 16, { align: 'right' })
 
   let y = 30
 
@@ -138,7 +160,7 @@ function buildPdfTurnosMes(turnos: LaborTurno[], monthTitle: string) {
     for (const t of list) {
       ensureSpace(7)
 
-      const fecha = dayPart(t.fechaTurnoISO || '-') || '-'
+      const fecha = formatDayAR(t.fechaTurnoISO || '-') || '-'
       const hora = FIXED_TURNO_HORA
       const dni = (t.dni || '-').slice(0, 14)
       const nombre = (t.nombre || '-').slice(0, 28)
@@ -229,6 +251,7 @@ export function TurnosLaboralAgendaMini() {
       .sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''))
 
     const total = dayTurns.length
+    const dayLabelAR = formatDayAR(dayISO) || dayISO
 
     const rowsHtml = dayTurns
       .map((t, idx) => {
@@ -268,7 +291,7 @@ export function TurnosLaboralAgendaMini() {
       </style>
 
       <div class="meta">
-        <div><b>${escapeHtml(dayISO)}</b></div>
+        <div><b>${escapeHtml(dayLabelAR)}</b></div>
         <div>· Turnos: <b>${total}</b></div>
         <div>· Hora fija: <b>${escapeHtml(FIXED_TURNO_HORA)}</b></div>
         <div>· Orden: <b>de llamado</b></div>

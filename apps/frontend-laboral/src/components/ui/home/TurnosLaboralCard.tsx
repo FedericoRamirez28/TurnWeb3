@@ -570,13 +570,13 @@ export function TurnosLaboralCard() {
         <div className="labor-turnos__scroller">
           <div className="labor-turnos__grid">
             <label className="labor-turnos__label">
-              Nombre y apellido
-              <input className="input" value={draft.nombre} onChange={(e) => setField('nombre', e.target.value)} placeholder="Ej: Juan Pérez" disabled={busy} />
+              Empresa
+              <input className="input" value={draft.empresa} onChange={(e) => setField('empresa', e.target.value)} placeholder="Ej: Implatell" disabled={busy} />
             </label>
 
             <label className="labor-turnos__label">
-              Empresa
-              <input className="input" value={draft.empresa} onChange={(e) => setField('empresa', e.target.value)} placeholder="Ej: Implatell" disabled={busy} />
+              Nombre y apellido
+              <input className="input" value={draft.nombre} onChange={(e) => setField('nombre', e.target.value)} placeholder="Ej: Juan Pérez" disabled={busy} />
             </label>
 
             <label className="labor-turnos__label">
