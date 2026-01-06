@@ -3,9 +3,6 @@ import { useLocation } from 'react-router-dom'
 import jsPDF from 'jspdf'
 import Swal from 'sweetalert2'
 
-// ✅ logo HD (ajustá el path si tu asset está en otro lugar)
-
-
 type ExamKey = 'preocupacional' | 'periodico' | 'egreso'
 type ViewKey = 'planilla' | 'adicionales' | 'clasificacion'
 type ClasifKey = 'A' | 'B' | 'C' | 'D' | 'E'
@@ -156,8 +153,7 @@ const ADICIONALES_LAB: string[] = [
 
 const ADICIONALES_ALL = [...ADICIONALES_CONCEPTO, ...ADICIONALES_LAB]
 
-// ====== helpers imagen -> dataURL ======
-
+// ====== helpers pdf ======
 
 function drawCheckbox(doc: jsPDF, x: number, y: number, label: string, checked: boolean) {
   doc.rect(x, y, 6, 6)
@@ -178,18 +174,15 @@ function drawHeader(
   const pageW = doc.internal.pageSize.getWidth()
   const margin = 16
 
-  // Título
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(12)
   doc.setTextColor(15, 23, 42)
   doc.text('EXAMEN MEDICO', margin, 24)
 
-  // Fecha
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(10)
   doc.text(opts.dateText, pageW - margin, 24, { align: 'right' })
 }
-
 
 function drawFirmas(doc: jsPDF) {
   const pageW = doc.internal.pageSize.getWidth()
@@ -208,21 +201,15 @@ function drawFirmas(doc: jsPDF) {
   doc.text('FIRMA DEL MEDICO', pageW - margin - 40, signatureY + 7, { align: 'center' })
 }
 
-// ===================== PDF COMPLETO (igual que antes) =====================
-function buildPdfCompleto(
-  draft: Draft,
-  dateText: string,
-)
- {
+// ===================== PDF COMPLETO =====================
+function buildPdfCompleto(draft: Draft, dateText: string) {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' })
   const pageW = doc.internal.pageSize.getWidth()
   const pageH = doc.internal.pageSize.getHeight()
   const margin = 16
 
-drawHeader(doc, { dateText })
+  drawHeader(doc, { dateText })
 
-
-  // ===== PLANILLA (arriba) =====
   const y0 = 52
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(10)
@@ -248,7 +235,6 @@ drawHeader(doc, { dateText })
   drawCheckbox(doc, margin + 70, cy, 'Examen Periodico', draft.checks.periodico)
   drawCheckbox(doc, margin + 132, cy, 'Examen Egreso', draft.checks.egreso)
 
-  // ===== CLASIFICACIÓN (debajo, misma hoja) =====
   const yClasifTop = cy + 18
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(12)
@@ -291,7 +277,6 @@ drawHeader(doc, { dateText })
     x += boxW + (idx < 4 ? gap : 0)
   })
 
-  // ===== OBSERVACIONES =====
   const obsTitleY = y + 34
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(11)
@@ -350,25 +335,18 @@ drawHeader(doc, { dateText })
   doc.text(legendLines, margin, legendY)
 
   drawFirmas(doc)
-
   return doc
 }
 
 // ===================== PDF VISTA (tab actual) =====================
-function buildPdfVista(
-  view: ViewKey,
-  draft: Draft,
-  dateText: string,
-)
- {
+function buildPdfVista(view: ViewKey, draft: Draft, dateText: string) {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' })
   const pageW = doc.internal.pageSize.getWidth()
   const pageH = doc.internal.pageSize.getHeight()
   const margin = 16
   const maxW = pageW - margin * 2
 
- drawHeader(doc, { dateText })
-
+  drawHeader(doc, { dateText })
 
   if (view === 'planilla') {
     const y0 = 52
@@ -465,7 +443,6 @@ function buildPdfVista(
     return doc
   }
 
-  // view === 'clasificacion'
   {
     const yClasifTop = 52
 
@@ -571,10 +548,6 @@ function buildPdfVista(
   }
 }
 
-function isISODate(s: string) {
-  return /^\d{4}-\d{2}-\d{2}$/.test(s)
-}
-
 function isPreocupacionalPrefill(x: unknown): x is PreocupacionalPrefill {
   if (!x || typeof x !== 'object') return false
   const o = x as Record<string, unknown>
@@ -605,18 +578,20 @@ export default function PreocupacionalScreen() {
   const today = useMemo(() => fmtDate(new Date()), [])
   const todayISO = useMemo(() => isoDay(new Date()), [])
 
-  // logo cache
+  // ✅ ROOT para encontrar focusables
+  const rootRef = useRef<HTMLDivElement | null>(null)
 
+  // ✅ refs para inputs de observaciones (para enfocar la nueva)
+  const obsRefs = useRef<Array<HTMLInputElement | null>>([])
+  const pendingObsFocusIndexRef = useRef<number | null>(null)
 
-const currentDocCompleto = useCallback(async () => {
-  return buildPdfCompleto(draft, today)
-}, [draft, today])
+  const currentDocCompleto = useCallback(async () => {
+    return buildPdfCompleto(draft, today)
+  }, [ý [draft, today])
 
-
-const currentDocVista = useCallback(async () => {
-  return buildPdfVista(view, draft, today)
-}, [view, draft, today])
-
+  const currentDocVista = useCallback(async () => {
+    return buildPdfVista(view, draft, today)
+  }, [view, draft, today])
 
   const setPdfPreview = useCallback(async (docPromise: Promise<jsPDF>) => {
     const doc = await docPromise
@@ -701,7 +676,6 @@ const currentDocVista = useCallback(async () => {
     }
   }, [draft])
 
-  // preview live
   useEffect(() => {
     if (!previewOpen) return
     const t = window.setTimeout(() => {
@@ -970,8 +944,125 @@ const currentDocVista = useCallback(async () => {
     }
   }
 
+  // ===================== ✅ HOTKEY GLOBAL: ENTER = TAB + OBS =====================
+
+  const focusNextField = useCallback(() => {
+    const root = rootRef.current
+    if (!root) return
+
+    const active = document.activeElement as HTMLElement | null
+    if (!active) return
+
+    const isHidden = (el: HTMLElement) => {
+      const anyEl = el as any
+      if (anyEl.type === 'hidden') return true
+      if ((el as HTMLInputElement).hidden) return true
+      return false
+    }
+
+    const nodes = Array.from(
+      root.querySelectorAll<HTMLElement>(
+        'input, select, textarea, button, [tabindex]:not([tabindex="-1"])',
+      ),
+    ).filter((el) => {
+      if (!el) return false
+      if (el.hasAttribute('disabled')) return false
+      if ((el as any).disabled) return false
+      if (isHidden(el)) return false
+      const style = window.getComputedStyle(el)
+      if (style.display === 'none' || style.visibility === 'hidden') return false
+      return true
+    })
+
+    const idx = nodes.indexOf(active)
+    if (idx < 0) return
+
+    const next = nodes[idx + 1]
+    if (next) next.focus()
+  }, [])
+
+  const handleEnterOnObs = useCallback(
+    (obsIndex: number) => {
+      const lastIdx = draft.observaciones.length - 1
+
+      if (obsIndex >= lastIdx) {
+        const nextIndex = lastIdx + 1
+        pendingObsFocusIndexRef.current = nextIndex
+        addObs()
+        return
+      }
+
+      // si no es la última, pasa a la siguiente
+      const next = obsRefs.current[obsIndex + 1]
+      if (next) next.focus()
+      else focusNextField()
+    },
+    [draft.observaciones.length, focusNextField],
+  )
+
+  // enfocar la observación recién creada
+  useEffect(() => {
+    const idx = pendingObsFocusIndexRef.current
+    if (idx === null) return
+    if (view !== 'clasificacion') return
+
+    // esperamos a que el input exista en el DOM
+    const t = window.setTimeout(() => {
+      const el = obsRefs.current[idx]
+      if (el) el.focus()
+      pendingObsFocusIndexRef.current = null
+    }, 0)
+
+    return () => window.clearTimeout(t)
+  }, [draft.observaciones.length, view])
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter') return
+      if (e.shiftKey || e.altKey || e.ctrlKey || e.metaKey) return
+
+      const target = e.target as HTMLElement | null
+      if (!target) return
+
+      const tag = target.tagName.toLowerCase()
+
+      // No interceptar botones (Enter debería ejecutar click)
+      if (tag === 'button') return
+
+      // Solo inputs/select/textarea
+      const isFormField = tag === 'input' || tag === 'select' || tag === 'textarea'
+      if (!isFormField) return
+
+      // si es input tipo submit/checkbox/radio, no tocamos
+      if (tag === 'input') {
+        const t = (target as HTMLInputElement).type
+        if (t === 'submit' || t === 'button' || t === 'checkbox' || t === 'radio') return
+      }
+
+      // ✅ Si estamos en clasificacion y es una observación -> Enter agrega/pasa
+      const obsIndexAttr = target.getAttribute('data-obs-index')
+      if (view === 'clasificacion' && obsIndexAttr) {
+        const idx = Number(obsIndexAttr)
+        if (Number.isFinite(idx)) {
+          e.preventDefault()
+          handleEnterOnObs(idx)
+          return
+        }
+      }
+
+      // ✅ Global: Enter = Tab
+      e.preventDefault()
+      focusNextField()
+    }
+
+    window.addEventListener('keydown', onKeyDown, true)
+    return () => window.removeEventListener('keydown', onKeyDown, true)
+  }, [focusNextField, handleEnterOnObs, view])
+
+  // ===================== UI =====================
+
   return (
-    <div className="preocupacional">
+    <div className="preocupacional" ref={rootRef}>
       <div className="card preocupacional__card">
         <div className="preocupacional__header">
           <div>
@@ -1165,6 +1256,10 @@ const currentDocVista = useCallback(async () => {
                         value={line}
                         placeholder="Escribí una observación…"
                         onChange={(e) => setObs(i, e.target.value)}
+                        data-obs-index={String(i)}
+                        ref={(el) => {
+                          obsRefs.current[i] = el
+                        }}
                       />
                       <button className="btn btn--ghost btn--sm" type="button" onClick={() => removeObs(i)} aria-label="Quitar">
                         ✕

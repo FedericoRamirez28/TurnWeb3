@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Swal from 'sweetalert2'
 import escobaPng from '@/assets/icons/escoba.png'
 import { laboralTurnoDelete } from '@/api/laboralTurnosApi'
+import { listCompanies, type Company } from '@/api/companiesApi'
 
 type SedeKey = 'caba' | 'sanjusto'
 
@@ -199,12 +200,7 @@ async function createLaborTurno(payload: {
   })
 }
 
-async function listLaborTurnos(params: {
-  q?: string
-  from?: string
-  to?: string
-  month?: string
-}): Promise<ListLaborTurnosResponse> {
+async function listLaborTurnos(params: { q?: string; from?: string; to?: string; month?: string }): Promise<ListLaborTurnosResponse> {
   const usp = new URLSearchParams()
   if (params.q && params.q.trim()) usp.set('q', params.q.trim())
   if (params.from) usp.set('from', params.from)
@@ -212,9 +208,7 @@ async function listLaborTurnos(params: {
   if (params.month) usp.set('month', params.month)
 
   const qs = usp.toString()
-  return fetchJson<ListLaborTurnosResponse>(`/laboral/turnos${qs ? `?${qs}` : ''}`, {
-    method: 'GET',
-  })
+  return fetchJson<ListLaborTurnosResponse>(`/laboral/turnos${qs ? `?${qs}` : ''}`, { method: 'GET' })
 }
 
 export function TurnosLaboralCard() {
@@ -250,6 +244,53 @@ export function TurnosLaboralCard() {
   const viewerAbortRef = useRef<AbortController | null>(null)
   const viewerReqSeqRef = useRef(0)
 
+  // ✅ Cartilla de empresas para autocompletar
+  const [companies, setCompanies] = useState<Company[]>([])
+  const [companiesLoading, setCompaniesLoading] = useState(false)
+  const autoCompanyIdRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    let alive = true
+    ;(async () => {
+      try {
+        setCompaniesLoading(true)
+        const r = await listCompanies({ q: '', filter: 'actives' })
+        if (!alive) return
+        setCompanies(Array.isArray(r.items) ? r.items : [])
+      } catch {
+        if (!alive) return
+        setCompanies([])
+      } finally {
+        if (!alive) return
+        setCompaniesLoading(false)
+      }
+    })()
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  function findCompanyByExactName(name: string) {
+    const key = normalizeText(name)
+    if (!key) return null
+    return companies.find((c) => normalizeText(c.nombre) === key) ?? null
+  }
+
+  function applyCompanyAutofill(name: string) {
+    const c = findCompanyByExactName(name)
+    if (!c) {
+      autoCompanyIdRef.current = null
+      return
+    }
+
+    setDraft((p) => ({
+      ...p,
+      empresa: c.nombre,
+      nroAfiliado: (c.nroSocio ?? '').toString(),
+    }))
+    autoCompanyIdRef.current = c.id
+  }
+
   useEffect(() => {
     setServerAdicionales([])
   }, [])
@@ -280,6 +321,7 @@ export function TurnosLaboralCard() {
   }
 
   function clearSelection() {
+    autoCompanyIdRef.current = null
     setDraft((p) => ({
       ...p,
       nombre: '',
@@ -397,7 +439,6 @@ export function TurnosLaboralCard() {
         } else {
           const items = Array.isArray(r.turnos) ? r.turnos.slice() : []
 
-          // ✅ orden “de llamado” (createdAt ASC) dentro de la fecha
           items.sort((a, b) => {
             const byDate = dayPart(a.fechaTurnoISO || '').localeCompare(dayPart(b.fechaTurnoISO || ''))
             if (byDate !== 0) return byDate
@@ -509,7 +550,6 @@ export function TurnosLaboralCard() {
         showConfirmButton: false,
       })
 
-      // ✅ refresco rápido: lo saco del estado actual
       setViewerTurnos((prev) => prev.filter((x) => x.id !== t.id))
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Error'
@@ -571,7 +611,44 @@ export function TurnosLaboralCard() {
           <div className="labor-turnos__grid">
             <label className="labor-turnos__label">
               Empresa
-              <input className="input" value={draft.empresa} onChange={(e) => setField('empresa', e.target.value)} placeholder="Ej: Implatell" disabled={busy} />
+              <input
+                className="input"
+                value={draft.empresa}
+                placeholder="Ej: Implatell"
+                disabled={busy}
+                list="companies_datalist"
+                onChange={(e) => {
+                  const v = e.target.value
+                  setField('empresa', v)
+
+                  const c = findCompanyByExactName(v)
+                  if (c) {
+                    setDraft((p) => ({
+                      ...p,
+                      empresa: c.nombre,
+                      nroAfiliado: (c.nroSocio ?? '').toString(),
+                    }))
+                    autoCompanyIdRef.current = c.id
+                  } else {
+                    autoCompanyIdRef.current = null
+                  }
+                }}
+                onBlur={() => {
+                  applyCompanyAutofill(draft.empresa)
+                }}
+              />
+
+              <datalist id="companies_datalist">
+                {companies.map((c) => (
+                  <option key={c.id} value={c.nombre} />
+                ))}
+              </datalist>
+
+              {companiesLoading && (
+                <small className="field__hint" style={{ marginTop: 6, display: 'block', color: 'var(--color-ink-soft)' }}>
+                  Cargando cartilla…
+                </small>
+              )}
             </label>
 
             <label className="labor-turnos__label">
@@ -581,7 +658,16 @@ export function TurnosLaboralCard() {
 
             <label className="labor-turnos__label">
               N° afiliado (opcional)
-              <input className="input" value={draft.nroAfiliado} onChange={(e) => setField('nroAfiliado', e.target.value)} placeholder="Si no tiene, dejar vacío" disabled={busy} />
+              <input
+                className="input"
+                value={draft.nroAfiliado}
+                onChange={(e) => {
+                  autoCompanyIdRef.current = null
+                  setField('nroAfiliado', e.target.value)
+                }}
+                placeholder="Si no tiene, dejar vacío"
+                disabled={busy}
+              />
             </label>
 
             <label className="labor-turnos__label">
@@ -747,11 +833,7 @@ export function TurnosLaboralCard() {
               <div className="labor-turnos__viewer-results">
                 <div className="labor-turnos__viewer-meta">
                   Coincidencias: <b>{filteredTurnos.length}</b>
-                  {cancelMode && (
-                    <span style={{ marginLeft: 10, color: '#b91c1c', fontWeight: 700 }}>
-                      · Modo cancelar activo
-                    </span>
-                  )}
+                  {cancelMode && <span style={{ marginLeft: 10, color: '#b91c1c', fontWeight: 700 }}>· Modo cancelar activo</span>}
                 </div>
 
                 <div className="labor-turnos__viewer-tableWrap">
@@ -835,7 +917,6 @@ export function TurnosLaboralCard() {
           </div>
         </div>
 
-        {/* ✅ Footer: agregamos el botón nuevo donde lo marcaste */}
         <div className="labor-turnos__footer">
           <button
             type="button"
