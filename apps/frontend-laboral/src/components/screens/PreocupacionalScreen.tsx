@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
+// src/components/screens/PreocupacionalScreen.tsx
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import jsPDF from 'jspdf'
 import Swal from 'sweetalert2'
@@ -165,12 +166,7 @@ function drawCheckbox(doc: jsPDF, x: number, y: number, label: string, checked: 
   doc.text(label, x + 9, y + 5)
 }
 
-function drawHeader(
-  doc: jsPDF,
-  opts: {
-    dateText: string
-  },
-) {
+function drawHeader(doc: jsPDF, opts: { dateText: string }) {
   const pageW = doc.internal.pageSize.getWidth()
   const margin = 16
 
@@ -443,6 +439,7 @@ function buildPdfVista(view: ViewKey, draft: Draft, dateText: string) {
     return doc
   }
 
+  // view === 'clasificacion'
   {
     const yClasifTop = 52
 
@@ -578,25 +575,17 @@ export default function PreocupacionalScreen() {
   const today = useMemo(() => fmtDate(new Date()), [])
   const todayISO = useMemo(() => isoDay(new Date()), [])
 
-  // ✅ ROOT para encontrar focusables
-  const rootRef = useRef<HTMLDivElement | null>(null)
-
-  // ✅ refs para inputs de observaciones (para enfocar la nueva)
+  // ✅ refs para inputs de observaciones
   const obsRefs = useRef<Array<HTMLInputElement | null>>([])
   const pendingObsFocusIndexRef = useRef<number | null>(null)
 
-  const currentDocCompleto = useCallback(async () => {
-    return buildPdfCompleto(draft, today)
-  }, [ý [draft, today])
-
-  const currentDocVista = useCallback(async () => {
-    return buildPdfVista(view, draft, today)
-  }, [view, draft, today])
+  const currentDocCompleto = useCallback(async () => buildPdfCompleto(draft, today), [draft, today])
+  const currentDocVista = useCallback(async () => buildPdfVista(view, draft, today), [view, draft, today])
 
   const setPdfPreview = useCallback(async (docPromise: Promise<jsPDF>) => {
     const doc = await docPromise
     try {
-      const blob = doc.output('blob')
+      const blob: Blob = doc.output('blob')
       const url = URL.createObjectURL(blob)
       if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current)
       blobUrlRef.current = url
@@ -634,7 +623,6 @@ export default function PreocupacionalScreen() {
   const handleDownloadCompleto = useCallback(async () => {
     try {
       const doc = await currentDocCompleto()
-
       const safeName =
         (draft.nombre || 'examen')
           .trim()
@@ -652,7 +640,6 @@ export default function PreocupacionalScreen() {
   const handleDownloadVista = useCallback(async () => {
     try {
       const doc = await currentDocVista()
-
       const safeName =
         (draft.nombre || 'examen')
           .trim()
@@ -678,9 +665,7 @@ export default function PreocupacionalScreen() {
 
   useEffect(() => {
     if (!previewOpen) return
-    const t = window.setTimeout(() => {
-      void setPdfPreview(currentDocVista())
-    }, 200)
+    const t = window.setTimeout(() => void setPdfPreview(currentDocVista()), 200)
     return () => window.clearTimeout(t)
   }, [draft, previewOpen, view, currentDocVista, setPdfPreview])
 
@@ -688,10 +673,7 @@ export default function PreocupacionalScreen() {
     setDraft((p) => ({ ...p, checks: { ...p.checks, [key]: !p.checks[key] } }))
   }
 
-  function updateField<K extends keyof Omit<Draft, 'checks' | 'observaciones' | 'adicionalesSelected'>>(
-    key: K,
-    value: Draft[K],
-  ) {
+  function updateField<K extends keyof Omit<Draft, 'checks' | 'observaciones' | 'adicionalesSelected'>>(key: K, value: Draft[K]) {
     setDraft((p) => ({ ...p, [key]: value }))
   }
 
@@ -734,7 +716,6 @@ export default function PreocupacionalScreen() {
     }))
   }
 
-  // ✅ re-aplicar prefill si el componente no se desmonta
   const prefillAppliedRef = useRef(false)
   useEffect(() => {
     prefillAppliedRef.current = false
@@ -796,11 +777,7 @@ export default function PreocupacionalScreen() {
 
     const t = window.setTimeout(() => {
       setDraft((p) => {
-        const nextChecks: Record<ExamKey, boolean> = {
-          preocupacional: false,
-          periodico: false,
-          egreso: false,
-        }
+        const nextChecks: Record<ExamKey, boolean> = { preocupacional: false, periodico: false, egreso: false }
         nextChecks[examKey] = true
 
         const mergedAdicionales = (() => {
@@ -896,13 +873,9 @@ export default function PreocupacionalScreen() {
 
     try {
       const base = getApiBase()
-
       const res = await fetch(`${base}/laboral/adicionales/batch`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-id': 'dev-user',
-        },
+        headers: { 'Content-Type': 'application/json', 'x-user-id': 'dev-user' },
         body: JSON.stringify(payload),
       })
 
@@ -936,77 +909,36 @@ export default function PreocupacionalScreen() {
       setAdQ('')
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Error'
-      Swal.fire({
-        icon: 'error',
-        title: 'No se pudo guardar',
-        text: msg,
-      })
+      Swal.fire({ icon: 'error', title: 'No se pudo guardar', text: msg })
     }
   }
 
-  // ===================== ✅ HOTKEY GLOBAL: ENTER = TAB + OBS =====================
+  // ===================== ✅ EXCEPCIÓN LOCAL: Enter en Observaciones =====================
 
-  const focusNextField = useCallback(() => {
-    const root = rootRef.current
-    if (!root) return
-
-    const active = document.activeElement as HTMLElement | null
-    if (!active) return
-
-    const isHidden = (el: HTMLElement) => {
-      const anyEl = el as any
-      if (anyEl.type === 'hidden') return true
-      if ((el as HTMLInputElement).hidden) return true
-      return false
-    }
-
-    const nodes = Array.from(
-      root.querySelectorAll<HTMLElement>(
-        'input, select, textarea, button, [tabindex]:not([tabindex="-1"])',
-      ),
-    ).filter((el) => {
-      if (!el) return false
-      if (el.hasAttribute('disabled')) return false
-      if ((el as any).disabled) return false
-      if (isHidden(el)) return false
-      const style = window.getComputedStyle(el)
-      if (style.display === 'none' || style.visibility === 'hidden') return false
-      return true
-    })
-
-    const idx = nodes.indexOf(active)
-    if (idx < 0) return
-
-    const next = nodes[idx + 1]
-    if (next) next.focus()
-  }, [])
-
-  const handleEnterOnObs = useCallback(
+  const handleEnterObs = useCallback(
     (obsIndex: number) => {
       const lastIdx = draft.observaciones.length - 1
 
+      // si es la última -> crea otra y enfoca
       if (obsIndex >= lastIdx) {
         const nextIndex = lastIdx + 1
         pendingObsFocusIndexRef.current = nextIndex
-        addObs()
+        setDraft((p) => ({ ...p, observaciones: [...p.observaciones, ''] }))
         return
       }
 
       // si no es la última, pasa a la siguiente
       const next = obsRefs.current[obsIndex + 1]
       if (next) next.focus()
-      else focusNextField()
     },
-    [draft.observaciones.length, focusNextField],
+    [draft.observaciones.length],
   )
 
-  // enfocar la observación recién creada
   useEffect(() => {
     const idx = pendingObsFocusIndexRef.current
     if (idx === null) return
     if (view !== 'clasificacion') return
 
-    // esperamos a que el input exista en el DOM
     const t = window.setTimeout(() => {
       const el = obsRefs.current[idx]
       if (el) el.focus()
@@ -1016,53 +948,8 @@ export default function PreocupacionalScreen() {
     return () => window.clearTimeout(t)
   }, [draft.observaciones.length, view])
 
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== 'Enter') return
-      if (e.shiftKey || e.altKey || e.ctrlKey || e.metaKey) return
-
-      const target = e.target as HTMLElement | null
-      if (!target) return
-
-      const tag = target.tagName.toLowerCase()
-
-      // No interceptar botones (Enter debería ejecutar click)
-      if (tag === 'button') return
-
-      // Solo inputs/select/textarea
-      const isFormField = tag === 'input' || tag === 'select' || tag === 'textarea'
-      if (!isFormField) return
-
-      // si es input tipo submit/checkbox/radio, no tocamos
-      if (tag === 'input') {
-        const t = (target as HTMLInputElement).type
-        if (t === 'submit' || t === 'button' || t === 'checkbox' || t === 'radio') return
-      }
-
-      // ✅ Si estamos en clasificacion y es una observación -> Enter agrega/pasa
-      const obsIndexAttr = target.getAttribute('data-obs-index')
-      if (view === 'clasificacion' && obsIndexAttr) {
-        const idx = Number(obsIndexAttr)
-        if (Number.isFinite(idx)) {
-          e.preventDefault()
-          handleEnterOnObs(idx)
-          return
-        }
-      }
-
-      // ✅ Global: Enter = Tab
-      e.preventDefault()
-      focusNextField()
-    }
-
-    window.addEventListener('keydown', onKeyDown, true)
-    return () => window.removeEventListener('keydown', onKeyDown, true)
-  }, [focusNextField, handleEnterOnObs, view])
-
-  // ===================== UI =====================
-
   return (
-    <div className="preocupacional" ref={rootRef}>
+    <div className="preocupacional">
       <div className="card preocupacional__card">
         <div className="preocupacional__header">
           <div>
@@ -1256,9 +1143,19 @@ export default function PreocupacionalScreen() {
                         value={line}
                         placeholder="Escribí una observación…"
                         onChange={(e) => setObs(i, e.target.value)}
-                        data-obs-index={String(i)}
                         ref={(el) => {
                           obsRefs.current[i] = el
+                        }}
+                        onKeyDown={(e) => {
+                          if (view !== 'clasificacion') return
+                          if (e.key !== 'Enter') return
+                          if (e.shiftKey || e.altKey || e.ctrlKey || e.metaKey) return
+                          if ((e.nativeEvent as unknown as { isComposing?: boolean })?.isComposing) return
+
+                          e.preventDefault()
+                          e.stopPropagation() // ✅ evita que lo agarre el Enter global
+
+                          handleEnterObs(i)
                         }}
                       />
                       <button className="btn btn--ghost btn--sm" type="button" onClick={() => removeObs(i)} aria-label="Quitar">
@@ -1301,7 +1198,11 @@ export default function PreocupacionalScreen() {
             </div>
 
             <div className="preocupacional__preview-frame">
-              {previewUrl ? <iframe title="preview" src={previewUrl} /> : <div className="preocupacional__preview-loading">Generando vista previa…</div>}
+              {previewUrl ? (
+                <iframe title="preview" src={previewUrl} />
+              ) : (
+                <div className="preocupacional__preview-loading">Generando vista previa…</div>
+              )}
             </div>
           </div>
         </div>

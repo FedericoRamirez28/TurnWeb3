@@ -211,6 +211,8 @@ async function listLaborTurnos(params: { q?: string; from?: string; to?: string;
   return fetchJson<ListLaborTurnosResponse>(`/laboral/turnos${qs ? `?${qs}` : ''}`, { method: 'GET' })
 }
 
+/* ===================== COMPONENT ===================== */
+
 export function TurnosLaboralCard() {
   const navigate = useNavigate()
 
@@ -653,7 +655,13 @@ export function TurnosLaboralCard() {
 
             <label className="labor-turnos__label">
               Nombre y apellido
-              <input className="input" value={draft.nombre} onChange={(e) => setField('nombre', e.target.value)} placeholder="Ej: Juan Pérez" disabled={busy} />
+              <input
+                className="input"
+                value={draft.nombre}
+                onChange={(e) => setField('nombre', e.target.value)}
+                placeholder="Ej: Juan Pérez"
+                disabled={busy}
+              />
             </label>
 
             <label className="labor-turnos__label">
@@ -672,12 +680,25 @@ export function TurnosLaboralCard() {
 
             <label className="labor-turnos__label">
               DNI
-              <input className="input" value={draft.dni} onChange={(e) => setField('dni', e.target.value)} placeholder="Documento" inputMode="numeric" disabled={busy} />
+              <input
+                className="input"
+                value={draft.dni}
+                onChange={(e) => setField('dni', e.target.value)}
+                placeholder="Documento"
+                inputMode="numeric"
+                disabled={busy}
+              />
             </label>
 
             <label className="labor-turnos__label">
               Fecha recepcionado
-              <input type="date" className="input" value={draft.fechaRecepcionISO} onChange={(e) => setField('fechaRecepcionISO', e.target.value)} disabled={busy} />
+              <input
+                type="date"
+                className="input"
+                value={draft.fechaRecepcionISO}
+                onChange={(e) => setField('fechaRecepcionISO', e.target.value)}
+                disabled={busy}
+              />
             </label>
 
             <label className="labor-turnos__label">
@@ -704,7 +725,13 @@ export function TurnosLaboralCard() {
 
             <label className="labor-turnos__label labor-turnos__label--full">
               Puesto a ocupar
-              <input className="input" value={draft.puesto} onChange={(e) => setField('puesto', e.target.value)} placeholder="Ej: Operario / Chofer / Administrativo…" disabled={busy} />
+              <input
+                className="input"
+                value={draft.puesto}
+                onChange={(e) => setField('puesto', e.target.value)}
+                placeholder="Ej: Operario / Chofer / Administrativo…"
+                disabled={busy}
+              />
             </label>
 
             <div className="labor-turnos__exam">
@@ -813,21 +840,21 @@ export function TurnosLaboralCard() {
 
               <label className="labor-turnos__label labor-turnos__label--full">
                 Búsqueda inteligente
-                <input className="input" value={smartQ} onChange={(e) => setSmartQ(e.target.value)} placeholder="Buscar por empresa, DNI, nombre, examen, puesto…" disabled={busy} />
+                <input
+                  className="input"
+                  value={smartQ}
+                  onChange={(e) => setSmartQ(e.target.value)}
+                  placeholder="Buscar por empresa, DNI, nombre, examen, puesto…"
+                  disabled={busy}
+                />
               </label>
             </div>
 
-            {!hasViewerFilters && (
-              <div className="labor-turnos__viewer-empty">
-                Tip: para ver turnos, cargá <b>Desde/Hasta</b> o escribí algo en <b>Búsqueda inteligente</b>.
-              </div>
-            )}
+            {!hasViewerFilters && <div className="labor-turnos__viewer-empty">Tip: para ver turnos, cargá <b>Desde/Hasta</b> o escribí algo en <b>Búsqueda inteligente</b>.</div>}
 
             {hasViewerFilters && viewerLoading && <div className="labor-turnos__viewer-empty">Buscando turnos…</div>}
 
-            {hasViewerFilters && !viewerLoading && !shouldShowResults && (
-              <div className="labor-turnos__viewer-empty">Sin coincidencias para los filtros actuales.</div>
-            )}
+            {hasViewerFilters && !viewerLoading && !shouldShowResults && <div className="labor-turnos__viewer-empty">Sin coincidencias para los filtros actuales.</div>}
 
             {shouldShowResults && (
               <div className="labor-turnos__viewer-results">
