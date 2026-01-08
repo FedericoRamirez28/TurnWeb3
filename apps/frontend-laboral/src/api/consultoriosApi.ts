@@ -9,7 +9,6 @@ export type ConsultorioTurno = {
   dni: string
   nombre: string
   nacimientoISO: string | null
-  motivo: string
   diagnostico: string
 
   fechaTurnoISO: string
@@ -21,7 +20,6 @@ export type CreateConsultorioTurnoDto = {
   dni: string
   nombre: string
   nacimientoISO?: string
-  motivo: string
   diagnostico: string
   fechaTurnoISO: string
 }
@@ -47,7 +45,6 @@ export async function listConsultorios(params: {
 export async function createConsultorioTurno(
   dto: CreateConsultorioTurnoDto,
 ): Promise<ConsultorioTurno> {
-  // ✅ body como objeto
   return apiJson<ConsultorioTurno>('/laboral/consultorios', {
     method: 'POST',
     body: dto,

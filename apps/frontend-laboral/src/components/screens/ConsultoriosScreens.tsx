@@ -1,9 +1,14 @@
-import React, { useMemo, useState, useCallback, useEffect } from 'react'
+import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react'
 import jsPDF from 'jspdf'
 import Swal from 'sweetalert2'
 
 import { createConsultorioTurno, listConsultorios } from '@/api/consultoriosApi'
-import { listCompanies, type Company as ApiCompany } from '@/api/companiesApi'
+import {
+  listCompanies,
+  type Company as ApiCompany,
+  getCompanyPadron,
+  type CompanyPadronPerson,
+} from '@/api/companiesApi'
 
 type Company = ApiCompany
 
@@ -15,7 +20,6 @@ type ConsultorioTurno = {
   dni: string
   nombre: string
   nacimientoISO: string
-  motivo: string
   diagnostico: string
 
   fechaTurnoISO: string
@@ -27,7 +31,6 @@ type Draft = {
   dni: string
   nombre: string
   nacimientoISO: string
-  motivo: string
   diagnostico: string
   fechaTurnoISO: string
 }
@@ -49,25 +52,30 @@ function normalizeText(s: string) {
     .trim()
 }
 
-function safeLoadDraft(): Draft {
+function normalizeDni(s: string) {
+  return (s || '').replace(/\D/g, '')
+}
+
+function safeLoadDraft(todayISO: string): Draft {
   const fallback: Draft = {
     empresaId: '',
     dni: '',
     nombre: '',
     nacimientoISO: '',
-    motivo: '',
     diagnostico: '',
-    fechaTurnoISO: isoDay(new Date()),
+    fechaTurnoISO: todayISO, // ✅ SIEMPRE HOY
   }
 
   try {
     const raw = localStorage.getItem(STORAGE_KEY_CONSULTORIOS_DRAFT)
     if (!raw) return fallback
     const parsed = JSON.parse(raw) as Partial<Draft>
+
+    // ✅ aunque venga guardado, FORZAMOS HOY
     return {
       ...fallback,
       ...parsed,
-      fechaTurnoISO: parsed.fechaTurnoISO || fallback.fechaTurnoISO,
+      fechaTurnoISO: todayISO,
     }
   } catch {
     return fallback
@@ -159,13 +167,13 @@ function buildPdfConsultorios(turnosList: ConsultorioTurno[], title: string) {
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(9.2)
 
+    // ✅ sin Motivo
     const cols = [
       { x: margin, w: 20, label: 'Fecha' },
       { x: margin + 22, w: 22, label: 'DNI' },
-      { x: margin + 46, w: 50, label: 'Nombre' },
-      { x: margin + 98, w: 24, label: 'Nac.' },
-      { x: margin + 124, w: 36, label: 'Motivo' },
-      { x: margin + 162, w: pageW - margin - (margin + 162), label: 'Diagnóstico' },
+      { x: margin + 46, w: 58, label: 'Nombre' },
+      { x: margin + 106, w: 24, label: 'Nac.' },
+      { x: margin + 132, w: pageW - margin - (margin + 132), label: 'Diagnóstico' },
     ]
     cols.forEach((c) => doc.text(c.label, c.x, y))
 
@@ -176,19 +184,17 @@ function buildPdfConsultorios(turnosList: ConsultorioTurno[], title: string) {
     y += 5
 
     list.forEach((t) => {
-      const linesMotivo = doc.splitTextToSize(t.motivo || '-', cols[4].w)
-      const linesDiag = doc.splitTextToSize(t.diagnostico || '-', cols[5].w)
+      const linesDiag = doc.splitTextToSize(t.diagnostico || '-', cols[4].w)
       const linesNombre = doc.splitTextToSize(t.nombre || '-', cols[2].w)
 
-      const rowH = Math.max(linesMotivo.length, linesDiag.length, linesNombre.length, 1) * 4.2
+      const rowH = Math.max(linesDiag.length, linesNombre.length, 1) * 4.2
       ensureSpace(rowH + 6)
 
       doc.text(t.fechaTurnoISO || '-', cols[0].x, y)
       doc.text(t.dni || '-', cols[1].x, y)
       doc.text(linesNombre, cols[2].x, y)
       doc.text(t.nacimientoISO || '-', cols[3].x, y)
-      doc.text(linesMotivo, cols[4].x, y)
-      doc.text(linesDiag, cols[5].x, y)
+      doc.text(linesDiag, cols[4].x, y)
 
       y += rowH
       doc.setDrawColor(0, 0, 0)
@@ -203,12 +209,95 @@ function buildPdfConsultorios(turnosList: ConsultorioTurno[], title: string) {
   return doc
 }
 
+/** Busca un DNI en el padrón de empresas activas (con cache + concurrencia). */
+async function findPersonByDniAcrossCompanies(opts: {
+  dni: string
+  companies: Company[]
+  padronCache: Map<string, CompanyPadronPerson[]>
+  padronCacheSet: React.Dispatch<React.SetStateAction<Map<string, CompanyPadronPerson[]>>>
+}): Promise<
+  | null
+  | {
+      company: Company
+      person: CompanyPadronPerson
+    }
+> {
+  const dni = normalizeDni(opts.dni)
+  if (dni.length < 7) return null
+
+  const actives = (opts.companies || []).filter((c) => c.isActive)
+  if (actives.length === 0) return null
+
+  // ✅ primero: buscamos en cache
+  for (const c of actives) {
+    const cached = opts.padronCache.get(c.id)
+    if (cached && cached.length) {
+      const hit = cached.find((p) => normalizeDni(p.dni) === dni)
+      if (hit) return { company: c, person: hit }
+    }
+  }
+
+  // ✅ luego: fetch concurrente, cortando al primer match
+  let found: { company: Company; person: CompanyPadronPerson } | null = null
+  let idx = 0
+  const limit = 4
+
+  const workers = new Array(Math.min(limit, actives.length)).fill(0).map(async () => {
+    while (idx < actives.length && !found) {
+      const my = idx++
+      const c = actives[my]
+
+      // si ya hay cache vacía, evitamos pegarle de nuevo
+      if (opts.padronCache.has(c.id)) continue
+
+      try {
+        const r = await getCompanyPadron(c.id)
+        const items = (r.items || []).slice()
+
+        // guardamos cache (aunque venga vacío)
+        opts.padronCacheSet((prev) => {
+          const next = new Map(prev)
+          next.set(c.id, items)
+          return next
+        })
+
+        if (!found) {
+          const hit = items.find((p) => normalizeDni(p.dni) === dni)
+          if (hit) found = { company: c, person: hit }
+        }
+      } catch {
+        // cacheamos vacío para no insistir infinito
+        opts.padronCacheSet((prev) => {
+          const next = new Map(prev)
+          next.set(c.id, [])
+          return next
+        })
+      }
+    }
+  })
+
+  await Promise.all(workers)
+  return found
+}
+
 export default function ConsultoriosScreen() {
+  const todayISO = useMemo(() => isoDay(new Date()), [])
+
   const [companies, setCompanies] = useState<Company[]>([])
   const [companiesLoading, setCompaniesLoading] = useState(true)
 
   const [turnos, setTurnos] = useState<ConsultorioTurno[]>([])
-  const [draft, setDraft] = useState<Draft>(() => safeLoadDraft())
+  const [draft, setDraft] = useState<Draft>(() => safeLoadDraft(todayISO))
+
+  // ✅ cache de padrón por empresa (para autocompletar por DNI)
+  const [padronCache, setPadronCache] = useState<Map<string, CompanyPadronPerson[]>>(() => new Map())
+  const padronCacheRef = useRef<Map<string, CompanyPadronPerson[]>>(new Map())
+  useEffect(() => {
+    padronCacheRef.current = padronCache
+  }, [padronCache])
+
+  const searchingRef = useRef(false)
+  const lastAutoDniRef = useRef<string>('')
 
   const now = useMemo(() => new Date(), [])
   const [year, setYear] = useState(now.getFullYear())
@@ -216,9 +305,14 @@ export default function ConsultoriosScreen() {
 
   const monthTitle = useMemo(() => fmtMonthTitle(year, monthIndex0), [year, monthIndex0])
 
+  // ✅ siempre guardar draft, pero con fecha forzada a hoy
   useEffect(() => {
+    if (draft.fechaTurnoISO !== todayISO) {
+      setDraft((p) => ({ ...p, fechaTurnoISO: todayISO }))
+      return
+    }
     safeSaveDraft(draft)
-  }, [draft])
+  }, [draft, todayISO])
 
   const activeCompanies = useMemo(() => {
     const list = companies.slice()
@@ -233,7 +327,7 @@ export default function ConsultoriosScreen() {
   const monthResetKey = useMemo(() => `${year}-${monthIndex0}`, [year, monthIndex0])
   const [selectedDayISO, setSelectedDayISO] = useState<string>('')
 
-  // ✅ NUEVO: filtro de empresa para reportes/listado (independiente del formulario)
+  // ✅ filtro de empresa para reportes/listado (independiente del formulario)
   const [reportCompanyId, setReportCompanyId] = useState<string>('')
 
   const reportCompany = useMemo(() => {
@@ -268,7 +362,6 @@ export default function ConsultoriosScreen() {
           dni: x.dni,
           nombre: x.nombre,
           nacimientoISO: x.nacimientoISO || '',
-          motivo: x.motivo,
           diagnostico: x.diagnostico,
           fechaTurnoISO: x.fechaTurnoISO,
           createdAt: x.createdAt,
@@ -315,7 +408,7 @@ export default function ConsultoriosScreen() {
     return monthTurnos.filter((t) => t.fechaTurnoISO === selectedDayISO)
   }, [monthTurnos, selectedDayISO])
 
-  // ✅ NUEVO: aplica filtro de empresa al listado (mes o día)
+  // ✅ aplica filtro de empresa al listado (mes o día)
   const baseForReport = useMemo(() => {
     return selectedDayISO ? dayTurnos : monthTurnos
   }, [selectedDayISO, dayTurnos, monthTurnos])
@@ -332,14 +425,15 @@ export default function ConsultoriosScreen() {
   const clearForm = useCallback(() => {
     setDraft((p) => ({
       ...p,
+      // si querés que NO se borre empresa, queda como estaba
       empresaId: p.empresaId,
       dni: '',
       nombre: '',
       nacimientoISO: '',
-      motivo: '',
       diagnostico: '',
-      fechaTurnoISO: isoDay(new Date()),
+      fechaTurnoISO: isoDay(new Date()), // ✅ hoy
     }))
+    lastAutoDniRef.current = ''
   }, [])
 
   const validate = useCallback((): string | null => {
@@ -347,13 +441,67 @@ export default function ConsultoriosScreen() {
     if (!draft.dni.trim()) return 'Completá DNI.'
     if (!draft.nombre.trim()) return 'Completá Nombre y Apellido.'
     if (!draft.nacimientoISO) return 'Completá Nacimiento.'
-    if (!draft.motivo.trim()) return 'Completá Motivo de consulta.'
     if (!draft.diagnostico.trim()) return 'Completá Diagnóstico.'
     if (!draft.fechaTurnoISO) return 'Completá la fecha del turno.'
     return null
   }, [draft])
 
+  // ✅ AUTOCOMPLETAR por DNI (empresa + nombre) buscando en padrón
+  useEffect(() => {
+    const dni = normalizeDni(draft.dni)
+    if (dni.length < 7) return
+
+    // no repetir búsqueda si ya autocompletamos ese mismo dni
+    if (lastAutoDniRef.current === dni) return
+
+    // si ya está buscando, no solapamos
+    if (searchingRef.current) return
+
+    // si ya hay nombre + empresa, no molestamos (igual si cambian dni, se vuelve a disparar)
+    // (lo dejamos igual: solo evitamos repetir con lastAutoDniRef)
+
+    searchingRef.current = true
+
+    ;(async () => {
+      try {
+        const hit = await findPersonByDniAcrossCompanies({
+          dni,
+          companies: activeCompanies,
+          padronCache: padronCacheRef.current,
+          padronCacheSet: setPadronCache,
+        })
+
+        if (!hit) return
+
+        lastAutoDniRef.current = dni
+
+        setDraft((p) => ({
+          ...p,
+          empresaId: hit.company.id,
+          nombre: (hit.person.nombre || '').trim() || p.nombre,
+          // nacimientoISO no viene en padrón, lo dejamos
+        }))
+
+        Swal.fire({
+          icon: 'info',
+          title: 'Encontrado en padrón',
+          text: `${(hit.person.nombre || 'Persona').toString()} · ${hit.company.nombre}`,
+          timer: 1400,
+          showConfirmButton: false,
+        })
+      } finally {
+        searchingRef.current = false
+      }
+    })()
+  }, [draft.dni, activeCompanies])
+
   const takeTurno = useCallback(async () => {
+    // ✅ forzamos fecha a HOY siempre (por si algo raro)
+    const fechaHoy = isoDay(new Date())
+    if (draft.fechaTurnoISO !== fechaHoy) {
+      setDraft((p) => ({ ...p, fechaTurnoISO: fechaHoy }))
+    }
+
     const err = validate()
     if (err) {
       Swal.fire({ icon: 'warning', title: 'Faltan datos', text: err, timer: 2300, showConfirmButton: false })
@@ -365,12 +513,11 @@ export default function ConsultoriosScreen() {
     try {
       await createConsultorioTurno({
         companyId: draft.empresaId,
-        dni: draft.dni.trim(),
+        dni: normalizeDni(draft.dni),
         nombre: draft.nombre.trim(),
         nacimientoISO: draft.nacimientoISO,
-        motivo: draft.motivo.trim(),
         diagnostico: draft.diagnostico.trim(),
-        fechaTurnoISO: draft.fechaTurnoISO,
+        fechaTurnoISO: fechaHoy, // ✅ HOY SIEMPRE
       })
 
       Swal.fire({
@@ -480,12 +627,23 @@ export default function ConsultoriosScreen() {
 
               <label className="consultorios__label">
                 DNI
-                <input className="input" value={draft.dni} onChange={(e) => setField('dni', e.target.value)} placeholder="Documento" />
+                <input
+                  className="input"
+                  value={draft.dni}
+                  onChange={(e) => setField('dni', e.target.value)}
+                  placeholder="Documento"
+                  inputMode="numeric"
+                />
               </label>
 
               <label className="consultorios__label">
                 Nombre y Apellido
-                <input className="input" value={draft.nombre} onChange={(e) => setField('nombre', e.target.value)} placeholder="Ej: Juan Pérez" />
+                <input
+                  className="input"
+                  value={draft.nombre}
+                  onChange={(e) => setField('nombre', e.target.value)}
+                  placeholder="Ej: Juan Pérez"
+                />
               </label>
 
               <label className="consultorios__label">
@@ -495,12 +653,16 @@ export default function ConsultoriosScreen() {
 
               <label className="consultorios__label">
                 Fecha del turno
-                <input type="date" className="input" value={draft.fechaTurnoISO} onChange={(e) => setField('fechaTurnoISO', e.target.value)} />
-              </label>
-
-              <label className="consultorios__label consultorios__label--full">
-                Motivo de consulta
-                <input className="input" value={draft.motivo} onChange={(e) => setField('motivo', e.target.value)} placeholder="Ej: Control / Dolor / Apto / etc." />
+                <input
+                  type="date"
+                  className="input"
+                  value={draft.fechaTurnoISO}
+                  disabled
+                  title="Demanda espontánea: los turnos son siempre para hoy"
+                  onChange={() => {
+                    // noop (lock)
+                  }}
+                />
               </label>
 
               <label className="consultorios__label consultorios__label--full">
@@ -556,15 +718,10 @@ export default function ConsultoriosScreen() {
             </div>
           </header>
 
-          {/* ✅ NUEVO: FILTRO DE EMPRESA PARA REPORTES */}
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 10, alignItems: 'flex-end' }}>
             <label className="consultorios__label" style={{ margin: 0, flex: '1 1 260px' }}>
               Filtrar por empresa (reporte/listado)
-              <select
-                className="input"
-                value={reportCompanyId}
-                onChange={(e) => setReportCompanyId(e.target.value)}
-              >
+              <select className="input" value={reportCompanyId} onChange={(e) => setReportCompanyId(e.target.value)}>
                 <option value="">Todas las empresas</option>
                 {activeCompanies.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -679,7 +836,6 @@ export default function ConsultoriosScreen() {
                     <th>DNI</th>
                     <th>Nombre</th>
                     <th>Nac.</th>
-                    <th>Motivo</th>
                     <th>Diagnóstico</th>
                   </tr>
                 </thead>
@@ -691,14 +847,13 @@ export default function ConsultoriosScreen() {
                       <td>{t.dni}</td>
                       <td>{t.nombre}</td>
                       <td>{t.nacimientoISO}</td>
-                      <td className="consultorios__cellText">{t.motivo}</td>
                       <td className="consultorios__cellText">{t.diagnostico}</td>
                     </tr>
                   ))}
 
                   {reportTurnos.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="consultorios__noRows">
+                      <td colSpan={6} className="consultorios__noRows">
                         No hay turnos para mostrar.
                       </td>
                     </tr>

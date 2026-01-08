@@ -15,12 +15,27 @@ type AdicionalItem = {
   createdAt: string
 }
 
+type AdicionalDisplayRow = {
+  ids: string[] // ✅ todas las filas originales que forman este "A + B + C"
+  empresa: string
+  nroAfiliado: string
+  nombre: string
+  dni: string
+  fechaISO: string
+  adicional: string // ✅ ya concatenado "A + B + C"
+  createdAtMin: string
+}
+
 function normalizeText(s: string) {
   return (s || '')
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .trim()
+}
+
+function normalizeKey(s: string) {
+  return normalizeText(s).replace(/[^a-z0-9]+/g, ' ').trim()
 }
 
 function monthKeyFromISO(iso: string) {
@@ -35,26 +50,72 @@ function alpha(a: string, b: string) {
   return 0
 }
 
-function uniqByKey(items: AdicionalItem[]) {
+function uniqStringsByNorm(items: string[]) {
+  const seen = new Set<string>()
+  const out: string[] = []
+  for (const it of items) {
+    const k = normalizeKey(it)
+    if (!k) continue
+    if (seen.has(k)) continue
+    seen.add(k)
+    out.push(it)
+  }
+  return out
+}
+
+/**
+ * ✅ MERGE:
+ * Agrupa filas que pertenecen al MISMO paciente/fecha/empresa y une "adicional" como "A + B + C".
+ */
+function mergeAdicionales(items: AdicionalItem[]): AdicionalDisplayRow[] {
   const keyOf = (x: AdicionalItem) =>
     [
       normalizeText(x.empresa),
-      normalizeText(x.nroAfiliado),
-      normalizeText(x.nombre),
+      normalizeText(x.fechaISO),
       normalizeText(x.dni),
-      normalizeText(x.adicional),
-      x.fechaISO,
+      normalizeText(x.nombre),
+      normalizeText(x.nroAfiliado || ''),
     ].join('|')
 
-  const map = new Map<string, AdicionalItem>()
-  items.forEach((it) => {
+  const map = new Map<string, AdicionalItem[]>()
+
+  for (const it of items) {
     const k = keyOf(it)
-    if (!map.has(k)) map.set(k, it)
-  })
-  return Array.from(map.values())
+    if (!map.has(k)) map.set(k, [])
+    map.get(k)!.push(it)
+  }
+
+  const merged: AdicionalDisplayRow[] = []
+
+  for (const group of map.values()) {
+    // orden estable dentro del grupo
+    group.sort((a, b) => {
+      const byCreated = (a.createdAt || '').localeCompare(b.createdAt || '')
+      if (byCreated !== 0) return byCreated
+      return alpha(a.adicional, b.adicional)
+    })
+
+    const first = group[0]
+    const adicionales = uniqStringsByNorm(group.map((x) => x.adicional || '').filter(Boolean))
+      .slice()
+      .sort(alpha)
+
+    merged.push({
+      ids: group.map((x) => x.id),
+      empresa: first.empresa || '—',
+      nroAfiliado: first.nroAfiliado || '',
+      nombre: first.nombre || '—',
+      dni: first.dni || '—',
+      fechaISO: first.fechaISO || '—',
+      adicional: adicionales.length ? adicionales.join(' + ') : '—',
+      createdAtMin: first.createdAt || '',
+    })
+  }
+
+  return merged
 }
 
-function buildPdf(monthLabel: string, grouped: Array<{ empresa: string; rows: AdicionalItem[] }>) {
+function buildPdf(monthLabel: string, grouped: Array<{ empresa: string; rows: AdicionalDisplayRow[] }>) {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' })
   const margin = 14
   const pageW = doc.internal.pageSize.getWidth()
@@ -156,7 +217,7 @@ async function apiRequest<T>(
 }
 
 export default function AdicionalesScreen() {
-  const [items, setItems] = useState<AdicionalItem[]>([])
+  const [rawItems, setRawItems] = useState<AdicionalItem[]>([])
   const [q, setQ] = useState('')
 
   const now = new Date()
@@ -180,19 +241,19 @@ export default function AdicionalesScreen() {
       undefined,
       { from, to, q: q.trim() || undefined },
     )
-    setItems(uniqByKey(data.items || []))
+    setRawItems(Array.isArray(data.items) ? data.items : [])
   }, [month, q])
 
   useEffect(() => {
-  const t = window.setTimeout(() => {
-    void load()
-  }, 0)
-  return () => window.clearTimeout(t)
-}, [load])
+    const t = window.setTimeout(() => {
+      void load()
+    }, 0)
+    return () => window.clearTimeout(t)
+  }, [load])
 
-
-  const filtered = useMemo(() => {
-    const inMonth = items.filter((x) => monthKeyFromISO(x.fechaISO) === month)
+  // ✅ 1) Filtra por mes y búsqueda (sobre raw)
+  const filteredRaw = useMemo(() => {
+    const inMonth = rawItems.filter((x) => monthKeyFromISO(x.fechaISO) === month)
     const qq = normalizeText(q)
     if (!qq) return inMonth
     return inMonth.filter((x) => {
@@ -208,11 +269,15 @@ export default function AdicionalesScreen() {
         normalizeText(x.adicional)
       return hay.includes(qq)
     })
-  }, [items, q, month])
+  }, [rawItems, q, month])
 
+  // ✅ 2) Mergea a displayRows: "A + B + C"
+  const displayRows = useMemo(() => mergeAdicionales(filteredRaw), [filteredRaw])
+
+  // ✅ 3) Agrupa por empresa para mostrar tablas
   const grouped = useMemo(() => {
-    const map = new Map<string, AdicionalItem[]>()
-    filtered.forEach((x) => {
+    const map = new Map<string, AdicionalDisplayRow[]>()
+    displayRows.forEach((x) => {
       const key = x.empresa || '—'
       if (!map.has(key)) map.set(key, [])
       map.get(key)!.push(x)
@@ -229,18 +294,20 @@ export default function AdicionalesScreen() {
       })
       return { empresa, rows }
     })
-  }, [filtered])
+  }, [displayRows])
 
   const downloadPdf = useCallback(() => {
     const doc = buildPdf(monthLabel, grouped)
     doc.save(`Adicionales_${month}.pdf`)
   }, [month, monthLabel, grouped])
 
-  const removeItem = useCallback(async (row: AdicionalItem) => {
+  // ✅ elimina todas las filas que componen el "A + B + C"
+  const removeDisplayRow = useCallback(async (row: AdicionalDisplayRow) => {
     const res = await Swal.fire({
       icon: 'warning',
-      title: 'Eliminar adicional',
-      text: `¿Seguro que querés eliminar este adicional de ${row.nombre}?`,
+      title: 'Eliminar adicional(es)',
+      html: `¿Seguro que querés eliminar estos adicional(es) de <b>${row.nombre}</b>?<br/><br/>
+             <span style="color:#64748b">${row.adicional}</span>`,
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar',
@@ -250,16 +317,23 @@ export default function AdicionalesScreen() {
     if (!res.isConfirmed) return
 
     try {
-      await apiRequest<{ ok: true }>(`/laboral/adicionales/${encodeURIComponent(row.id)}`, {
-        method: 'DELETE',
-      })
+      // borramos todas las IDs
+      await Promise.all(
+        row.ids.map((id) =>
+          apiRequest<{ ok: true }>(`/laboral/adicionales/${encodeURIComponent(id)}`, {
+            method: 'DELETE',
+          }),
+        ),
+      )
 
-      setItems((prev) => prev.filter((x) => x.id !== row.id))
+      // actualizamos rawItems removiendo todas las ids
+      const idsSet = new Set(row.ids)
+      setRawItems((prev) => prev.filter((x) => !idsSet.has(x.id)))
 
       Swal.fire({
         icon: 'success',
         title: 'Eliminado',
-        text: 'El adicional fue eliminado.',
+        text: 'El/los adicional(es) fueron eliminados.',
         timer: 1300,
         showConfirmButton: false,
       })
@@ -329,17 +403,19 @@ export default function AdicionalesScreen() {
                     </thead>
                     <tbody>
                       {g.rows.map((r) => (
-                        <tr key={r.id}>
+                        <tr key={r.ids.join('|')}>
                           <td>{r.fechaISO}</td>
                           <td>{r.nombre}</td>
                           <td>{r.dni}</td>
                           <td>{r.nroAfiliado || '-'}</td>
+
+                          {/* ✅ ahora siempre aparece "A + B + C" */}
                           <td>{r.adicional}</td>
 
                           <td style={{ textAlign: 'right' }}>
                             <button
                               type="button"
-                              onClick={() => void removeItem(r)}
+                              onClick={() => void removeDisplayRow(r)}
                               title="Eliminar"
                               style={{
                                 width: 36,

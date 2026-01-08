@@ -28,7 +28,7 @@ type PreocupacionalPrefill = {
   nombre?: string
   dni?: string
   puesto?: string
-  examen?: string
+  examen?: string // puede venir "A + B + C"
   examKey?: ExamKey
   focusTab?: ViewKey
 }
@@ -59,8 +59,8 @@ function getApiBase(): string {
   return base.replace(/\/$/, '')
 }
 
-function loadDraft(): Draft {
-  const fallback: Draft = {
+function blankDraft(): Draft {
+  return {
     empresa: '',
     nroAfiliado: '',
     nombre: '',
@@ -73,11 +73,16 @@ function loadDraft(): Draft {
 
     adicionalesSelected: [],
   }
+}
+
+function loadDraft(): Draft {
+  const fallback = blankDraft()
 
   try {
     const raw = localStorage.getItem(STORAGE_KEY_DRAFT)
     if (!raw) return fallback
     const parsed = JSON.parse(raw) as Partial<Draft>
+
     return {
       ...fallback,
       ...parsed,
@@ -87,15 +92,21 @@ function loadDraft(): Draft {
           ? parsed.observaciones
           : fallback.observaciones,
       clasificacion: (parsed.clasificacion as ClasifKey) || fallback.clasificacion,
-      adicionalesSelected: Array.isArray(parsed.adicionalesSelected) ? parsed.adicionalesSelected : [],
+      adicionalesSelected: Array.isArray(parsed.adicionalesSelected)
+        ? parsed.adicionalesSelected
+        : [],
     }
   } catch {
     return fallback
   }
 }
 
+// ✅ dd/mm/yyyy siempre con 0 adelante
 function fmtDate(d = new Date()) {
-  return d.toLocaleDateString()
+  const dd = String(d.getDate()).padStart(2, '0')
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const yyyy = String(d.getFullYear())
+  return `${dd}/${mm}/${yyyy}`
 }
 
 function isoDay(d = new Date()) {
@@ -111,6 +122,65 @@ function normalizeText(s: string) {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .trim()
+}
+
+/** Normalización fuerte para comparar ítems aunque cambie puntuación / slashes / puntos */
+function normalizeKey(s: string) {
+  return normalizeText(s).replace(/[^a-z0-9]+/g, ' ').trim()
+}
+
+function uniqByNorm(items: string[]) {
+  const seen = new Set<string>()
+  const out: string[] = []
+  for (const it of items) {
+    const k = normalizeKey(it)
+    if (!k) continue
+    if (seen.has(k)) continue
+    seen.add(k)
+    out.push(it)
+  }
+  return out
+}
+
+function canonicalizeAdicional(raw: string, options: string[]) {
+  const v = (raw || '').trim()
+  if (!v) return ''
+  const key = normalizeKey(v)
+  if (!key) return v
+
+  const map = new Map<string, string>()
+  for (const o of options) map.set(normalizeKey(o), o)
+
+  const exact = map.get(key)
+  if (exact) return exact
+
+  // fallback: contains (por si algún separador raro cambió)
+  let best: { opt: string; score: number } | null = null
+  for (const o of options) {
+    const ok = normalizeKey(o)
+    if (!ok) continue
+
+    const match = ok.includes(key) || key.includes(ok)
+    if (!match) continue
+
+    const score = Math.min(ok.length, key.length)
+    if (!best || score > best.score) best = { opt: o, score }
+  }
+  return best ? best.opt : v
+}
+
+function parseTipoExamenToAdicionales(tipoExamenRaw: string, options: string[]) {
+  const raw = (tipoExamenRaw || '').trim()
+  if (!raw) return []
+
+  // viene "A + B + C"
+  const parts = raw
+    .split(/\s*\+\s*/g)
+    .map((x) => x.trim())
+    .filter(Boolean)
+
+  const canon = parts.map((p) => canonicalizeAdicional(p, options)).filter(Boolean)
+  return uniqByNorm(canon)
 }
 
 const ADICIONALES_CONCEPTO: string[] = [
@@ -154,6 +224,18 @@ const ADICIONALES_LAB: string[] = [
 
 const ADICIONALES_ALL = [...ADICIONALES_CONCEPTO, ...ADICIONALES_LAB]
 
+// ===================== PDF: layout fijo para encastre =====================
+// A4 (mm). Vamos a usar SIEMPRE las mismas coordenadas
+const PDF = {
+  margin: 16,
+  // Bloque planilla
+  y0: 52,
+  // donde empiezan los 3 checks (tiene que ser idéntico en completo/planilla)
+  checksY: 52 + 44, // 96
+  // El “cuadrado azul” (bloque intermedio) empieza acá
+  clasifTop: 52 + 44 + 18, // 114
+}
+
 // ====== helpers pdf ======
 
 function drawCheckbox(doc: jsPDF, x: number, y: number, label: string, checked: boolean) {
@@ -166,24 +248,21 @@ function drawCheckbox(doc: jsPDF, x: number, y: number, label: string, checked: 
   doc.text(label, x + 9, y + 5)
 }
 
+// ✅ Header: SOLO fecha (quitamos “EXAMEN MEDICO” tachado)
 function drawHeader(doc: jsPDF, opts: { dateText: string }) {
   const pageW = doc.internal.pageSize.getWidth()
-  const margin = 16
-
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(12)
-  doc.setTextColor(15, 23, 42)
-  doc.text('EXAMEN MEDICO', margin, 24)
+  const margin = PDF.margin
 
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(10)
-  doc.text(opts.dateText, pageW - margin, 24, { align: 'right' })
+  doc.setTextColor(15, 23, 42)
+  doc.text(opts.dateText, pageW - margin, 18, { align: 'right' })
 }
 
 function drawFirmas(doc: jsPDF) {
   const pageW = doc.internal.pageSize.getWidth()
   const pageH = doc.internal.pageSize.getHeight()
-  const margin = 16
+  const margin = PDF.margin
 
   const signatureY = pageH - 22
   doc.setDrawColor(15, 23, 42)
@@ -197,46 +276,22 @@ function drawFirmas(doc: jsPDF) {
   doc.text('FIRMA DEL MEDICO', pageW - margin - 40, signatureY + 7, { align: 'center' })
 }
 
-// ===================== PDF COMPLETO =====================
-function buildPdfCompleto(draft: Draft, dateText: string) {
-  const doc = new jsPDF({ unit: 'mm', format: 'a4' })
+function drawClasificacionBlock(doc: jsPDF, draft: Draft, yTop: number, opts: { includeTitle: boolean }) {
   const pageW = doc.internal.pageSize.getWidth()
   const pageH = doc.internal.pageSize.getHeight()
-  const margin = 16
+  const margin = PDF.margin
+  const maxW = pageW - margin * 2
 
-  drawHeader(doc, { dateText })
+  const yClasifTop = yTop
 
-  const y0 = 52
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(10)
-  doc.setTextColor(15, 23, 42)
+  if (opts.includeTitle) {
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(12)
+    doc.setTextColor(15, 23, 42)
+    doc.text('CLASIFICACION', margin, yClasifTop)
+  }
 
-  doc.text('EMPRESA:', margin, y0)
-  doc.text(draft.empresa || ' ', margin + 26, y0)
-
-  doc.text('N° AFILIADO:', pageW / 2 + 20, y0)
-  doc.text(draft.nroAfiliado || ' ', pageW / 2 + 46, y0)
-
-  doc.text('NOMBRE Y APELLIDO:', margin, y0 + 12)
-  doc.text(draft.nombre || ' ', margin + 45, y0 + 12)
-
-  doc.text('DNI:', pageW / 2 + 20, y0 + 12)
-  doc.text(draft.dni || ' ', pageW / 2 + 30, y0 + 12)
-
-  doc.text('PUESTO A OCUPAR:', margin, y0 + 24)
-  doc.text(draft.puesto || ' ', margin + 36, y0 + 24)
-
-  const cy = y0 + 44
-  drawCheckbox(doc, margin, cy, 'Examen Preocupacional', draft.checks.preocupacional)
-  drawCheckbox(doc, margin + 70, cy, 'Examen Periodico', draft.checks.periodico)
-  drawCheckbox(doc, margin + 132, cy, 'Examen Egreso', draft.checks.egreso)
-
-  const yClasifTop = cy + 18
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(12)
-  doc.text('CLASIFICACION', margin, yClasifTop)
-
-  const y = yClasifTop + 12
+  const y = yClasifTop + (opts.includeTitle ? 12 : 0)
 
   const items: { k: ClasifKey; title: string; sub: string }[] = [
     { k: 'A', title: 'A', sub: 'SIN INCAPACIDAD' },
@@ -284,8 +339,8 @@ function buildPdfCompleto(draft: Draft, dateText: string) {
   doc.setTextColor(15, 23, 42)
 
   const obs = draft.observaciones.map((s) => s.trim()).filter(Boolean)
-  const maxW = pageW - margin * 2
 
+  // Importante: este bloque debe entrar ANTES de las firmas de la planilla
   const signatureY = pageH - 22
   const legendMaxBottom = signatureY - 10
   const obsStartY = obsTitleY + 10
@@ -329,7 +384,45 @@ function buildPdfCompleto(draft: Draft, dateText: string) {
   doc.setFontSize(9.6)
   doc.setTextColor(15, 23, 42)
   doc.text(legendLines, margin, legendY)
+}
 
+// ===================== PDF COMPLETO =====================
+function buildPdfCompleto(draft: Draft, dateText: string) {
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' })
+  const pageW = doc.internal.pageSize.getWidth()
+  const margin = PDF.margin
+
+  drawHeader(doc, { dateText })
+
+  const y0 = PDF.y0
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(10)
+  doc.setTextColor(15, 23, 42)
+
+  doc.text('EMPRESA:', margin, y0)
+  doc.text(draft.empresa || ' ', margin + 26, y0)
+
+  doc.text('N° AFILIADO:', pageW / 2 + 20, y0)
+  doc.text(draft.nroAfiliado || ' ', pageW / 2 + 46, y0)
+
+  doc.text('NOMBRE Y APELLIDO:', margin, y0 + 12)
+  doc.text(draft.nombre || ' ', margin + 45, y0 + 12)
+
+  doc.text('DNI:', pageW / 2 + 20, y0 + 12)
+  doc.text(draft.dni || ' ', pageW / 2 + 30, y0 + 12)
+
+  doc.text('PUESTO A OCUPAR:', margin, y0 + 24)
+  doc.text(draft.puesto || ' ', margin + 36, y0 + 24)
+
+  const cy = PDF.checksY
+  drawCheckbox(doc, margin, cy, 'Examen Preocupacional', draft.checks.preocupacional)
+  drawCheckbox(doc, margin + 70, cy, 'Examen Periodico', draft.checks.periodico)
+  drawCheckbox(doc, margin + 132, cy, 'Examen Egreso', draft.checks.egreso)
+
+  // ✅ Clasificación ocupa el “cuadrado azul” (entre checks y firmas)
+  drawClasificacionBlock(doc, draft, PDF.clasifTop, { includeTitle: true })
+
+  // ✅ Firmas SOLO en el completo/planilla/adicionales (no en clasificacion-vista)
   drawFirmas(doc)
   return doc
 }
@@ -339,18 +432,14 @@ function buildPdfVista(view: ViewKey, draft: Draft, dateText: string) {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' })
   const pageW = doc.internal.pageSize.getWidth()
   const pageH = doc.internal.pageSize.getHeight()
-  const margin = 16
+  const margin = PDF.margin
   const maxW = pageW - margin * 2
 
-  drawHeader(doc, { dateText })
+  // ✅ En vista “clasificacion” NO dibujamos fecha/header (pedido)
+  if (view !== 'clasificacion') drawHeader(doc, { dateText })
 
   if (view === 'planilla') {
-    const y0 = 52
-
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(12)
-    doc.setTextColor(15, 23, 42)
-    doc.text('PLANILLA', margin, y0 - 6)
+    const y0 = PDF.y0
 
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(10)
@@ -371,7 +460,7 @@ function buildPdfVista(view: ViewKey, draft: Draft, dateText: string) {
     doc.text('PUESTO A OCUPAR:', margin, y0 + 24)
     doc.text(draft.puesto || ' ', margin + 36, y0 + 24)
 
-    const cy = y0 + 44
+    const cy = PDF.checksY
     drawCheckbox(doc, margin, cy, 'Examen Preocupacional', draft.checks.preocupacional)
     drawCheckbox(doc, margin + 70, cy, 'Examen Periodico', draft.checks.periodico)
     drawCheckbox(doc, margin + 132, cy, 'Examen Egreso', draft.checks.egreso)
@@ -381,12 +470,7 @@ function buildPdfVista(view: ViewKey, draft: Draft, dateText: string) {
   }
 
   if (view === 'adicionales') {
-    const y0 = 52
-
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(12)
-    doc.setTextColor(15, 23, 42)
-    doc.text('ADICIONALES', margin, y0 - 6)
+    const y0 = PDF.y0
 
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(10)
@@ -427,7 +511,7 @@ function buildPdfVista(view: ViewKey, draft: Draft, dateText: string) {
         if (y + needed > pageH - 34) {
           doc.addPage()
           drawHeader(doc, { dateText })
-          y = 52
+          y = PDF.y0
         }
 
         doc.text(wrapped, margin, y)
@@ -439,108 +523,13 @@ function buildPdfVista(view: ViewKey, draft: Draft, dateText: string) {
     return doc
   }
 
-  // view === 'clasificacion'
+  // ✅ view === 'clasificacion'
   {
-    const yClasifTop = 52
-
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(12)
-    doc.setTextColor(15, 23, 42)
-    doc.text('CLASIFICACION', margin, yClasifTop)
-
-    const y = yClasifTop + 12
-
-    const items: { k: ClasifKey; title: string; sub: string }[] = [
-      { k: 'A', title: 'A', sub: 'SIN INCAPACIDAD' },
-      { k: 'B', title: 'B', sub: 'SIN INCAPACIDAD' },
-      { k: 'C', title: 'C', sub: 'SIN INCAPACIDAD' },
-      { k: 'D', title: 'D', sub: 'CON LIMITACION' },
-      { k: 'E', title: 'E', sub: 'NO APTO' },
-    ]
-
-    const gap = 6
-    const boxW = (pageW - margin * 2 - gap * 4) / 5
-    let x = margin
-
-    items.forEach((it, idx) => {
-      doc.setDrawColor(148, 163, 184)
-      doc.rect(x, y, boxW, 22)
-
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(11)
-      doc.setTextColor(15, 23, 42)
-      doc.text(it.title, x + 4, y + 7)
-
-      doc.setFont('helvetica', 'normal')
-      doc.setFontSize(8.8)
-      doc.setTextColor(100, 116, 139)
-      doc.text(it.sub, x + boxW / 2, y + 18, { align: 'center' })
-
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(11)
-      doc.setTextColor(15, 23, 42)
-      const mark = draft.clasificacion === it.k ? 'X' : '-'
-      doc.text(`( ${mark} )`, x + boxW - 14, y + 7)
-
-      x += boxW + (idx < 4 ? gap : 0)
-    })
-
-    const obsTitleY = y + 34
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(11)
-    doc.setTextColor(15, 23, 42)
-    doc.text('Observaciones:', margin, obsTitleY)
-
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(10)
-    doc.setTextColor(15, 23, 42)
-
-    const obs = draft.observaciones.map((s) => s.trim()).filter(Boolean)
-
-    const signatureY = pageH - 22
-    const legendMaxBottom = signatureY - 10
-    const obsStartY = obsTitleY + 10
-    const maxObsBottom = legendMaxBottom - 28
-
-    let oy = obsStartY
-
-    if (!obs.length) {
-      doc.setTextColor(100, 116, 139)
-      doc.text('-', margin, oy)
-      doc.setTextColor(15, 23, 42)
-      oy += 6
-    } else {
-      for (let i = 0; i < obs.length; i++) {
-        const line = obs[i]
-        const wrapped = doc.splitTextToSize(`• ${line}`, maxW)
-        const needed = wrapped.length * 5 + 1
-
-        if (oy + needed > maxObsBottom) {
-          doc.setTextColor(100, 116, 139)
-          doc.text('• …', margin, oy)
-          doc.setTextColor(15, 23, 42)
-          oy += 6
-          break
-        }
-
-        doc.text(wrapped, margin, oy)
-        oy += needed
-      }
-    }
-
-    const legend =
-      'Por la presente me notifico de mis afecciones detectadas en el presente examen en un total acuerdo al art. 6 inc. 3 de la Ley 24557 de Accidentes de Trabajo.'
-    const legendLines = doc.splitTextToSize(legend, maxW)
-
-    const legendY = Math.min(
-      Math.max(oy + 6, legendMaxBottom - legendLines.length * 5 - 10),
-      legendMaxBottom - legendLines.length * 5 - 10,
-    )
-
-    doc.setFontSize(9.6)
-    doc.setTextColor(15, 23, 42)
-    doc.text(legendLines, margin, legendY)
-
+    // IMPORTANTE:
+    // - Sin fecha
+    // - Sin firmas
+    // - En el “cuadrado azul”: entre checks y firmas
+    drawClasificacionBlock(doc, draft, PDF.clasifTop, { includeTitle: true })
     return doc
   }
 }
@@ -673,7 +662,9 @@ export default function PreocupacionalScreen() {
     setDraft((p) => ({ ...p, checks: { ...p.checks, [key]: !p.checks[key] } }))
   }
 
-  function updateField<K extends keyof Omit<Draft, 'checks' | 'observaciones' | 'adicionalesSelected'>>(key: K, value: Draft[K]) {
+  function updateField<
+    K extends keyof Omit<Draft, 'checks' | 'observaciones' | 'adicionalesSelected'>
+  >(key: K, value: Draft[K]) {
     setDraft((p) => ({ ...p, [key]: value }))
   }
 
@@ -714,6 +705,16 @@ export default function PreocupacionalScreen() {
       clasificacion: 'C',
       observaciones: [''],
     }))
+  }
+
+  function clearAdicionalesSelection() {
+    setDraft((p) => ({ ...p, adicionalesSelected: [] }))
+  }
+
+  /** ✅ Limpia TODO (planilla + adicionales + clasificación) para evitar acumular paciente anterior */
+  function clearAllSelection() {
+    setDraft(blankDraft())
+    setAdQ('')
   }
 
   const prefillAppliedRef = useRef(false)
@@ -773,64 +774,72 @@ export default function PreocupacionalScreen() {
     safeClearPrefillStorage()
 
     const examKey: ExamKey = payload.examKey || 'preocupacional'
-    const incomingExam = (payload.examen || '').trim()
+    const incomingExamRaw = (payload.examen || '').trim()
+
+    const incomingAdicionales = parseTipoExamenToAdicionales(incomingExamRaw, ADICIONALES_ALL)
+
+    const pick = (incoming: unknown, prev: string) => {
+      if (typeof incoming !== 'string') return prev
+      const v = incoming.trim()
+      return v ? v : prev
+    }
 
     const t = window.setTimeout(() => {
-      setDraft((p) => {
-        const nextChecks: Record<ExamKey, boolean> = { preocupacional: false, periodico: false, egreso: false }
-        nextChecks[examKey] = true
+      const nextChecks: Record<ExamKey, boolean> = {
+        preocupacional: false,
+        periodico: false,
+        egreso: false,
+      }
+      nextChecks[examKey] = true
 
-        const mergedAdicionales = (() => {
-          if (!incomingExam) return p.adicionalesSelected
-          const set = new Set(p.adicionalesSelected)
-          set.add(incomingExam)
-          return Array.from(set)
-        })()
-
-        const pick = (incoming: unknown, prev: string) => {
-          if (typeof incoming !== 'string') return prev
-          const v = incoming.trim()
-          return v ? v : prev
-        }
-
-        return {
-          ...p,
-          empresa: pick(payload.empresa, p.empresa),
-          nroAfiliado: pick(payload.nroAfiliado, p.nroAfiliado),
-          nombre: pick(payload.nombre, p.nombre),
-          dni: pick(payload.dni, p.dni),
-          puesto: pick(payload.puesto, p.puesto),
-          checks: nextChecks,
-          adicionalesSelected: mergedAdicionales,
-        }
-      })
+      setDraft(() => ({
+        ...blankDraft(),
+        empresa: pick(payload.empresa, ''),
+        nroAfiliado: pick(payload.nroAfiliado, ''),
+        nombre: pick(payload.nombre, ''),
+        dni: pick(payload.dni, ''),
+        puesto: pick(payload.puesto, ''),
+        checks: nextChecks,
+        adicionalesSelected: incomingAdicionales,
+      }))
 
       if (payload.focusTab) setView(payload.focusTab)
-      else if (incomingExam) setView('adicionales')
+      else if (incomingAdicionales.length) setView('adicionales')
       else setView('planilla')
 
-      if (incomingExam) setAdQ(incomingExam)
+      if (incomingAdicionales.length === 1) setAdQ(incomingAdicionales[0])
+      else setAdQ('')
     }, 0)
 
     return () => window.clearTimeout(t)
   }, [location.state, coercePrefill, safeReadPrefillFromStorage, safeClearPrefillStorage])
 
+  const displayedAdicionales = useMemo(() => {
+    const base = ADICIONALES_ALL
+    const baseKeys = new Set(base.map(normalizeKey))
+    const extra = (draft.adicionalesSelected || []).filter((x) => !baseKeys.has(normalizeKey(x)))
+    return extra.length ? [...uniqByNorm(extra), ...base] : base
+  }, [draft.adicionalesSelected])
+
   const filteredAdicionales = useMemo(() => {
     const qq = normalizeText(adQ)
-    if (!qq) return ADICIONALES_ALL
-    return ADICIONALES_ALL.filter((x) => normalizeText(x).includes(qq))
-  }, [adQ])
+    if (!qq) return displayedAdicionales
+
+    const r = displayedAdicionales.filter((x) => normalizeText(x).includes(qq))
+    if (!r.length) return displayedAdicionales
+    return r
+  }, [adQ, displayedAdicionales])
 
   function toggleAdicional(name: string) {
-    setDraft((p) => {
-      const has = p.adicionalesSelected.includes(name)
-      const next = has ? p.adicionalesSelected.filter((x) => x !== name) : [...p.adicionalesSelected, name]
-      return { ...p, adicionalesSelected: next }
-    })
-  }
+    const canonical = canonicalizeAdicional(name, ADICIONALES_ALL) || name
 
-  function clearAdicionalesSelection() {
-    setDraft((p) => ({ ...p, adicionalesSelected: [] }))
+    setDraft((p) => {
+      const has = p.adicionalesSelected.some((x) => normalizeKey(x) === normalizeKey(canonical))
+      const next = has
+        ? p.adicionalesSelected.filter((x) => normalizeKey(x) !== normalizeKey(canonical))
+        : [...p.adicionalesSelected, canonical]
+      return { ...p, adicionalesSelected: uniqByNorm(next) }
+    })
   }
 
   async function saveAdicionales() {
@@ -850,7 +859,7 @@ export default function PreocupacionalScreen() {
       return
     }
 
-    const selected = draft.adicionalesSelected
+    const selected = uniqByNorm(draft.adicionalesSelected || [])
     if (!selected.length) {
       Swal.fire({
         icon: 'info',
@@ -905,21 +914,20 @@ export default function PreocupacionalScreen() {
         showConfirmButton: false,
       })
 
-      clearAdicionalesSelection()
-      setAdQ('')
+      clearAllSelection()
+      setView('planilla')
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Error'
       Swal.fire({ icon: 'error', title: 'No se pudo guardar', text: msg })
     }
   }
 
-  // ===================== ✅ EXCEPCIÓN LOCAL: Enter en Observaciones =====================
+  // ===================== ✅ Enter en Observaciones =====================
 
   const handleEnterObs = useCallback(
     (obsIndex: number) => {
       const lastIdx = draft.observaciones.length - 1
 
-      // si es la última -> crea otra y enfoca
       if (obsIndex >= lastIdx) {
         const nextIndex = lastIdx + 1
         pendingObsFocusIndexRef.current = nextIndex
@@ -927,7 +935,6 @@ export default function PreocupacionalScreen() {
         return
       }
 
-      // si no es la última, pasa a la siguiente
       const next = obsRefs.current[obsIndex + 1]
       if (next) next.focus()
     },
@@ -1081,7 +1088,7 @@ export default function PreocupacionalScreen() {
 
               <div className="adicionales-grid">
                 {filteredAdicionales.map((name) => {
-                  const checked = draft.adicionalesSelected.includes(name)
+                  const checked = draft.adicionalesSelected.some((x) => normalizeKey(x) === normalizeKey(name))
                   return (
                     <label key={name} className="adicional-item">
                       <input type="checkbox" checked={checked} onChange={() => toggleAdicional(name)} />
@@ -1153,7 +1160,7 @@ export default function PreocupacionalScreen() {
                           if ((e.nativeEvent as unknown as { isComposing?: boolean })?.isComposing) return
 
                           e.preventDefault()
-                          e.stopPropagation() // ✅ evita que lo agarre el Enter global
+                          e.stopPropagation()
 
                           handleEnterObs(i)
                         }}
@@ -1198,11 +1205,7 @@ export default function PreocupacionalScreen() {
             </div>
 
             <div className="preocupacional__preview-frame">
-              {previewUrl ? (
-                <iframe title="preview" src={previewUrl} />
-              ) : (
-                <div className="preocupacional__preview-loading">Generando vista previa…</div>
-              )}
+              {previewUrl ? <iframe title="preview" src={previewUrl} /> : <div className="preocupacional__preview-loading">Generando vista previa…</div>}
             </div>
           </div>
         </div>

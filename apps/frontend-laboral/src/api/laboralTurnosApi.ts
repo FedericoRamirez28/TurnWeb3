@@ -58,6 +58,9 @@ type BackendCreateResponse = {
 
 type BackendListResponse = { turnos: LaborTurno[] }
 
+// ✅ si el backend devuelve {turno} en update, lo tipamos igual
+type BackendUpdateResponse = { turno: LaborTurno }
+
 function mapCreateTurnoToLaborTurno(t: BackendCreateResponse['turno']): LaborTurno {
   return {
     id: t.id,
@@ -90,6 +93,7 @@ export async function laboralTurnosList(params?: {
   from?: string
   to?: string
   month?: string
+  sede?: SedeKey
 }): Promise<LaborTurno[]> {
   const r = await apiJson<BackendListResponse>('/laboral/turnos', {
     query: {
@@ -97,15 +101,34 @@ export async function laboralTurnosList(params?: {
       from: params?.from?.trim() || undefined,
       to: params?.to?.trim() || undefined,
       month: params?.month?.trim() || undefined,
+      sede: params?.sede?.trim() || undefined,
     },
   })
 
   return Array.isArray(r.turnos) ? r.turnos : []
 }
 
-// ✅ NUEVO: borrar turno
 export async function laboralTurnoDelete(id: string): Promise<void> {
   await apiJson<{ ok: boolean }>(`/laboral/turnos/${encodeURIComponent(id)}`, {
     method: 'DELETE',
   })
+}
+
+export async function laboralTurnoUpdate(
+  id: string,
+  input: Partial<{
+    nombre: string
+    dni: string
+    nroAfiliado?: string | null
+    puesto: string
+    tipoExamen: string
+    fechaTurnoISO: string
+    horaTurno: string
+  }>,
+): Promise<LaborTurno> {
+  const r = await apiJson<BackendUpdateResponse>(`/laboral/turnos/${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    body: input,
+  })
+  return r.turno
 }

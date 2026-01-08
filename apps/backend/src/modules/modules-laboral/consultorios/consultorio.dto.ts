@@ -45,9 +45,7 @@ export class CreateConsultorioTurnoDto {
   @Matches(ISO_DAY_RE, { message: 'nacimientoISO inválido (YYYY-MM-DD)' })
   nacimientoISO?: string;
 
-  @IsString()
-  @MaxLength(180)
-  motivo!: string;
+  // ✅ motivo eliminado
 
   @IsString()
   @MaxLength(4000)
@@ -66,7 +64,6 @@ export type ConsultorioTurnoResponse = {
   dni: string;
   nombre: string;
   nacimientoISO: string | null;
-  motivo: string;
   diagnostico: string;
 
   fechaTurnoISO: string;

@@ -1,28 +1,17 @@
+// src/components/ui/home/TurnosLaboralCard.tsx
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Swal from 'sweetalert2'
+
 import escobaPng from '@/assets/icons/escoba.png'
-import { laboralTurnoDelete } from '@/api/laboralTurnosApi'
 import { listCompanies, type Company } from '@/api/companiesApi'
-
-type SedeKey = 'caba' | 'sanjusto'
-
-type LaborTurno = {
-  id: string
-  sede: SedeKey
-  empresa: string
-  companyId: string
-  employeeId: string
-  nombre: string
-  dni: string
-  nroAfiliado: string
-  puesto: string
-  fechaRecepcionISO: string
-  fechaTurnoISO: string
-  tipoExamen: string
-  createdAt: string
-  horaTurno?: string
-}
+import {
+  laboralTurnoCreate,
+  laboralTurnoDelete,
+  laboralTurnosList,
+  type LaborTurno,
+  type SedeKey,
+} from '@/api/laboralTurnosApi'
 
 type PreocupacionalPrefill = {
   empresa?: string
@@ -49,8 +38,35 @@ type Draft = {
 }
 
 const STORAGE_KEY_PREFILL = 'medic_laboral_preocupacional_prefill_v1'
+const STORAGE_KEY_SEDE = 'medic_laboral_sede_v1'
 const PREOCUPACIONAL_ROUTE = '/preocupacional'
 const FIXED_TURNO_HORA = '08:00'
+
+function isoDay(d = new Date()) {
+  const yyyy = d.getFullYear()
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}
+
+function dayPart(iso: string) {
+  return (iso || '').slice(0, 10)
+}
+
+function normalizeText(s: string) {
+  return (s || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+}
+
+function inRangeISO(dateISO: string, fromISO: string, toISO: string) {
+  if (!dateISO) return false
+  if (fromISO && dateISO < fromISO) return false
+  if (toISO && dateISO > toISO) return false
+  return true
+}
 
 function savePreocupacionalPrefill(payload: PreocupacionalPrefill) {
   try {
@@ -60,6 +76,44 @@ function savePreocupacionalPrefill(payload: PreocupacionalPrefill) {
   }
 }
 
+function readPersistedSede(): SedeKey {
+  try {
+    const v = String(localStorage.getItem(STORAGE_KEY_SEDE) || '').trim()
+    if (v === 'caba' || v === 'sanjusto') return v
+  } catch {
+    // no-op
+  }
+  return 'caba'
+}
+
+function persistSede(next: SedeKey) {
+  try {
+    localStorage.setItem(STORAGE_KEY_SEDE, next)
+    window.dispatchEvent(new CustomEvent('medic:laboral-sede', { detail: next }))
+  } catch {
+    // no-op
+  }
+}
+
+type ExamKey = 'preocupacional' | 'periodico' | 'egreso'
+
+function detectExamKeyFromPicked(picked: string[], fallbackJoined: string): ExamKey {
+  const all = [...picked, fallbackJoined].filter(Boolean).join(' + ')
+  const k = normalizeText(all)
+
+  // Ojo: normalizamos y buscamos por palabras clave
+  if (k.includes('egreso')) return 'egreso'
+  if (k.includes('periodico') || k.includes('periódico')) return 'periodico'
+  // preocupacional por defecto
+  return 'preocupacional'
+}
+
+function focusTabFromTipoExamen(tipo: string): 'planilla' | 'adicionales' | 'clasificacion' {
+  return tipo?.trim() ? 'adicionales' : 'planilla'
+}
+
+
+// ✅ MISMA CARTILLA QUE PreocupacionalScreen (para que el autofill matchee perfecto)
 const ADICIONALES_CONCEPTO: string[] = [
   'Preocupacional / Basico de ley',
   'Periódico',
@@ -101,123 +155,11 @@ const ADICIONALES_LAB: string[] = [
 
 const ADICIONALES_BASE = [...ADICIONALES_CONCEPTO, ...ADICIONALES_LAB]
 
-function isoDay(d = new Date()) {
-  const yyyy = d.getFullYear()
-  const mm = String(d.getMonth() + 1).padStart(2, '0')
-  const dd = String(d.getDate()).padStart(2, '0')
-  return `${yyyy}-${mm}-${dd}`
-}
-
-function dayPart(iso: string) {
-  return (iso || '').slice(0, 10)
-}
-
-function normalizeText(s: string) {
-  return (s || '')
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .trim()
-}
-
-function inRangeISO(dateISO: string, fromISO: string, toISO: string) {
-  if (!dateISO) return false
-  if (fromISO && dateISO < fromISO) return false
-  if (toISO && dateISO > toISO) return false
-  return true
-}
-
-function isRecord(v: unknown): v is Record<string, unknown> {
-  return typeof v === 'object' && v !== null
-}
-
-function pickErrorMessage(data: unknown, status: number): string {
-  if (typeof data === 'string' && data.trim()) return data
-  if (isRecord(data)) {
-    const msg = data.message
-    const err = data.error
-    const detail = data.detail
-    if (typeof msg === 'string' && msg.trim()) return msg
-    if (typeof err === 'string' && err.trim()) return err
-    if (typeof detail === 'string' && detail.trim()) return detail
-  }
-  return `HTTP ${status}`
-}
-
-function buildApiBase() {
-  const v = import.meta.env?.VITE_API_BASE_URL
-  if (typeof v === 'string' && v.trim()) return v.trim().replace(/\/$/, '')
-  return ''
-}
-
-async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
-  const base = buildApiBase()
-  const url = path.startsWith('http') ? path : `${base}${path}`
-
-  const res = await fetch(url, {
-    credentials: 'include',
-    headers: {
-      ...(init?.body ? { 'Content-Type': 'application/json' } : {}),
-      ...(init?.headers || {}),
-    },
-    ...init,
-  })
-
-  const text = await res.text()
-
-  let data: unknown = null
-  try {
-    data = text ? (JSON.parse(text) as unknown) : null
-  } catch {
-    data = text
-  }
-
-  if (!res.ok) {
-    throw new Error(pickErrorMessage(data, res.status))
-  }
-
-  return data as T
-}
-
-type CreateLaborTurnoResponse = { turno: LaborTurno }
-type ListLaborTurnosResponse = { turnos: LaborTurno[] }
-
-async function createLaborTurno(payload: {
-  sede: SedeKey
-  empresa: string
-  nombre: string
-  dni: string
-  nroAfiliado?: string
-  puesto: string
-  tipoExamen: string
-  fechaRecepcionISO: string
-  fechaTurnoISO: string
-  horaTurno: string
-}): Promise<CreateLaborTurnoResponse> {
-  return fetchJson<CreateLaborTurnoResponse>('/laboral/turnos', {
-    method: 'POST',
-    body: JSON.stringify(payload),
-  })
-}
-
-async function listLaborTurnos(params: { q?: string; from?: string; to?: string; month?: string }): Promise<ListLaborTurnosResponse> {
-  const usp = new URLSearchParams()
-  if (params.q && params.q.trim()) usp.set('q', params.q.trim())
-  if (params.from) usp.set('from', params.from)
-  if (params.to) usp.set('to', params.to)
-  if (params.month) usp.set('month', params.month)
-
-  const qs = usp.toString()
-  return fetchJson<ListLaborTurnosResponse>(`/laboral/turnos${qs ? `?${qs}` : ''}`, { method: 'GET' })
-}
-
-/* ===================== COMPONENT ===================== */
-
 export function TurnosLaboralCard() {
   const navigate = useNavigate()
 
   const [draft, setDraft] = useState<Draft>(() => ({
-    sede: 'caba',
+    sede: readPersistedSede(),
     nombre: '',
     empresa: '',
     nroAfiliado: '',
@@ -240,22 +182,22 @@ export function TurnosLaboralCard() {
   const [smartQ, setSmartQ] = useState('')
   const [viewerTurnos, setViewerTurnos] = useState<LaborTurno[]>([])
   const [viewerLoading, setViewerLoading] = useState(false)
-
   const [cancelMode, setCancelMode] = useState(false)
 
   const viewerAbortRef = useRef<AbortController | null>(null)
   const viewerReqSeqRef = useRef(0)
 
-  // ✅ Cartilla de empresas para autocompletar
+  // ✅ Cartilla de empresas
   const [companies, setCompanies] = useState<Company[]>([])
   const [companiesLoading, setCompaniesLoading] = useState(false)
   const autoCompanyIdRef = useRef<string | null>(null)
 
   useEffect(() => {
     let alive = true
+
     ;(async () => {
+      setCompaniesLoading(true)
       try {
-        setCompaniesLoading(true)
         const r = await listCompanies({ q: '', filter: 'actives' })
         if (!alive) return
         setCompanies(Array.isArray(r.items) ? r.items : [])
@@ -267,10 +209,23 @@ export function TurnosLaboralCard() {
         setCompaniesLoading(false)
       }
     })()
+
     return () => {
       alive = false
     }
   }, [])
+
+  function setField<K extends keyof Draft>(key: K, value: Draft[K]) {
+    setDraft((p) => ({ ...p, [key]: value }))
+  }
+
+  function onChangeSede(next: SedeKey) {
+    setDraft((p) => ({ ...p, sede: next }))
+    persistSede(next)
+    if (normalizeText(smartQ) || viewFrom || viewTo) {
+      setViewerTurnos([])
+    }
+  }
 
   function findCompanyByExactName(name: string) {
     const key = normalizeText(name)
@@ -305,6 +260,7 @@ export function TurnosLaboralCard() {
     const all = [...ADICIONALES_BASE, ...(serverAdicionales || [])]
     const seen = new Set<string>()
     const uniq: string[] = []
+
     for (const it of all) {
       const k = normalizeText(it)
       if (!k) continue
@@ -317,10 +273,6 @@ export function TurnosLaboralCard() {
     if (!qq) return uniq
     return uniq.filter((x) => normalizeText(x).includes(qq))
   }, [examQ, serverAdicionales])
-
-  function setField<K extends keyof Draft>(key: K, value: Draft[K]) {
-    setDraft((p) => ({ ...p, [key]: value }))
-  }
 
   function clearSelection() {
     autoCompanyIdRef.current = null
@@ -369,7 +321,7 @@ export function TurnosLaboralCard() {
 
     setBusy(true)
     try {
-      const payload = {
+      const turno = await laboralTurnoCreate({
         sede: draft.sede,
         empresa: draft.empresa.trim(),
         nombre: draft.nombre.trim(),
@@ -380,19 +332,21 @@ export function TurnosLaboralCard() {
         fechaRecepcionISO: draft.fechaRecepcionISO,
         fechaTurnoISO: draft.fechaTurnoISO,
         horaTurno: FIXED_TURNO_HORA,
-      }
-
-      await createLaborTurno(payload)
+      })
 
       Swal.fire({
         icon: 'success',
         title: 'Turno tomado',
-        text: `Se guardó el turno ${draft.fechaTurnoISO} ${FIXED_TURNO_HORA} (${draft.sede === 'caba' ? 'CABA' : 'San Justo'}).`,
+        text: `Se guardó el turno ${turno.fechaTurnoISO} ${turno.horaTurno || FIXED_TURNO_HORA} (${draft.sede === 'caba' ? 'CABA' : 'San Justo'}).`,
         timer: 1600,
         showConfirmButton: false,
       })
 
       clearSelection()
+
+      if (normalizeText(smartQ) || viewFrom || viewTo) {
+        setViewerTurnos((prev) => [turno, ...prev])
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Error'
       const looksLikeDup =
@@ -431,32 +385,30 @@ export function TurnosLaboralCard() {
 
     const run = async () => {
       setViewerLoading(true)
-      let shouldStop = false
-
       try {
-        const r = await listLaborTurnos({ q: smartQ, from: viewFrom, to: viewTo })
+        const list = await laboralTurnosList({
+          q: smartQ,
+          from: viewFrom,
+          to: viewTo,
+          sede: draft.sede,
+        } as any)
 
-        if (ac.signal.aborted || seq !== viewerReqSeqRef.current) {
-          shouldStop = true
-        } else {
-          const items = Array.isArray(r.turnos) ? r.turnos.slice() : []
+        if (ac.signal.aborted || seq !== viewerReqSeqRef.current) return
 
-          items.sort((a, b) => {
-            const byDate = dayPart(a.fechaTurnoISO || '').localeCompare(dayPart(b.fechaTurnoISO || ''))
-            if (byDate !== 0) return byDate
-            return (a.createdAt || '').localeCompare(b.createdAt || '')
-          })
+        const items = Array.isArray(list) ? list.slice() : []
 
-          setViewerTurnos(items)
-        }
+        items.sort((a, b) => {
+          const byDate = dayPart(a.fechaTurnoISO || '').localeCompare(dayPart(b.fechaTurnoISO || ''))
+          if (byDate !== 0) return byDate
+          return (a.createdAt || '').localeCompare(b.createdAt || '')
+        })
+
+        setViewerTurnos(items)
       } catch {
-        if (ac.signal.aborted || seq !== viewerReqSeqRef.current) {
-          shouldStop = true
-        } else {
-          setViewerTurnos([])
-        }
+        if (ac.signal.aborted || seq !== viewerReqSeqRef.current) return
+        setViewerTurnos([])
       } finally {
-        if (!shouldStop && !ac.signal.aborted && seq === viewerReqSeqRef.current) {
+        if (!ac.signal.aborted && seq === viewerReqSeqRef.current) {
           setViewerLoading(false)
         }
       }
@@ -464,7 +416,7 @@ export function TurnosLaboralCard() {
 
     const t = window.setTimeout(() => void run(), 250)
     return () => window.clearTimeout(t)
-  }, [hasViewerFilters, smartQ, viewFrom, viewTo])
+  }, [hasViewerFilters, smartQ, viewFrom, viewTo, draft.sede])
 
   const filteredTurnos = useMemo(() => {
     if (!hasViewerFilters) return []
@@ -473,6 +425,8 @@ export function TurnosLaboralCard() {
     return viewerTurnos.filter((t) => {
       const d = dayPart(t.fechaTurnoISO || '')
       if (!inRangeISO(d, viewFrom, viewTo)) return false
+      if (t.sede !== draft.sede) return false
+
       if (!qq) return true
 
       const hay =
@@ -494,7 +448,7 @@ export function TurnosLaboralCard() {
 
       return hay.includes(qq)
     })
-  }, [viewerTurnos, smartQ, viewFrom, viewTo, hasViewerFilters])
+  }, [viewerTurnos, smartQ, viewFrom, viewTo, hasViewerFilters, draft.sede])
 
   const shouldShowResults = hasViewerFilters && filteredTurnos.length > 0
 
@@ -506,21 +460,24 @@ export function TurnosLaboralCard() {
     setCancelMode(false)
   }
 
-  function goToPreocupacionalFromTurno(t: LaborTurno) {
-    const payload: PreocupacionalPrefill = {
-      empresa: t.empresa || '',
-      nroAfiliado: t.nroAfiliado || '',
-      nombre: t.nombre || '',
-      dni: t.dni || '',
-      puesto: t.puesto || '',
-      examen: t.tipoExamen || '',
-      examKey: 'preocupacional',
-      focusTab: t.tipoExamen ? 'adicionales' : 'planilla',
-    }
+function goToPreocupacionalFromTurno(t: LaborTurno) {
+  const examKey = detectExamKeyFromPicked([], t.tipoExamen || '')
 
-    savePreocupacionalPrefill(payload)
-    navigate(PREOCUPACIONAL_ROUTE, { state: payload })
+  const payload: PreocupacionalPrefill = {
+    empresa: t.empresa || '',
+    nroAfiliado: t.nroAfiliado || '',
+    nombre: t.nombre || '',
+    dni: t.dni || '',
+    puesto: t.puesto || '',
+    examen: t.tipoExamen || '',
+    examKey,
+    focusTab: focusTabFromTipoExamen(t.tipoExamen || ''),
   }
+
+  savePreocupacionalPrefill(payload)
+  navigate(PREOCUPACIONAL_ROUTE, { state: payload })
+}
+
 
   async function cancelTurnoRow(t: LaborTurno) {
     if (busy) return
@@ -591,7 +548,7 @@ export function TurnosLaboralCard() {
             <button
               type="button"
               className={'labor-turnos__tab' + (draft.sede === 'caba' ? ' labor-turnos__tab--active' : '')}
-              onClick={() => setField('sede', 'caba')}
+              onClick={() => onChangeSede('caba')}
               disabled={busy}
             >
               CABA
@@ -599,7 +556,7 @@ export function TurnosLaboralCard() {
             <button
               type="button"
               className={'labor-turnos__tab' + (draft.sede === 'sanjusto' ? ' labor-turnos__tab--active' : '')}
-              onClick={() => setField('sede', 'sanjusto')}
+              onClick={() => onChangeSede('sanjusto')}
               disabled={busy}
             >
               San Justo
@@ -635,9 +592,7 @@ export function TurnosLaboralCard() {
                     autoCompanyIdRef.current = null
                   }
                 }}
-                onBlur={() => {
-                  applyCompanyAutofill(draft.empresa)
-                }}
+                onBlur={() => applyCompanyAutofill(draft.empresa)}
               />
 
               <datalist id="companies_datalist">
@@ -655,13 +610,7 @@ export function TurnosLaboralCard() {
 
             <label className="labor-turnos__label">
               Nombre y apellido
-              <input
-                className="input"
-                value={draft.nombre}
-                onChange={(e) => setField('nombre', e.target.value)}
-                placeholder="Ej: Juan Pérez"
-                disabled={busy}
-              />
+              <input className="input" value={draft.nombre} onChange={(e) => setField('nombre', e.target.value)} placeholder="Ej: Juan Pérez" disabled={busy} />
             </label>
 
             <label className="labor-turnos__label">
@@ -680,25 +629,12 @@ export function TurnosLaboralCard() {
 
             <label className="labor-turnos__label">
               DNI
-              <input
-                className="input"
-                value={draft.dni}
-                onChange={(e) => setField('dni', e.target.value)}
-                placeholder="Documento"
-                inputMode="numeric"
-                disabled={busy}
-              />
+              <input className="input" value={draft.dni} onChange={(e) => setField('dni', e.target.value)} placeholder="Documento" inputMode="numeric" disabled={busy} />
             </label>
 
             <label className="labor-turnos__label">
               Fecha recepcionado
-              <input
-                type="date"
-                className="input"
-                value={draft.fechaRecepcionISO}
-                onChange={(e) => setField('fechaRecepcionISO', e.target.value)}
-                disabled={busy}
-              />
+              <input type="date" className="input" value={draft.fechaRecepcionISO} onChange={(e) => setField('fechaRecepcionISO', e.target.value)} disabled={busy} />
             </label>
 
             <label className="labor-turnos__label">
@@ -816,7 +752,10 @@ export function TurnosLaboralCard() {
               <div>
                 <div className="labor-turnos__viewer-title">Ver turnos tomados</div>
                 <div className="labor-turnos__viewer-sub">
-                  Usá rango de fechas o búsqueda (empresa / DNI / nombre). Se ordenan por <b>orden de llamado</b>.
+                  Usá rango de fechas o búsqueda (empresa / DNI / nombre). Se ordenan por <b>orden de llamado</b>.{' '}
+                  <span style={{ color: 'var(--color-ink-soft)' }}>
+                    (Vista actual: <b>{draft.sede === 'caba' ? 'CABA' : 'San Justo'}</b>)
+                  </span>
                 </div>
               </div>
 
@@ -850,13 +789,17 @@ export function TurnosLaboralCard() {
               </label>
             </div>
 
-            {!hasViewerFilters && <div className="labor-turnos__viewer-empty">Tip: para ver turnos, cargá <b>Desde/Hasta</b> o escribí algo en <b>Búsqueda inteligente</b>.</div>}
+            {!hasViewerFilters && (
+              <div className="labor-turnos__viewer-empty">
+                Tip: para ver turnos, cargá <b>Desde/Hasta</b> o escribí algo en <b>Búsqueda inteligente</b>.
+              </div>
+            )}
 
             {hasViewerFilters && viewerLoading && <div className="labor-turnos__viewer-empty">Buscando turnos…</div>}
 
-            {hasViewerFilters && !viewerLoading && !shouldShowResults && <div className="labor-turnos__viewer-empty">Sin coincidencias para los filtros actuales.</div>}
+            {hasViewerFilters && !viewerLoading && filteredTurnos.length === 0 && <div className="labor-turnos__viewer-empty">Sin coincidencias para los filtros actuales.</div>}
 
-            {shouldShowResults && (
+            {hasViewerFilters && filteredTurnos.length > 0 && (
               <div className="labor-turnos__viewer-results">
                 <div className="labor-turnos__viewer-meta">
                   Coincidencias: <b>{filteredTurnos.length}</b>
@@ -949,8 +892,8 @@ export function TurnosLaboralCard() {
             type="button"
             className={'btn btn--outline'}
             onClick={() => setCancelMode((v) => !v)}
-            disabled={busy || !shouldShowResults}
-            title={shouldShowResults ? 'Activar/desactivar modo cancelar' : 'Primero buscá turnos para poder cancelar'}
+            disabled={busy || !(hasViewerFilters && filteredTurnos.length > 0)}
+            title={hasViewerFilters && filteredTurnos.length > 0 ? 'Activar/desactivar modo cancelar' : 'Primero buscá turnos para poder cancelar'}
           >
             {cancelMode ? 'Salir de cancelar' : 'Cancelar turnos'}
           </button>

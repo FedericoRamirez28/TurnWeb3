@@ -6,8 +6,8 @@ import {
   Param,
   Post,
   Query,
+  Patch,
 } from '@nestjs/common';
-import type { Request } from 'express';
 import { LaboralTurnosService } from './laboral-turnos.service';
 
 type CreateLaboralTurnoDto = {
@@ -20,7 +20,7 @@ type CreateLaboralTurnoDto = {
   tipoExamen: string;
   fechaRecepcionISO: string;
   fechaTurnoISO: string;
-  horaTurno: string; // HH:mm
+  horaTurno: string;
 };
 
 @Controller('laboral/turnos')
@@ -39,8 +39,17 @@ export class LaboralTurnosController {
     @Query('from') from?: string,
     @Query('to') to?: string,
     @Query('month') month?: string,
+    @Query('sede') sede?: 'caba' | 'sanjusto', // ✅ NUEVO
   ) {
-    return this.service.list({ q, from, to, month });
+    return this.service.list({ q, from, to, month, sede });
+  }
+
+  @Patch(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() dto: Partial<CreateLaboralTurnoDto>,
+  ) {
+    return this.service.update(id, dto);
   }
 
   @Delete(':id')

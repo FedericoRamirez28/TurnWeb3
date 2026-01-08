@@ -33,7 +33,7 @@ function toResp(x: {
   dni: string;
   nombre: string;
   nacimientoISO: string | null;
-  motivo: string;
+  // motivo puede seguir existiendo en la tabla, pero NO lo devolvemos
   diagnostico: string;
   fechaTurnoISO: string;
   createdAt: Date;
@@ -45,7 +45,6 @@ function toResp(x: {
     dni: x.dni,
     nombre: x.nombre,
     nacimientoISO: x.nacimientoISO,
-    motivo: x.motivo,
     diagnostico: x.diagnostico,
     fechaTurnoISO: x.fechaTurnoISO,
     createdAt: x.createdAt.toISOString(),
@@ -73,7 +72,8 @@ export class ConsultoriosService {
     if (to && !isISODateDay(to))
       throw new BadRequestException('to inválido (YYYY-MM-DD)');
 
-    const where: Prisma.LaboralConsultorioTurnoWhereInput = {};
+    // ✅ IMPORTANTE: scope por usuario (si no, se mezclan datos)
+    const where: Prisma.LaboralConsultorioTurnoWhereInput = { userId };
 
     if (from || to) {
       where.fechaTurnoISO = {};
@@ -91,7 +91,7 @@ export class ConsultoriosService {
         { empresaNombreSnap: { contains: qq, mode: 'insensitive' } },
         { nombre: { contains: qq, mode: 'insensitive' } },
         { dni: { contains: qq, mode: 'insensitive' } },
-        { motivo: { contains: qq, mode: 'insensitive' } },
+        // ✅ motivo eliminado del search
         { diagnostico: { contains: qq, mode: 'insensitive' } },
       ];
     }
@@ -126,7 +126,6 @@ export class ConsultoriosService {
     const companyId = norm(dto.companyId);
     const dni = norm(dto.dni);
     const nombre = norm(dto.nombre);
-    const motivo = norm(dto.motivo);
     const diagnostico = norm(dto.diagnostico);
     const fechaTurnoISO = norm(dto.fechaTurnoISO);
     const nacimientoISO = dto.nacimientoISO ? norm(dto.nacimientoISO) : null;
@@ -134,7 +133,6 @@ export class ConsultoriosService {
     if (!companyId) throw new BadRequestException('companyId requerido');
     if (!dni) throw new BadRequestException('dni requerido');
     if (!nombre) throw new BadRequestException('nombre requerido');
-    if (!motivo) throw new BadRequestException('motivo requerido');
     if (!diagnostico) throw new BadRequestException('diagnostico requerido');
     if (!isISODateDay(fechaTurnoISO))
       throw new BadRequestException('fechaTurnoISO inválida (YYYY-MM-DD)');
@@ -148,6 +146,9 @@ export class ConsultoriosService {
     if (!company)
       throw new BadRequestException('Empresa inexistente o dada de baja');
 
+    // ✅ compat: si la columna motivo sigue siendo NOT NULL en DB, guardamos vacío
+    const motivo = '';
+
     try {
       const created = await this.prisma.laboralConsultorioTurno.create({
         data: {
@@ -157,7 +158,7 @@ export class ConsultoriosService {
           dni,
           nombre,
           nacimientoISO,
-          motivo,
+          motivo, // ✅
           diagnostico,
           fechaTurnoISO,
         },

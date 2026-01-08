@@ -9,7 +9,7 @@ import {
   Query,
   Req,
   UnauthorizedException,
-  UseGuards, // <--- 1. Importamos UseGuards
+  UseGuards,
 } from '@nestjs/common';
 import type { Request } from 'express';
 
@@ -20,10 +20,10 @@ import {
   ConsultorioTurnoResponse,
 } from './consultorio.dto';
 
-// <--- 2. Importamos tu Guard y el tipo del payload
-// Ajusta la ruta ('../../auth/jwt-cookie.guard') si tu archivo está en otra carpeta, 
-// pero usualmente es ../../auth/...
-import { JwtCookieAuthGuard, type JwtPayload } from '../../auth/jwt-cookie.guard';
+import {
+  JwtCookieAuthGuard,
+  type JwtPayload,
+} from '../../auth/jwt-cookie.guard';
 
 type RequestWithUser = Request & { user?: JwtPayload };
 
@@ -51,7 +51,7 @@ function resolveUserId(req: RequestWithUser): string {
 }
 
 @Controller('laboral/consultorios')
-@UseGuards(JwtCookieAuthGuard) // <--- 3. APLICAMOS EL GUARD AQUÍ
+@UseGuards(JwtCookieAuthGuard)
 export class ConsultoriosController {
   constructor(private readonly service: ConsultoriosService) {}
 

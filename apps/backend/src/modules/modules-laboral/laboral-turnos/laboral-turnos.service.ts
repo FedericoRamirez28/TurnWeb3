@@ -32,6 +32,15 @@ function isHHmm(s: string) {
   return true
 }
 
+function isSedeKey(s: string) {
+  return s === 'caba' || s === 'sanjusto'
+}
+
+function isNonEmptyStringOrUndefined(v: unknown) {
+  if (v === undefined) return true
+  return typeof v === 'string' && v.trim().length > 0
+}
+
 @Injectable()
 export class LaboralTurnosService {
   constructor(private prisma: PrismaService) {}
@@ -73,7 +82,6 @@ export class LaboralTurnosService {
     if (!isHHmm(horaTurno))
       throw new BadRequestException('Hora turno inválida (HH:mm)')
 
-    // 1) Buscar/crear Company
     const company = await this.prisma.laboralCompany.findFirst({
       where: { nombre: { equals: empresa, mode: 'insensitive' } },
     })
@@ -88,7 +96,6 @@ export class LaboralTurnosService {
           },
         })
 
-    // 2) Upsert Employee por (companyId + dni)
     const employee = await this.prisma.laboralEmployee.upsert({
       where: { companyId_dni: { companyId: companyRow.id, dni } },
       update: {
@@ -107,9 +114,6 @@ export class LaboralTurnosService {
       },
     })
 
-    // ✅ SIN BLOQUEO DE SLOT (se permiten múltiples turnos mismo día/hora)
-
-    // 3) Evitar duplicados (mismo empleado + fechaTurno + examen + sede + horaTurno)
     const exists = await this.prisma.laboralTurno.findFirst({
       where: {
         employeeId: employee.id,
@@ -167,11 +171,19 @@ export class LaboralTurnosService {
     return { turno }
   }
 
-  async list(input: { q?: string; from?: string; to?: string; month?: string }) {
+  // ✅ ahora acepta sede
+  async list(input: {
+    q?: string
+    from?: string
+    to?: string
+    month?: string
+    sede?: string
+  }) {
     const q = String(input.q ?? '').trim()
     const from = String(input.from ?? '').trim()
     const to = String(input.to ?? '').trim()
     const month = String(input.month ?? '').trim()
+    const sede = String(input.sede ?? '').trim()
 
     let rangeFrom = ''
     let rangeToExclusive = ''
@@ -210,6 +222,12 @@ export class LaboralTurnosService {
         (where.fechaTurnoISO as Prisma.StringFilter).lt = rangeToExclusive
     }
 
+    if (sede) {
+      if (!isSedeKey(sede))
+        throw new BadRequestException('sede inválida (caba | sanjusto)')
+      where.sede = sede as 'caba' | 'sanjusto'
+    }
+
     if (q) {
       where.OR = [
         { company: { nombre: { contains: q, mode: 'insensitive' } } },
@@ -223,9 +241,9 @@ export class LaboralTurnosService {
       ]
     }
 
+    // ✅ CLAVE: traemos los snapshots
     const rows = await this.prisma.laboralTurno.findMany({
       where,
-      // ✅ orden de llamado (más viejo primero) dentro del día
       orderBy: [{ fechaTurnoISO: 'desc' }, { createdAt: 'asc' }],
       take: 500,
       select: {
@@ -236,6 +254,12 @@ export class LaboralTurnosService {
         horaTurno: true,
         tipoExamen: true,
         createdAt: true,
+
+        nombreSnap: true,
+        dniSnap: true,
+        nroAfiliadoSnap: true,
+        puestoSnap: true,
+
         company: { select: { id: true, nombre: true } },
         employee: {
           select: {
@@ -255,10 +279,13 @@ export class LaboralTurnosService {
       empresa: r.company.nombre,
       companyId: r.company.id,
       employeeId: r.employee.id,
-      nombre: r.employee.nombre,
-      dni: r.employee.dni,
-      nroAfiliado: r.employee.nroAfiliado ?? '',
-      puesto: r.employee.puesto ?? '',
+
+      // ✅ mostrar lo editado
+      nombre: (r.nombreSnap ?? r.employee.nombre) || '',
+      dni: (r.dniSnap ?? r.employee.dni) || '',
+      nroAfiliado: (r.nroAfiliadoSnap ?? r.employee.nroAfiliado ?? '') || '',
+      puesto: (r.puestoSnap ?? r.employee.puesto ?? '') || '',
+
       fechaRecepcionISO: r.fechaRecepcionISO,
       fechaTurnoISO: r.fechaTurnoISO,
       horaTurno: r.horaTurno ?? '',
@@ -267,6 +294,107 @@ export class LaboralTurnosService {
     }))
 
     return { turnos }
+  }
+
+  // ✅ UPDATE (PATCH) para el lápiz
+  async update(
+    id: string,
+    dto: Partial<{
+      nombre: string
+      dni: string
+      nroAfiliado?: string | null
+      puesto: string
+      tipoExamen: string
+      fechaTurnoISO: string
+      horaTurno: string
+    }>,
+  ) {
+    const tid = String(id || '').trim()
+    if (!tid) throw new BadRequestException('id requerido')
+
+    if (!isNonEmptyStringOrUndefined(dto.nombre))
+      throw new BadRequestException('nombre inválido')
+    if (!isNonEmptyStringOrUndefined(dto.dni))
+      throw new BadRequestException('dni inválido')
+    if (!isNonEmptyStringOrUndefined(dto.puesto))
+      throw new BadRequestException('puesto inválido')
+    if (!isNonEmptyStringOrUndefined(dto.tipoExamen))
+      throw new BadRequestException('tipoExamen inválido')
+
+    if (dto.fechaTurnoISO !== undefined && !isISODate(String(dto.fechaTurnoISO)))
+      throw new BadRequestException('fechaTurnoISO inválida (YYYY-MM-DD)')
+
+    if (dto.horaTurno !== undefined) {
+      const ht = String(dto.horaTurno || '').trim()
+      if (!ht) throw new BadRequestException('horaTurno requerida')
+      if (!isHHmm(ht)) throw new BadRequestException('horaTurno inválida (HH:mm)')
+    }
+
+    try {
+      const updated = await this.prisma.laboralTurno.update({
+        where: { id: tid },
+        data: {
+          ...(dto.fechaTurnoISO !== undefined ? { fechaTurnoISO: String(dto.fechaTurnoISO).trim() } : {}),
+          ...(dto.horaTurno !== undefined ? { horaTurno: String(dto.horaTurno).trim() } : {}),
+          ...(dto.tipoExamen !== undefined ? { tipoExamen: String(dto.tipoExamen).trim() } : {}),
+
+          ...(dto.nombre !== undefined ? { nombreSnap: String(dto.nombre).trim() } : {}),
+          ...(dto.dni !== undefined ? { dniSnap: String(dto.dni).trim() } : {}),
+          ...(dto.nroAfiliado !== undefined
+            ? { nroAfiliadoSnap: dto.nroAfiliado ? String(dto.nroAfiliado).trim() : null }
+            : {}),
+          ...(dto.puesto !== undefined ? { puestoSnap: String(dto.puesto).trim() } : {}),
+        },
+        select: {
+          id: true,
+          sede: true,
+          fechaRecepcionISO: true,
+          fechaTurnoISO: true,
+          horaTurno: true,
+          tipoExamen: true,
+          createdAt: true,
+
+          nombreSnap: true,
+          dniSnap: true,
+          nroAfiliadoSnap: true,
+          puestoSnap: true,
+
+          company: { select: { id: true, nombre: true } },
+          employee: {
+            select: {
+              id: true,
+              dni: true,
+              nombre: true,
+              nroAfiliado: true,
+              puesto: true,
+            },
+          },
+        },
+      })
+
+      const turno = {
+        id: updated.id,
+        sede: updated.sede,
+        empresa: updated.company.nombre,
+        companyId: updated.company.id,
+        employeeId: updated.employee.id,
+
+        nombre: (updated.nombreSnap ?? updated.employee.nombre) || '',
+        dni: (updated.dniSnap ?? updated.employee.dni) || '',
+        nroAfiliado: (updated.nroAfiliadoSnap ?? updated.employee.nroAfiliado ?? '') || '',
+        puesto: (updated.puestoSnap ?? updated.employee.puesto ?? '') || '',
+
+        fechaRecepcionISO: updated.fechaRecepcionISO,
+        fechaTurnoISO: updated.fechaTurnoISO,
+        horaTurno: updated.horaTurno ?? '',
+        tipoExamen: updated.tipoExamen,
+        createdAt: updated.createdAt.toISOString(),
+      }
+
+      return { turno }
+    } catch {
+      throw new NotFoundException('Turno no encontrado')
+    }
   }
 
   async remove(id: string) {
