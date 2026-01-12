@@ -78,3 +78,15 @@ export async function getCompanyPadron(companyId: string) {
     `/laboral/companies/${encodeURIComponent(companyId)}/padron`,
   )
 }
+
+/**
+ * ✅ Eliminar una persona del padrón (por DNI)
+ * Endpoint esperado:
+ * DELETE /laboral/companies/:companyId/padron/:dni
+ */
+export async function deleteCompanyPadronPerson(companyId: string, dni: string) {
+  return apiJson<{ ok: true }>(
+    `/laboral/companies/${encodeURIComponent(companyId)}/padron/${encodeURIComponent(dni)}`,
+    { method: 'DELETE' },
+  )
+}

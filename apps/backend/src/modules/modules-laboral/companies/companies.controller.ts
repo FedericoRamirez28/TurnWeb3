@@ -69,10 +69,16 @@ export class CompaniesController {
     return this.service.remove(id);
   }
 
-  // ✅ ESTE ERA EL QUE FALTABA
+  // ✅ padrón de empleados por empresa
   @Get(':id/padron')
   async padron(@Param('id') id: string) {
     const items = await this.service.padron(id);
     return { items };
+  }
+
+  // ✅ NUEVO: eliminar empleado del padrón por DNI (soft delete)
+  @Delete(':id/padron/:dni')
+  async removeFromPadron(@Param('id') id: string, @Param('dni') dni: string) {
+    return this.service.removeFromPadron(id, dni);
   }
 }

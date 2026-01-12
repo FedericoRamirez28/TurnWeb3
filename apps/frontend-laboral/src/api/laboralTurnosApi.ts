@@ -88,25 +88,29 @@ export async function laboralTurnoCreate(input: CreateLaborTurnoInput): Promise<
   return mapCreateTurnoToLaborTurno(r.turno)
 }
 
-export async function laboralTurnosList(params?: {
+export type LaboralTurnosListParams = {
   q?: string
   from?: string
   to?: string
   month?: string
   sede?: SedeKey
-}): Promise<LaborTurno[]> {
+}
+
+export async function laboralTurnosList(params?: LaboralTurnosListParams): Promise<LaborTurno[]> {
   const r = await apiJson<BackendListResponse>('/laboral/turnos', {
     query: {
       q: params?.q?.trim() || undefined,
       from: params?.from?.trim() || undefined,
       to: params?.to?.trim() || undefined,
       month: params?.month?.trim() || undefined,
-      sede: params?.sede?.trim() || undefined,
+      // ✅ sede es union type, no string => NO trim
+      sede: params?.sede || undefined,
     },
   })
 
   return Array.isArray(r.turnos) ? r.turnos : []
 }
+
 
 export async function laboralTurnoDelete(id: string): Promise<void> {
   await apiJson<{ ok: boolean }>(`/laboral/turnos/${encodeURIComponent(id)}`, {

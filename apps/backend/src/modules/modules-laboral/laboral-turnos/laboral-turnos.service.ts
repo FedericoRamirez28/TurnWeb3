@@ -225,6 +225,7 @@ export class LaboralTurnosService {
     if (sede) {
       if (!isSedeKey(sede))
         throw new BadRequestException('sede inválida (caba | sanjusto)')
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       where.sede = sede as 'caba' | 'sanjusto'
     }
 

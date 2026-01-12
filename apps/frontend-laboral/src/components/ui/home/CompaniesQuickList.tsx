@@ -18,6 +18,7 @@ import {
   updateCompany,
   deleteCompany,
   getCompanyPadron,
+  deleteCompanyPadronPerson,
 } from '@/api/companiesApi'
 
 type FilterMode = 'actives' | 'inactive' | 'all'
@@ -265,7 +266,6 @@ export function CompaniesQuickList() {
   useEffect(() => {
     if (loading) return
     void prefetchCounts(filtered)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtered, loading])
 
   const padronCompany = useMemo(() => {
@@ -421,7 +421,7 @@ export function CompaniesQuickList() {
 
     const { value: form } = await Swal.fire({
       title: 'Editar empresa',
-       width: "100vw",
+      width: '100vw',
       html: `
         <div style="display:grid;gap:10px;text-align:left;width:100%">
           <label style="display:grid;gap:6px">
@@ -474,13 +474,18 @@ export function CompaniesQuickList() {
       focusConfirm: false,
       preConfirm: () => {
         const nombre = (document.getElementById('sw_nombre') as HTMLInputElement | null)?.value ?? ''
-        const nroSocio = (document.getElementById('sw_nroSocio') as HTMLInputElement | null)?.value ?? ''
+        const nroSocio =
+          (document.getElementById('sw_nroSocio') as HTMLInputElement | null)?.value ?? ''
         const cuit = (document.getElementById('sw_cuit') as HTMLInputElement | null)?.value ?? ''
-        const contacto = (document.getElementById('sw_contacto') as HTMLInputElement | null)?.value ?? ''
-        const telefono = (document.getElementById('sw_telefono') as HTMLInputElement | null)?.value ?? ''
+        const contacto =
+          (document.getElementById('sw_contacto') as HTMLInputElement | null)?.value ?? ''
+        const telefono =
+          (document.getElementById('sw_telefono') as HTMLInputElement | null)?.value ?? ''
         const email = (document.getElementById('sw_email') as HTMLInputElement | null)?.value ?? ''
-        const domicilio = (document.getElementById('sw_domicilio') as HTMLInputElement | null)?.value ?? ''
-        const notas = (document.getElementById('sw_notas') as HTMLTextAreaElement | null)?.value ?? ''
+        const domicilio =
+          (document.getElementById('sw_domicilio') as HTMLInputElement | null)?.value ?? ''
+        const notas =
+          (document.getElementById('sw_notas') as HTMLTextAreaElement | null)?.value ?? ''
 
         if (!nombre.trim()) {
           Swal.showValidationMessage('El nombre de la empresa es obligatorio.')
@@ -528,6 +533,62 @@ export function CompaniesQuickList() {
         .replace(/[^\w-]/g, '')
         .slice(0, 40) || 'empresa'
     doc.save(`Empresa_${safeName}_${new Date().toISOString().slice(0, 10)}.pdf`)
+  }
+
+  function askDeletePadronPerson(p: CompanyPadronPerson) {
+    const companyId = padronCompanyId
+    if (!companyId) return
+
+    const dni = (p.dni || '').toString().trim()
+    if (!dni) return
+
+    Swal.fire({
+      title: '¿Eliminar del padrón?',
+      html: `
+        <div style="text-align:left">
+          <div style="font-weight:700;margin-bottom:6px;">${(p.nombre || 'Empleado').toString()}</div>
+          <div style="color:#6b7280;font-size:0.95rem;">
+            DNI: <b>${dni}</b><br/>
+            Esta acción elimina el empleado del padrón de la empresa.
+          </div>
+        </div>
+      `,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#e11d48',
+      reverseButtons: true,
+      customClass: { popup: 'swal-popup', title: 'swal-title', htmlContainer: 'swal-text' },
+    }).then(async (res) => {
+      if (!res.isConfirmed) return
+
+      try {
+        await deleteCompanyPadronPerson(companyId, dni)
+
+        setPadronPeople((prev) => {
+          const next = prev.filter((x) => String(x.dni) !== String(dni))
+          // actualiza contador del numerito
+          setCountsByCompanyId((mPrev) => {
+            const mNext = new Map(mPrev)
+            mNext.set(companyId, next.length)
+            return mNext
+          })
+          return next
+        })
+
+        Swal.fire({
+          title: 'Eliminado',
+          text: 'Se quitó del padrón.',
+          icon: 'success',
+          timer: 1100,
+          showConfirmButton: false,
+          customClass: { popup: 'swal-popup', title: 'swal-title', htmlContainer: 'swal-text' },
+        })
+      } catch (e) {
+        Swal.fire({ title: 'Error', text: String((e as Error)?.message || 'Error'), icon: 'error' })
+      }
+    })
   }
 
   return (
@@ -640,7 +701,11 @@ export function CompaniesQuickList() {
                         title={c.isActive ? 'Dar de baja' : 'Dar de alta'}
                         onClick={() => askToggleBaja(c)}
                       >
-                        <img className="icon-btn__img" src={c.isActive ? bajaIcon : altaIcon} alt="Toggle" />
+                        <img
+                          className="icon-btn__img"
+                          src={c.isActive ? bajaIcon : altaIcon}
+                          alt="Toggle"
+                        />
                       </button>
 
                       <button
@@ -661,8 +726,17 @@ export function CompaniesQuickList() {
       </div>
 
       {padronOpen && padronCompany && (
-        <div className="companies-modal__backdrop" role="presentation" onClick={() => setPadronOpen(false)}>
-          <div className="companies-modal" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="companies-modal__backdrop"
+          role="presentation"
+          onClick={() => setPadronOpen(false)}
+        >
+          <div
+            className="companies-modal"
+            role="dialog"
+            aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="companies-modal__header">
               <div className="companies-modal__title">
                 Padrón de empleados — <b>{padronCompany.nombre}</b>
@@ -676,7 +750,12 @@ export function CompaniesQuickList() {
                 >
                   Descargar PDF
                 </button>
-                <button type="button" className="companies-modal__close" onClick={() => setPadronOpen(false)} aria-label="Cerrar">
+                <button
+                  type="button"
+                  className="companies-modal__close"
+                  onClick={() => setPadronOpen(false)}
+                  aria-label="Cerrar"
+                >
                   ×
                 </button>
               </div>
@@ -702,6 +781,10 @@ export function CompaniesQuickList() {
                       <th>Afiliado</th>
                       <th>Puesto</th>
                       <th>Últ. turno</th>
+                      <th
+                        aria-label="Acciones"
+                        style={{ width: 56, textAlign: 'right' }}
+                      ></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -712,13 +795,25 @@ export function CompaniesQuickList() {
                         <td>{p.nroAfiliado || '-'}</td>
                         <td className="companies-modal__muted">{p.puesto || '-'}</td>
                         <td className="companies-modal__muted">{p.lastTurnoISO || '-'}</td>
+                        <td style={{ textAlign: 'right' }}>
+                          <button
+                            type="button"
+                            className="icon-btn"
+                            title="Eliminar del padrón"
+                            onClick={() => askDeletePadronPerson(p)}
+                          >
+                            <img className="icon-btn__img" src={trashIcon} alt="Eliminar" />
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             ) : (
-              <div className="companies-modal__empty">Todavía no hay empleados asociados a esta empresa.</div>
+              <div className="companies-modal__empty">
+                Todavía no hay empleados asociados a esta empresa.
+              </div>
             )}
 
             {padronPeople.length > 80 && (

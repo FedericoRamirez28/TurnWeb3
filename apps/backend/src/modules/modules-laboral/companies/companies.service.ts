@@ -1,4 +1,3 @@
-// src/modules/laboral/companies/companies.service.ts
 import {
   BadRequestException,
   Injectable,
@@ -106,7 +105,7 @@ export class CompaniesService {
     return { ok: true };
   }
 
-  // ✅ NUEVO: padrón de empleados por empresa
+  // ✅ padrón de empleados por empresa
   async padron(companyId: string) {
     const company = await this.prisma.laboralCompany.findUnique({
       where: { id: companyId },
@@ -138,5 +137,29 @@ export class CompaniesService {
       puesto: e.puesto ?? '',
       lastTurnoISO: e.turnos[0]?.fechaTurnoISO ?? '',
     }));
+  }
+
+  // ✅ NUEVO: eliminar empleado del padrón (soft delete)
+  async removeFromPadron(companyId: string, dni: string) {
+    const company = await this.prisma.laboralCompany.findUnique({
+      where: { id: companyId },
+      select: { id: true },
+    });
+    if (!company) throw new NotFoundException('Empresa no encontrada');
+
+    const dniClean = (dni || '').trim();
+    if (!dniClean) throw new BadRequestException('DNI requerido');
+
+    // Soft delete para no romper relaciones con turnos
+    const updated = await this.prisma.laboralEmployee.updateMany({
+      where: { companyId, dni: dniClean, isActive: true },
+      data: { isActive: false },
+    });
+
+    if (updated.count === 0) {
+      throw new NotFoundException('Empleado no encontrado en el padrón');
+    }
+
+    return { ok: true };
   }
 }

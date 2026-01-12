@@ -193,27 +193,28 @@ export function TurnosLaboralCard() {
   const autoCompanyIdRef = useRef<string | null>(null)
 
   useEffect(() => {
-    let alive = true
+  let alive = true
 
-    ;(async () => {
-      setCompaniesLoading(true)
-      try {
-        const r = await listCompanies({ q: '', filter: 'actives' })
-        if (!alive) return
-        setCompanies(Array.isArray(r.items) ? r.items : [])
-      } catch {
-        if (!alive) return
-        setCompanies([])
-      } finally {
-        if (!alive) return
-        setCompaniesLoading(false)
-      }
-    })()
-
-    return () => {
-      alive = false
+  ;(async () => {
+    setCompaniesLoading(true)
+    try {
+      const r = await listCompanies({ q: '', filter: 'actives' })
+      if (!alive) return
+      setCompanies(Array.isArray(r.items) ? r.items : [])
+    } catch {
+      if (!alive) return
+      setCompanies([])
+    } finally {
+      // ✅ NO usar "return" dentro de finally (eslint no-unsafe-finally)
+      if (alive) setCompaniesLoading(false)
     }
-  }, [])
+  })()
+
+  return () => {
+    alive = false
+  }
+}, [])
+
 
   function setField<K extends keyof Draft>(key: K, value: Draft[K]) {
     setDraft((p) => ({ ...p, [key]: value }))
@@ -391,7 +392,7 @@ export function TurnosLaboralCard() {
           from: viewFrom,
           to: viewTo,
           sede: draft.sede,
-        } as any)
+        })
 
         if (ac.signal.aborted || seq !== viewerReqSeqRef.current) return
 
@@ -449,8 +450,6 @@ export function TurnosLaboralCard() {
       return hay.includes(qq)
     })
   }, [viewerTurnos, smartQ, viewFrom, viewTo, hasViewerFilters, draft.sede])
-
-  const shouldShowResults = hasViewerFilters && filteredTurnos.length > 0
 
   function clearViewer() {
     setViewFrom('')
