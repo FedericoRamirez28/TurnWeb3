@@ -17,7 +17,8 @@ type Draft = {
   checks: Record<ExamKey, boolean>
 
   clasificacion: ClasifKey
-  observaciones: string[]
+  // ✅ ahora es texto libre (copiar/pegar desde Word)
+  observaciones: string
 
   adicionalesSelected: string[]
 }
@@ -69,7 +70,7 @@ function blankDraft(): Draft {
     checks: { preocupacional: false, periodico: false, egreso: false },
 
     clasificacion: 'C',
-    observaciones: [''],
+    observaciones: '',
 
     adicionalesSelected: [],
   }
@@ -81,20 +82,22 @@ function loadDraft(): Draft {
   try {
     const raw = localStorage.getItem(STORAGE_KEY_DRAFT)
     if (!raw) return fallback
-    const parsed = JSON.parse(raw) as Partial<Draft>
+    const parsed = JSON.parse(raw) as Partial<Draft> & { observaciones?: unknown }
+
+    const obsRaw = parsed.observaciones
 
     return {
       ...fallback,
       ...parsed,
       checks: { ...fallback.checks, ...(parsed.checks || {}) },
-      observaciones:
-        Array.isArray(parsed.observaciones) && parsed.observaciones.length
-          ? parsed.observaciones
+      // ✅ migra formato viejo string[] -> string (líneas)
+      observaciones: Array.isArray(obsRaw)
+        ? obsRaw.filter((x): x is string => typeof x === 'string').join('\n')
+        : typeof obsRaw === 'string'
+          ? obsRaw
           : fallback.observaciones,
       clasificacion: (parsed.clasificacion as ClasifKey) || fallback.clasificacion,
-      adicionalesSelected: Array.isArray(parsed.adicionalesSelected)
-        ? parsed.adicionalesSelected
-        : [],
+      adicionalesSelected: Array.isArray(parsed.adicionalesSelected) ? parsed.adicionalesSelected : [],
     }
   } catch {
     return fallback
@@ -338,7 +341,8 @@ function drawClasificacionBlock(doc: jsPDF, draft: Draft, yTop: number, opts: { 
   doc.setFontSize(10)
   doc.setTextColor(15, 23, 42)
 
-  const obs = draft.observaciones.map((s) => s.trim()).filter(Boolean)
+  // ✅ texto libre (respetamos saltos de línea, sin bullets automáticos)
+  const obsText = (draft.observaciones || '').replace(/\r\n/g, '\n').trim()
 
   // Importante: este bloque debe entrar ANTES de las firmas de la planilla
   const signatureY = pageH - 22
@@ -348,27 +352,40 @@ function drawClasificacionBlock(doc: jsPDF, draft: Draft, yTop: number, opts: { 
 
   let oy = obsStartY
 
-  if (!obs.length) {
+  if (!obsText) {
     doc.setTextColor(100, 116, 139)
     doc.text('-', margin, oy)
     doc.setTextColor(15, 23, 42)
     oy += 6
   } else {
-    for (let i = 0; i < obs.length; i++) {
-      const line = obs[i]
-      const wrapped = doc.splitTextToSize(`• ${line}`, maxW)
-      const needed = wrapped.length * 5 + 1
+    const rawLines = obsText.split('\n').map((x) => x.trimEnd())
+    const lines: string[] = []
+    for (const ln of rawLines) {
+      if (!ln.trim()) {
+        lines.push('') // línea en blanco
+        continue
+      }
+      const wrapped = doc.splitTextToSize(ln, maxW) as string[]
+      lines.push(...wrapped)
+    }
 
+    for (const ln of lines) {
+      const needed = 5 + 1
       if (oy + needed > maxObsBottom) {
         doc.setTextColor(100, 116, 139)
-        doc.text('• …', margin, oy)
+        doc.text('…', margin, oy)
         doc.setTextColor(15, 23, 42)
         oy += 6
         break
       }
 
-      doc.text(wrapped, margin, oy)
-      oy += needed
+      if (!ln) {
+        oy += 4 // salto visual
+        continue
+      }
+
+      doc.text(ln, margin, oy)
+      oy += 5.2
     }
   }
 
@@ -564,10 +581,6 @@ export default function PreocupacionalScreen() {
   const today = useMemo(() => fmtDate(new Date()), [])
   const todayISO = useMemo(() => isoDay(new Date()), [])
 
-  // ✅ refs para inputs de observaciones
-  const obsRefs = useRef<Array<HTMLInputElement | null>>([])
-  const pendingObsFocusIndexRef = useRef<number | null>(null)
-
   const currentDocCompleto = useCallback(async () => buildPdfCompleto(draft, today), [draft, today])
   const currentDocVista = useCallback(async () => buildPdfVista(view, draft, today), [view, draft, today])
 
@@ -662,29 +675,15 @@ export default function PreocupacionalScreen() {
     setDraft((p) => ({ ...p, checks: { ...p.checks, [key]: !p.checks[key] } }))
   }
 
-  function updateField<
-    K extends keyof Omit<Draft, 'checks' | 'observaciones' | 'adicionalesSelected'>
-  >(key: K, value: Draft[K]) {
+  function updateField<K extends keyof Omit<Draft, 'checks' | 'observaciones' | 'adicionalesSelected'>>(
+    key: K,
+    value: Draft[K],
+  ) {
     setDraft((p) => ({ ...p, [key]: value }))
   }
 
-  function setObs(i: number, v: string) {
-    setDraft((p) => {
-      const next = [...p.observaciones]
-      next[i] = v
-      return { ...p, observaciones: next }
-    })
-  }
-
-  function addObs() {
-    setDraft((p) => ({ ...p, observaciones: [...p.observaciones, ''] }))
-  }
-
-  function removeObs(i: number) {
-    setDraft((p) => {
-      const next = p.observaciones.filter((_, idx) => idx !== i)
-      return { ...p, observaciones: next.length ? next : [''] }
-    })
+  function setObsText(v: string) {
+    setDraft((p) => ({ ...p, observaciones: v }))
   }
 
   function clearPlanillaSelection() {
@@ -703,7 +702,7 @@ export default function PreocupacionalScreen() {
     setDraft((p) => ({
       ...p,
       clasificacion: 'C',
-      observaciones: [''],
+      observaciones: '',
     }))
   }
 
@@ -922,39 +921,6 @@ export default function PreocupacionalScreen() {
     }
   }
 
-  // ===================== ✅ Enter en Observaciones =====================
-
-  const handleEnterObs = useCallback(
-    (obsIndex: number) => {
-      const lastIdx = draft.observaciones.length - 1
-
-      if (obsIndex >= lastIdx) {
-        const nextIndex = lastIdx + 1
-        pendingObsFocusIndexRef.current = nextIndex
-        setDraft((p) => ({ ...p, observaciones: [...p.observaciones, ''] }))
-        return
-      }
-
-      const next = obsRefs.current[obsIndex + 1]
-      if (next) next.focus()
-    },
-    [draft.observaciones.length],
-  )
-
-  useEffect(() => {
-    const idx = pendingObsFocusIndexRef.current
-    if (idx === null) return
-    if (view !== 'clasificacion') return
-
-    const t = window.setTimeout(() => {
-      const el = obsRefs.current[idx]
-      if (el) el.focus()
-      pendingObsFocusIndexRef.current = null
-    }, 0)
-
-    return () => window.clearTimeout(t)
-  }, [draft.observaciones.length, view])
-
   return (
     <div className="preocupacional">
       <div className="card preocupacional__card">
@@ -1136,41 +1102,16 @@ export default function PreocupacionalScreen() {
               <div className="preocupacional__obs">
                 <div className="preocupacional__obs-head">
                   <h3 className="preocupacional__section-title">Observaciones</h3>
-                  <button className="btn btn--outline btn--sm" type="button" onClick={addObs}>
-                    + Agregar
-                  </button>
                 </div>
 
-                <div className="obs-list">
-                  {draft.observaciones.map((line, i) => (
-                    <div key={i} className="obs-row">
-                      <span className="obs-bullet">•</span>
-                      <input
-                        className="input"
-                        value={line}
-                        placeholder="Escribí una observación…"
-                        onChange={(e) => setObs(i, e.target.value)}
-                        ref={(el) => {
-                          obsRefs.current[i] = el
-                        }}
-                        onKeyDown={(e) => {
-                          if (view !== 'clasificacion') return
-                          if (e.key !== 'Enter') return
-                          if (e.shiftKey || e.altKey || e.ctrlKey || e.metaKey) return
-                          if ((e.nativeEvent as unknown as { isComposing?: boolean })?.isComposing) return
-
-                          e.preventDefault()
-                          e.stopPropagation()
-
-                          handleEnterObs(i)
-                        }}
-                      />
-                      <button className="btn btn--ghost btn--sm" type="button" onClick={() => removeObs(i)} aria-label="Quitar">
-                        ✕
-                      </button>
-                    </div>
-                  ))}
-                </div>
+                {/* ✅ Un solo textarea para copiar/pegar desde Word */}
+                <textarea
+                  className="input preocupacional__obs-textarea"
+                  value={draft.observaciones}
+                  placeholder="Pegá acá las observaciones (se respetan saltos de línea)…"
+                  onChange={(e) => setObsText(e.target.value)}
+                  rows={6}
+                />
 
                 <div className="preocupacional__legend">
                   <p className="preocupacional__legend-text">

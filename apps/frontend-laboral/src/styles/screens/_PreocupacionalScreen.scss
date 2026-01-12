@@ -434,3 +434,14 @@
 @media (max-width: 520px) {
   .preocupacional-check__box { width: 46px; height: 46px; }
 }
+
+/* ✅ Observaciones como textarea (copiar/pegar desde Word) */
+.preocupacional__obs-textarea {
+  margin-top: var(--space);
+  width: 100%;
+  min-height: 140px;
+  resize: vertical;
+  line-height: 1.35;
+  padding: 12px 14px;
+  white-space: pre-wrap; /* respeta saltos de línea visualmente */
+}
