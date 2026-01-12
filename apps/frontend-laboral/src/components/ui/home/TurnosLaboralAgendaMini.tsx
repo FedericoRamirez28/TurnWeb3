@@ -11,6 +11,11 @@ import {
   type SedeKey,
 } from '@/api/laboralTurnosApi'
 
+type TurnosLaboralAgendaMiniProps = {
+  /** Si viene, la agenda queda controlada por Home */
+  sede?: SedeKey
+}
+
 const FIXED_TURNO_HORA = '08:00'
 const AR_TZ = 'America/Argentina/Buenos_Aires'
 const STORAGE_KEY_SEDE = 'medic_laboral_sede_v1'
@@ -219,8 +224,12 @@ function buildPdfTurnosMes(turnos: LaborTurno[], monthTitle: string, sede: SedeK
   return doc
 }
 
-export function TurnosLaboralAgendaMini() {
-  const [sede, setSede] = useState<SedeKey>(() => readPersistedSede())
+export function TurnosLaboralAgendaMini(props: TurnosLaboralAgendaMiniProps) {
+  // ✅ estado local SOLO si no viene sede por props
+  const [localSede, setLocalSede] = useState<SedeKey>(() => readPersistedSede())
+  const sede: SedeKey = props.sede ?? localSede
+  const isControlled = props.sede !== undefined
+
   const [turnos, setTurnos] = useState<LaborTurno[]>([])
   const [anchor, setAnchor] = useState<Date>(() => {
     const d = new Date()
@@ -231,18 +240,21 @@ export function TurnosLaboralAgendaMini() {
 
   const openDayScheduleRef = useRef<(dayISO: string, cm?: boolean) => void>(() => {})
 
+  // ✅ escuchar eventos/storage SOLO cuando es uncontrolled
   useEffect(() => {
+    if (isControlled) return
+
     const onEvt = (ev: Event) => {
       const ce = ev as CustomEvent
       const next = String(ce.detail || '').trim()
-      if (next === 'caba' || next === 'sanjusto') setSede(next)
+      if (next === 'caba' || next === 'sanjusto') setLocalSede(next)
     }
     window.addEventListener('medic:laboral-sede', onEvt as EventListener)
 
     const onStorage = (e: StorageEvent) => {
       if (e.key !== STORAGE_KEY_SEDE) return
       const v = String(e.newValue || '').trim()
-      if (v === 'caba' || v === 'sanjusto') setSede(v)
+      if (v === 'caba' || v === 'sanjusto') setLocalSede(v)
     }
     window.addEventListener('storage', onStorage)
 
@@ -250,7 +262,7 @@ export function TurnosLaboralAgendaMini() {
       window.removeEventListener('medic:laboral-sede', onEvt as EventListener)
       window.removeEventListener('storage', onStorage)
     }
-  }, [])
+  }, [isControlled])
 
   const loadMonth = useCallback(async () => {
     const mk = monthKey(anchor)
@@ -282,7 +294,6 @@ export function TurnosLaboralAgendaMini() {
     return m
   }, [turnos, sede])
 
-  // ✅ SOLO UNA VEZ (evita redeclare)
   const weeks = useMemo(() => buildMonthMatrix(anchor), [anchor])
   const monthTitle = useMemo(() => monthLabelES(anchor), [anchor])
   const agendaTitle = useMemo(() => `Turnos laborales ${sedeLabel(sede)}`, [sede])

@@ -13,6 +13,13 @@ import {
   type SedeKey,
 } from '@/api/laboralTurnosApi'
 
+type TurnosLaboralCardProps = {
+  /** Si viene, la sede queda controlada por Home */
+  sede?: SedeKey
+  /** Callback para avisarle a Home que cambiaste la sede desde el card */
+  onSedeChange?: (next: SedeKey) => void
+}
+
 type PreocupacionalPrefill = {
   empresa?: string
   nroAfiliado?: string
@@ -101,17 +108,14 @@ function detectExamKeyFromPicked(picked: string[], fallbackJoined: string): Exam
   const all = [...picked, fallbackJoined].filter(Boolean).join(' + ')
   const k = normalizeText(all)
 
-  // Ojo: normalizamos y buscamos por palabras clave
   if (k.includes('egreso')) return 'egreso'
   if (k.includes('periodico') || k.includes('periódico')) return 'periodico'
-  // preocupacional por defecto
   return 'preocupacional'
 }
 
 function focusTabFromTipoExamen(tipo: string): 'planilla' | 'adicionales' | 'clasificacion' {
   return tipo?.trim() ? 'adicionales' : 'planilla'
 }
-
 
 // ✅ MISMA CARTILLA QUE PreocupacionalScreen (para que el autofill matchee perfecto)
 const ADICIONALES_CONCEPTO: string[] = [
@@ -155,11 +159,11 @@ const ADICIONALES_LAB: string[] = [
 
 const ADICIONALES_BASE = [...ADICIONALES_CONCEPTO, ...ADICIONALES_LAB]
 
-export function TurnosLaboralCard() {
+export function TurnosLaboralCard({ sede, onSedeChange }: TurnosLaboralCardProps) {
   const navigate = useNavigate()
 
   const [draft, setDraft] = useState<Draft>(() => ({
-    sede: readPersistedSede(),
+    sede: sede ?? readPersistedSede(),
     nombre: '',
     empresa: '',
     nroAfiliado: '',
@@ -170,6 +174,13 @@ export function TurnosLaboralCard() {
     puesto: '',
     tipoExamen: '',
   }))
+
+  // ✅ si Home controla sede, sincronizamos el draft + persistimos + evento
+  useEffect(() => {
+    if (!sede) return
+    setDraft((p) => (p.sede === sede ? p : { ...p, sede }))
+    persistSede(sede)
+  }, [sede])
 
   const [pickedExams, setPickedExams] = useState<string[]>([])
   const [busy, setBusy] = useState(false)
@@ -193,36 +204,39 @@ export function TurnosLaboralCard() {
   const autoCompanyIdRef = useRef<string | null>(null)
 
   useEffect(() => {
-  let alive = true
+    let alive = true
 
-  ;(async () => {
-    setCompaniesLoading(true)
-    try {
-      const r = await listCompanies({ q: '', filter: 'actives' })
-      if (!alive) return
-      setCompanies(Array.isArray(r.items) ? r.items : [])
-    } catch {
-      if (!alive) return
-      setCompanies([])
-    } finally {
-      // ✅ NO usar "return" dentro de finally (eslint no-unsafe-finally)
-      if (alive) setCompaniesLoading(false)
+    ;(async () => {
+      setCompaniesLoading(true)
+      try {
+        const r = await listCompanies({ q: '', filter: 'actives' })
+        if (!alive) return
+        setCompanies(Array.isArray(r.items) ? r.items : [])
+      } catch {
+        if (!alive) return
+        setCompanies([])
+      } finally {
+        // ✅ NO usar "return" dentro de finally (eslint no-unsafe-finally)
+        if (alive) setCompaniesLoading(false)
+      }
+    })()
+
+    return () => {
+      alive = false
     }
-  })()
-
-  return () => {
-    alive = false
-  }
-}, [])
-
+  }, [])
 
   function setField<K extends keyof Draft>(key: K, value: Draft[K]) {
     setDraft((p) => ({ ...p, [key]: value }))
   }
 
-  function onChangeSede(next: SedeKey) {
+  function onChangeSedeLocal(next: SedeKey) {
     setDraft((p) => ({ ...p, sede: next }))
     persistSede(next)
+
+    // ✅ avisar a Home si te pasaron handler
+    onSedeChange?.(next)
+
     if (normalizeText(smartQ) || viewFrom || viewTo) {
       setViewerTurnos([])
     }
@@ -459,24 +473,23 @@ export function TurnosLaboralCard() {
     setCancelMode(false)
   }
 
-function goToPreocupacionalFromTurno(t: LaborTurno) {
-  const examKey = detectExamKeyFromPicked([], t.tipoExamen || '')
+  function goToPreocupacionalFromTurno(t: LaborTurno) {
+    const examKey = detectExamKeyFromPicked([], t.tipoExamen || '')
 
-  const payload: PreocupacionalPrefill = {
-    empresa: t.empresa || '',
-    nroAfiliado: t.nroAfiliado || '',
-    nombre: t.nombre || '',
-    dni: t.dni || '',
-    puesto: t.puesto || '',
-    examen: t.tipoExamen || '',
-    examKey,
-    focusTab: focusTabFromTipoExamen(t.tipoExamen || ''),
+    const payload: PreocupacionalPrefill = {
+      empresa: t.empresa || '',
+      nroAfiliado: t.nroAfiliado || '',
+      nombre: t.nombre || '',
+      dni: t.dni || '',
+      puesto: t.puesto || '',
+      examen: t.tipoExamen || '',
+      examKey,
+      focusTab: focusTabFromTipoExamen(t.tipoExamen || ''),
+    }
+
+    savePreocupacionalPrefill(payload)
+    navigate(PREOCUPACIONAL_ROUTE, { state: payload })
   }
-
-  savePreocupacionalPrefill(payload)
-  navigate(PREOCUPACIONAL_ROUTE, { state: payload })
-}
-
 
   async function cancelTurnoRow(t: LaborTurno) {
     if (busy) return
@@ -547,7 +560,7 @@ function goToPreocupacionalFromTurno(t: LaborTurno) {
             <button
               type="button"
               className={'labor-turnos__tab' + (draft.sede === 'caba' ? ' labor-turnos__tab--active' : '')}
-              onClick={() => onChangeSede('caba')}
+              onClick={() => onChangeSedeLocal('caba')}
               disabled={busy}
             >
               CABA
@@ -555,7 +568,7 @@ function goToPreocupacionalFromTurno(t: LaborTurno) {
             <button
               type="button"
               className={'labor-turnos__tab' + (draft.sede === 'sanjusto' ? ' labor-turnos__tab--active' : '')}
-              onClick={() => onChangeSede('sanjusto')}
+              onClick={() => onChangeSedeLocal('sanjusto')}
               disabled={busy}
             >
               San Justo
@@ -778,21 +791,11 @@ function goToPreocupacionalFromTurno(t: LaborTurno) {
 
               <label className="labor-turnos__label labor-turnos__label--full">
                 Búsqueda inteligente
-                <input
-                  className="input"
-                  value={smartQ}
-                  onChange={(e) => setSmartQ(e.target.value)}
-                  placeholder="Buscar por empresa, DNI, nombre, examen, puesto…"
-                  disabled={busy}
-                />
+                <input className="input" value={smartQ} onChange={(e) => setSmartQ(e.target.value)} placeholder="Buscar por empresa, DNI, nombre, examen, puesto…" disabled={busy} />
               </label>
             </div>
 
-            {!hasViewerFilters && (
-              <div className="labor-turnos__viewer-empty">
-                Tip: para ver turnos, cargá <b>Desde/Hasta</b> o escribí algo en <b>Búsqueda inteligente</b>.
-              </div>
-            )}
+            {!hasViewerFilters && <div className="labor-turnos__viewer-empty">Tip: para ver turnos, cargá <b>Desde/Hasta</b> o escribí algo en <b>Búsqueda inteligente</b>.</div>}
 
             {hasViewerFilters && viewerLoading && <div className="labor-turnos__viewer-empty">Buscando turnos…</div>}
 
