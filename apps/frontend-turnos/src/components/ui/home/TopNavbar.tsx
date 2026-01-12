@@ -1,24 +1,24 @@
-import React from 'react';
-import { useAuth } from '@/auth/useAuth';
+import React from 'react'
+import { useAuth } from '@/auth/useAuth'
 
-
-export type NavKey = 'home' | 'afiliados' | 'reportes' | 'caja' | 'config';
+export type NavKey = 'home' | 'afiliados' | 'reportes' | 'caja' | 'bono' | 'config'
 
 const NAV_ITEMS: { key: NavKey; label: string }[] = [
   { key: 'home', label: 'Home' },
   { key: 'afiliados', label: 'Afiliados' },
   { key: 'reportes', label: 'Reportes' },
   { key: 'caja', label: 'Cierre de caja' },
+  { key: 'bono', label: 'Bono de Atención' },
   // { key: 'config', label: 'Configuración' },
-];
+]
 
 interface TopNavbarProps {
-  selected: NavKey;
-  onSelect: (key: NavKey) => void;
+  selected: NavKey
+  onSelect: (key: NavKey) => void
 }
 
 export const TopNavbar: React.FC<TopNavbarProps> = ({ selected, onSelect }) => {
-  const { user, logout } = useAuth();
+  const { user, logout } = useAuth()
 
   return (
     <header className="topnav">
@@ -32,7 +32,10 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ selected, onSelect }) => {
           {NAV_ITEMS.map((item) => (
             <button
               key={item.key}
-              className={'topnav__nav-item' + (selected === item.key ? ' topnav__nav-item--active' : '')}
+              className={
+                'topnav__nav-item' +
+                (selected === item.key ? ' topnav__nav-item--active' : '')
+              }
               onClick={() => onSelect(item.key)}
               type="button"
             >
@@ -49,5 +52,5 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ selected, onSelect }) => {
         </button>
       </div>
     </header>
-  );
-};
+  )
+}

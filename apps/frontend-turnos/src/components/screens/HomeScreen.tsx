@@ -30,6 +30,10 @@ import {
 import trashGradient from '@/assets/icons/trash-gradient.png'
 import { useTurnosPrices } from '@/hooks/useTurnoPrices'
 
+import BonoAtencionScreen from '@/components/screens/BonosAtencionScreen'
+
+
+
 // === catálogos básicos ===
 
 const PLAN_OPTIONS = ['BASE', 'ESMERALDA', 'RUBI', 'PARTICULAR', 'DORADO'] as const
@@ -65,7 +69,8 @@ const withNextTurno = (affiliates: Affiliate[], appointments: Appointment[]): Af
   const appointmentsByAffiliate = new Map<string, Appointment[]>()
 
   appointments.forEach((a) => {
-    const arr = appointmentsByAffiliate.get(a.affiliateId) ?? []
+    const arr = appointmentsByAffiliate.get(a.id) ?? appointmentsByAffiliate.get(a.affiliateId) ?? []
+    // ↑ compat por si alguna vez cambió shape; tu data real usa affiliateId
     arr.push(a)
     appointmentsByAffiliate.set(a.affiliateId, arr)
   })
@@ -378,10 +383,16 @@ export const HomeScreen: React.FC = () => {
           <CierreCajaScreen appointments={appointments} affiliates={affiliatesWithNext} />
         )}
 
+        {selectedNav === 'bono' && (
+  <BonoAtencionScreen affiliates={affiliatesWithNext} appointments={appointments} />
+)}
+
+
         {selectedNav !== 'home' &&
           selectedNav !== 'afiliados' &&
           selectedNav !== 'reportes' &&
-          selectedNav !== 'caja' && (
+          selectedNav !== 'caja' &&
+          selectedNav !== 'bono' && (
             <section className="home__placeholder">
               <div className="home__placeholder-card card">
                 <h2 className="card__title">Próximamente</h2>
@@ -540,6 +551,7 @@ export const HomeScreen: React.FC = () => {
     </div>
   )
 }
+
 
 interface AffiliateHistoryModalProps {
   affiliate: Affiliate

@@ -11,6 +11,8 @@ import { PortadasModule } from './modules/modules-laboral/portadas/portadas.modu
 import { ConsultoriosModule } from './modules/modules-laboral/consultorios/consultorio.module';
 import { AdicionalesModule } from './modules/modules-laboral/adicionales/adicionales.module';
 import { PreciosModule } from './modules/modules-laboral/precios/precios.module';
+import { BonosAtencionModule } from './modules/modules-turnos/bonos-atencion/bonos-atencion.module';
+import { PrestadoresModule } from './modules/modules-turnos/prestadores/prestadores.module';
 
 @Module({
   imports: [
@@ -26,6 +28,8 @@ import { PreciosModule } from './modules/modules-laboral/precios/precios.module'
     ConsultoriosModule,
     AdicionalesModule,
     PreciosModule,
+    BonosAtencionModule,
+    PrestadoresModule,
   ],
 })
 export class AppModule {}
