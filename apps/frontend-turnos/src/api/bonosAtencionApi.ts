@@ -1,63 +1,86 @@
+// apps/frontend-turnos/src/api/bonosAtencionApi.ts
 import { apiJson } from '@/api/http'
 
+/** ====== Prestadores ====== */
 export type PrestadorListItem = {
   id: string
   nombre: string
-  isActive: boolean
 }
 
-export async function fetchPrestadores(): Promise<PrestadorListItem[]> {
-  const r = await apiJson<{ prestadores: PrestadorListItem[] }>('/prestadores/active')
-  return r.prestadores
-}
+/** ====== Bonos (verify) ====== */
+export type BonoStatus = 'ISSUED' | 'USED' | 'CANCELLED' | 'EXPIRED'
 
-// ===== BONOS =====
+export type BonoDto = {
+  id: string
+  code: string
 
-export type CreateBonoDto = {
   afiliadoId: string
   prestadorId: string
+
   turnoId?: string | null
+
+  afiliadoNombreSnap: string
+  afiliadoDniSnap: string
+  prestadorNombreSnap: string
+
   practica: string
   observaciones?: string | null
   fechaAtencionISO?: string | null
-  venceDias: number
-}
 
-export type BonoCreated = {
-  id: string
-  code: string
+  issuedAt: string
   expiresAt: string
+
+  status: BonoStatus
+  usedAt?: string | null
 }
 
-export async function crearBono(dto: CreateBonoDto): Promise<BonoCreated> {
-  return await apiJson<BonoCreated>('/bonos-atencion', {
+export type BonoVerifyResp = {
+  ok: boolean
+  status: BonoStatus
+  bono: BonoDto
+}
+
+/** ====== Crear bono ====== */
+export type CreateBonoAtencionDto = {
+  afiliadoId: string
+  prestadorId: string
+  practica: string
+
+  // opcionales
+  observaciones?: string
+  fechaAtencionISO?: string // YYYY-MM-DD
+  venceDias?: number
+  turnoId?: string
+}
+
+/** =========================
+ * ENDPOINTS (backend)
+ * - GET  /prestadores/active
+ * - POST /bonos-atencion
+ * - GET  /bonos-atencion/verificar/:code?t=...
+ * - POST /bonos-atencion/:code/usar
+ * ========================= */
+
+export async function fetchPrestadores(): Promise<PrestadorListItem[]> {
+  return apiJson<PrestadorListItem[]>('/prestadores/active', { method: 'GET' })
+}
+
+export async function crearBono(dto: CreateBonoAtencionDto): Promise<BonoDto> {
+  return apiJson<BonoDto>('/bonos-atencion', {
     method: 'POST',
     body: JSON.stringify(dto),
   })
 }
 
-export type VerificarBonoResponse = {
-  ok: boolean
-  status: 'VALID' | 'INVALID' | 'USED' | 'EXPIRED' | 'CANCELLED'
-  bono?: {
-    id: string
-    code: string
-    afiliadoNombreSnap: string
-    prestadorNombreSnap: string
-    practica: string
-    expiresAt: string
-  }
+export async function verificarBono(code: string, token?: string): Promise<BonoVerifyResp> {
+  const q = token ? `?t=${encodeURIComponent(token)}` : ''
+  return apiJson<BonoVerifyResp>(`/bonos-atencion/verificar/${encodeURIComponent(code)}${q}`, {
+    method: 'GET',
+  })
 }
 
-export async function verificarBono(code: string, t?: string): Promise<VerificarBonoResponse> {
-  const qs = t ? `?t=${encodeURIComponent(t)}` : ''
-  return await apiJson<VerificarBonoResponse>(
-    `/bonos-atencion/verificar/${encodeURIComponent(code)}${qs}`,
-  )
-}
-
-export async function usarBono(code: string): Promise<{ ok: true }> {
-  return await apiJson<{ ok: true }>(`/bonos-atencion/${encodeURIComponent(code)}/usar`, {
+export async function usarBono(code: string): Promise<{ ok: true; bono: BonoDto }> {
+  return apiJson<{ ok: true; bono: BonoDto }>(`/bonos-atencion/${encodeURIComponent(code)}/usar`, {
     method: 'POST',
   })
 }

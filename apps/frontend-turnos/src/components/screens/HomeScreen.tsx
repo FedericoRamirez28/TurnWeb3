@@ -384,7 +384,7 @@ export const HomeScreen: React.FC = () => {
         )}
 
         {selectedNav === 'bono' && (
-  <BonoAtencionScreen affiliates={affiliatesWithNext} appointments={appointments} />
+  <BonoAtencionScreen affiliates={affiliatesWithNext} />
 )}
 
 

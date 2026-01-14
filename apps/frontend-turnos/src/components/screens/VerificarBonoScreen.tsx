@@ -1,14 +1,18 @@
+// apps/frontend-turnos/src/components/screens/VerificarBonoScreen.tsx
+
 import React, { useEffect, useMemo, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/auth/useAuth'
 import { usarBono, verificarBono, type BonoVerifyResp } from '@/api/bonosAtencionApi'
 
+function getErrorMessage(e: unknown): string {
+  if (e instanceof Error) return e.message
+  return String(e)
+}
+
 export const VerificarBonoScreen: React.FC = () => {
   const { user } = useAuth()
-  const isPrestador = useMemo(
-    () => String(user?.role ?? '').toLowerCase() === 'prestador',
-    [user],
-  )
+  const isPrestador = useMemo(() => String(user?.role ?? '').toLowerCase() === 'prestador', [user])
 
   const { code = '' } = useParams()
   const [sp] = useSearchParams()
@@ -23,9 +27,9 @@ export const VerificarBonoScreen: React.FC = () => {
     try {
       const r = await verificarBono(code, token)
       setData(r)
-    } catch (e: any) {
+    } catch (e: unknown) {
       setData(null)
-      setErr(String(e?.message ?? e))
+      setErr(getErrorMessage(e))
     }
   }
 
@@ -41,8 +45,8 @@ export const VerificarBonoScreen: React.FC = () => {
     try {
       await usarBono(code)
       await load()
-    } catch (e: any) {
-      setErr(String(e?.message ?? e))
+    } catch (e: unknown) {
+      setErr(getErrorMessage(e))
     } finally {
       setBusy(false)
     }
@@ -76,7 +80,9 @@ export const VerificarBonoScreen: React.FC = () => {
                   ? '✅ BONO VÁLIDO'
                   : data.status === 'USED'
                     ? '⚠️ YA UTILIZADO'
-                    : '❌ CANCELADO'}
+                    : data.status === 'EXPIRED'
+                      ? '⏳ VENCIDO'
+                      : '❌ CANCELADO'}
               </b>
             </div>
 
@@ -96,14 +102,17 @@ export const VerificarBonoScreen: React.FC = () => {
               <div>
                 <b>Práctica:</b> {data.bono.practica}
               </div>
+
               {data.bono.fechaAtencionISO ? (
                 <div>
                   <b>Fecha sugerida:</b> {data.bono.fechaAtencionISO}
                 </div>
               ) : null}
+
               <div>
                 <b>Vence:</b> {new Date(data.bono.expiresAt).toLocaleString()}
               </div>
+
               {data.bono.usedAt ? (
                 <div>
                   <b>Usado:</b> {new Date(data.bono.usedAt).toLocaleString()}
