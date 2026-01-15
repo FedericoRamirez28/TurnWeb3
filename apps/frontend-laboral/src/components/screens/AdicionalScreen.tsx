@@ -145,9 +145,9 @@ function buildPdf(monthLabel: string, grouped: Array<{ empresa: string; rows: Ad
     doc.setFontSize(9.5)
     doc.text('Fecha', margin, y)
     doc.text('Nombre y Apellido', margin + 28, y)
-    doc.text('DNI', margin + 112, y)
-    doc.text('N° afiliado', margin + 140, y)
-    doc.text('Adicional', margin + 170, y)
+    doc.text('DNI', margin + 70, y)
+    doc.text('N° afiliado', margin + 95, y)
+    doc.text('Adicional', margin + 120, y)
     y += 5
 
     doc.setFont('helvetica', 'normal')
@@ -160,12 +160,12 @@ function buildPdf(monthLabel: string, grouped: Array<{ empresa: string; rows: Ad
       }
       doc.text(r.fechaISO || '—', margin, y)
       doc.text((r.nombre || '—').slice(0, 36), margin + 28, y)
-      doc.text((r.dni || '—').slice(0, 12), margin + 112, y)
-      doc.text((r.nroAfiliado || '—').slice(0, 14), margin + 140, y)
+      doc.text((r.dni || '—').slice(0, 12), margin + 70, y)
+      doc.text((r.nroAfiliado || '—').slice(0, 14), margin + 95, y)
 
       const ad = r.adicional || '—'
-      const adLines = doc.splitTextToSize(ad, pageW - (margin + 170) - margin)
-      doc.text(adLines, margin + 170, y)
+      const adLines = doc.splitTextToSize(ad, pageW - (margin + 120) - margin)
+      doc.text(adLines, margin + 120, y)
       y += Math.max(5, adLines.length * 4.6)
     })
 

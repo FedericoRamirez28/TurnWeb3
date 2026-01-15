@@ -105,7 +105,7 @@ function ymd(year: number, monthIndex0: number, day: number) {
   return `${year}-${mm}-${dd}`
 }
 
-function buildPdfConsultorios(turnosList: ConsultorioTurno[], title: string) {
+function buildPdfConsultorios(turnosList: ConsultorioTurno[]) {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' })
   const pageW = doc.internal.pageSize.getWidth()
   const pageH = doc.internal.pageSize.getHeight()
@@ -124,12 +124,6 @@ function buildPdfConsultorios(turnosList: ConsultorioTurno[], title: string) {
   )
 
   let y = margin
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(13)
-  doc.text('TURNOS CONSULTORIO', margin, y)
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(10)
-  doc.text(title, pageW - margin, y, { align: 'right' })
 
   y += 10
   doc.setDrawColor(0, 0, 0)
@@ -172,8 +166,8 @@ function buildPdfConsultorios(turnosList: ConsultorioTurno[], title: string) {
       { x: margin, w: 20, label: 'Fecha' },
       { x: margin + 22, w: 22, label: 'DNI' },
       { x: margin + 46, w: 58, label: 'Nombre' },
-      { x: margin + 106, w: 24, label: 'Nac.' },
-      { x: margin + 132, w: pageW - margin - (margin + 132), label: 'Diagnóstico' },
+      { x: margin + 106, w: 24, label: ' ' },
+      { x: margin + 80, w: pageW - margin - (margin + 80), label: 'Diagnóstico' },
     ]
     cols.forEach((c) => doc.text(c.label, c.x, y))
 
@@ -193,7 +187,6 @@ function buildPdfConsultorios(turnosList: ConsultorioTurno[], title: string) {
       doc.text(t.fechaTurnoISO || '-', cols[0].x, y)
       doc.text(t.dni || '-', cols[1].x, y)
       doc.text(linesNombre, cols[2].x, y)
-      doc.text(t.nacimientoISO || '-', cols[3].x, y)
       doc.text(linesDiag, cols[4].x, y)
 
       y += rowH
@@ -565,13 +558,11 @@ export default function ConsultoriosScreen() {
     const empresaSuffix = reportCompanyId ? `_Empresa_${(empresaLabel || 'Empresa').replaceAll(' ', '_')}` : ''
 
     if (selectedDayISO) {
-      const title = `Turnos del día ${selectedDayISO}${empresaLabel ? ` · ${empresaLabel}` : ''}`
-      const doc = buildPdfConsultorios(reportTurnos, title)
+      const doc = buildPdfConsultorios(reportTurnos)
       const file = `Consultorios_Dia_${selectedDayISO}${empresaSuffix}.pdf`
       doc.save(file)
     } else {
-      const title = `Turnos Mes: ${monthTitle}${empresaLabel ? ` · ${empresaLabel}` : ''}`
-      const doc = buildPdfConsultorios(reportTurnos, title)
+      const doc = buildPdfConsultorios(reportTurnos)
       const file = `Consultorios_Mes_${String(monthIndex0 + 1).padStart(2, '0')}-${year}${empresaSuffix}.pdf`
       doc.save(file)
     }
