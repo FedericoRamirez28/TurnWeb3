@@ -33,7 +33,7 @@ function isHHmm(s: string) {
 }
 
 function isSedeKey(s: string) {
-  return s === 'caba' || s === 'sanjusto'
+  return s === 'sanjusto' || s === 'caba'
 }
 
 function isNonEmptyStringOrUndefined(v: unknown) {

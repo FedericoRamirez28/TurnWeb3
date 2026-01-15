@@ -86,11 +86,11 @@ function savePreocupacionalPrefill(payload: PreocupacionalPrefill) {
 function readPersistedSede(): SedeKey {
   try {
     const v = String(localStorage.getItem(STORAGE_KEY_SEDE) || '').trim()
-    if (v === 'caba' || v === 'sanjusto') return v
+    if (v === 'sanjusto' || v === 'caba') return v
   } catch {
     // no-op
   }
-  return 'caba'
+  return 'sanjusto'
 }
 
 function persistSede(next: SedeKey) {
@@ -188,7 +188,7 @@ export function TurnosLaboralCard({ sede, onSedeChange }: TurnosLaboralCardProps
   const [examQ, setExamQ] = useState('')
   const [serverAdicionales, setServerAdicionales] = useState<string[]>([])
 
-  const [viewFrom, setViewFrom] = useState('')
+  const [viewFrom, setViewFrom] = useState(() => isoDay(new Date()))
   const [viewTo, setViewTo] = useState('')
   const [smartQ, setSmartQ] = useState('')
   const [viewerTurnos, setViewerTurnos] = useState<LaborTurno[]>([])
@@ -559,20 +559,22 @@ export function TurnosLaboralCard({ sede, onSedeChange }: TurnosLaboralCardProps
           <div className="labor-turnos__tabs" role="tablist" aria-label="Sedes turnos laborales">
             <button
               type="button"
-              className={'labor-turnos__tab' + (draft.sede === 'caba' ? ' labor-turnos__tab--active' : '')}
-              onClick={() => onChangeSedeLocal('caba')}
-              disabled={busy}
-            >
-              CABA
-            </button>
-            <button
-              type="button"
               className={'labor-turnos__tab' + (draft.sede === 'sanjusto' ? ' labor-turnos__tab--active' : '')}
               onClick={() => onChangeSedeLocal('sanjusto')}
               disabled={busy}
             >
               San Justo
             </button>
+
+            <button
+              type="button"
+              className={'labor-turnos__tab' + (draft.sede === 'caba' ? ' labor-turnos__tab--active' : '')}
+              onClick={() => onChangeSedeLocal('caba')}
+              disabled={busy}
+            >
+              CABA
+            </button>
+
           </div>
         </div>
       </div>
@@ -876,7 +878,7 @@ export function TurnosLaboralCard({ sede, onSedeChange }: TurnosLaboralCardProps
                           <td>{t.nombre}</td>
                           <td>{t.dni}</td>
                           <td className="labor-turnos__viewer-exam">{t.tipoExamen}</td>
-                          <td>{t.sede === 'caba' ? 'CABA' : 'San Justo'}</td>
+                          <td>{t.sede === 'sanjusto' ? 'San Justo' : 'CABA'}</td>
                         </tr>
                       ))}
                     </tbody>

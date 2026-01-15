@@ -16,7 +16,7 @@ export default function HomeLaboral() {
   }, [user?.username, user?.displayName])
 
   // ✅ sede compartida entre “toma de turnos” y “agenda”
-  const [sede, setSede] = useState<SedeKey>('caba')
+  const [sede, setSede] = useState<SedeKey>('sanjusto')
 
   return (
     <div className="home-laboral">

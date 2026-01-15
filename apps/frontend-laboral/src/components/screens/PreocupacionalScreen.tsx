@@ -279,7 +279,17 @@ function drawFirmas(doc: jsPDF) {
   doc.text('FIRMA DEL MEDICO', pageW - margin - 40, signatureY + 7, { align: 'center' })
 }
 
-function drawClasificacionBlock(doc: jsPDF, draft: Draft, yTop: number, opts: { includeTitle: boolean }) {
+/**
+ * Bloque "Clasificación / Observaciones"
+ * - includePicker = true  => dibuja A/B/C/D/E + Observaciones + Leyenda
+ * - includePicker = false => NO dibuja A/B/C/D/E; solo Observaciones + Leyenda
+ */
+function drawClasificacionBlock(
+  doc: jsPDF,
+  draft: Draft,
+  yTop: number,
+  opts: { includeTitle: boolean; includePicker: boolean },
+) {
   const pageW = doc.internal.pageSize.getWidth()
   const pageH = doc.internal.pageSize.getHeight()
   const margin = PDF.margin
@@ -291,55 +301,71 @@ function drawClasificacionBlock(doc: jsPDF, draft: Draft, yTop: number, opts: { 
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(12)
     doc.setTextColor(15, 23, 42)
-    doc.text('CLASIFICACION', margin, yClasifTop)
+    // si no hay picker, el título queda más fiel a lo que se muestra
+    doc.text(opts.includePicker ? 'CLASIFICACION' : 'OBSERVACIONES', margin, yClasifTop)
   }
 
-  const y = yClasifTop + (opts.includeTitle ? 12 : 0)
+  const yBase = yClasifTop + (opts.includeTitle ? 12 : 0)
 
-  const items: { k: ClasifKey; title: string; sub: string }[] = [
-    { k: 'A', title: 'A', sub: 'SIN INCAPACIDAD' },
-    { k: 'B', title: 'B', sub: 'SIN INCAPACIDAD' },
-    { k: 'C', title: 'C', sub: 'SIN INCAPACIDAD' },
-    { k: 'D', title: 'D', sub: 'CON LIMITACION' },
-    { k: 'E', title: 'E', sub: 'NO APTO' },
-  ]
+  let obsTitleY = yBase
 
-  const gap = 6
-  const boxW = (pageW - margin * 2 - gap * 4) / 5
-  let x = margin
+  if (opts.includePicker) {
+    const items: { k: ClasifKey; title: string; sub: string }[] = [
+      { k: 'A', title: 'A', sub: 'SIN INCAPACIDAD' },
+      { k: 'B', title: 'B', sub: 'SIN INCAPACIDAD' },
+      { k: 'C', title: 'C', sub: 'SIN INCAPACIDAD' },
+      { k: 'D', title: 'D', sub: 'CON LIMITACION' },
+      { k: 'E', title: 'E', sub: 'NO APTO' },
+    ]
 
-  items.forEach((it, idx) => {
-    doc.setDrawColor(148, 163, 184)
-    doc.rect(x, y, boxW, 22)
+    const gap = 6
+    const boxW = (pageW - margin * 2 - gap * 4) / 5
+    let x = margin
 
+    items.forEach((it, idx) => {
+      doc.setDrawColor(148, 163, 184)
+      doc.rect(x, yBase, boxW, 22)
+
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(11)
+      doc.setTextColor(15, 23, 42)
+      doc.text(it.title, x + 4, yBase + 7)
+
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(8.8)
+      doc.setTextColor(100, 116, 139)
+      doc.text(it.sub, x + boxW / 2, yBase + 18, { align: 'center' })
+
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(11)
+      doc.setTextColor(15, 23, 42)
+      const mark = draft.clasificacion === it.k ? 'X' : '-'
+      doc.text(`( ${mark} )`, x + boxW - 14, yBase + 7)
+
+      x += boxW + (idx < 4 ? gap : 0)
+    })
+
+    obsTitleY = yBase + 34
+  } else {
+    // sin picker, arrancamos observaciones más arriba
+    obsTitleY = yBase + 6
+  }
+
+  // Si ya pusimos título OBSERVACIONES arriba, evitamos repetir "Observaciones:" abajo
+  const showObsLabel = opts.includePicker
+
+  if (showObsLabel) {
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(11)
     doc.setTextColor(15, 23, 42)
-    doc.text(it.title, x + 4, y + 7)
-
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(8.8)
-    doc.setTextColor(100, 116, 139)
-    doc.text(it.sub, x + boxW / 2, y + 18, { align: 'center' })
-
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(11)
-    doc.setTextColor(15, 23, 42)
-    const mark = draft.clasificacion === it.k ? 'X' : '-'
-    doc.text(`( ${mark} )`, x + boxW - 14, y + 7)
-
-    x += boxW + (idx < 4 ? gap : 0)
-  })
-
-  const obsTitleY = y + 34
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(11)
-  doc.setTextColor(15, 23, 42)
-  doc.text('Observaciones:', margin, obsTitleY)
+    doc.text('Observaciones:', margin, obsTitleY)
+  }
 
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(10)
   doc.setTextColor(15, 23, 42)
+
+  const obsStartY = showObsLabel ? obsTitleY + 10 : obsTitleY + 6
 
   // ✅ texto libre (respetamos saltos de línea, sin bullets automáticos)
   const obsText = (draft.observaciones || '').replace(/\r\n/g, '\n').trim()
@@ -347,7 +373,6 @@ function drawClasificacionBlock(doc: jsPDF, draft: Draft, yTop: number, opts: { 
   // Importante: este bloque debe entrar ANTES de las firmas de la planilla
   const signatureY = pageH - 22
   const legendMaxBottom = signatureY - 10
-  const obsStartY = obsTitleY + 10
   const maxObsBottom = legendMaxBottom - 28
 
   let oy = obsStartY
@@ -436,10 +461,10 @@ function buildPdfCompleto(draft: Draft, dateText: string) {
   drawCheckbox(doc, margin + 70, cy, 'Examen Periodico', draft.checks.periodico)
   drawCheckbox(doc, margin + 132, cy, 'Examen Egreso', draft.checks.egreso)
 
-  // ✅ Clasificación ocupa el “cuadrado azul” (entre checks y firmas)
-  drawClasificacionBlock(doc, draft, PDF.clasifTop, { includeTitle: true })
+  // ✅ En Periódico/Egreso NO hay selector A-E, pero sí Observaciones + Leyenda
+  const includePicker = !(draft.checks.periodico || draft.checks.egreso)
+  drawClasificacionBlock(doc, draft, PDF.clasifTop, { includeTitle: true, includePicker })
 
-  // ✅ Firmas SOLO en el completo/planilla/adicionales (no en clasificacion-vista)
   drawFirmas(doc)
   return doc
 }
@@ -463,19 +488,19 @@ function buildPdfVista(view: ViewKey, draft: Draft, dateText: string) {
     doc.setTextColor(15, 23, 42)
 
     doc.text('EMPRESA:', margin, y0)
-    doc.text(draft.empresa || ' ', margin + 26, y0)
+    doc.text(draft.empresa || ' ', margin + 40 , y0)
 
     doc.text('N° AFILIADO:', pageW / 2 + 20, y0)
     doc.text(draft.nroAfiliado || ' ', pageW / 2 + 46, y0)
 
     doc.text('NOMBRE Y APELLIDO:', margin, y0 + 12)
-    doc.text(draft.nombre || ' ', margin + 45, y0 + 12)
+    doc.text(draft.nombre || ' ', margin + 40, y0 + 12)
 
     doc.text('DNI:', pageW / 2 + 20, y0 + 12)
-    doc.text(draft.dni || ' ', pageW / 2 + 30, y0 + 12)
+    doc.text(draft.dni || ' ', pageW / 2 + 46, y0 + 12)
 
     doc.text('PUESTO A OCUPAR:', margin, y0 + 24)
-    doc.text(draft.puesto || ' ', margin + 36, y0 + 24)
+    doc.text(draft.puesto || ' ', margin + 40, y0 + 24)
 
     const cy = PDF.checksY
     drawCheckbox(doc, margin, cy, 'Examen Preocupacional', draft.checks.preocupacional)
@@ -542,11 +567,8 @@ function buildPdfVista(view: ViewKey, draft: Draft, dateText: string) {
 
   // ✅ view === 'clasificacion'
   {
-    // IMPORTANTE:
-    // - Sin fecha
-    // - Sin firmas
-    // - En el “cuadrado azul”: entre checks y firmas
-    drawClasificacionBlock(doc, draft, PDF.clasifTop, { includeTitle: true })
+    const includePicker = !(draft.checks.periodico || draft.checks.egreso)
+    drawClasificacionBlock(doc, draft, PDF.clasifTop, { includeTitle: true, includePicker })
     return doc
   }
 }
@@ -580,6 +602,12 @@ export default function PreocupacionalScreen() {
 
   const today = useMemo(() => fmtDate(new Date()), [])
   const todayISO = useMemo(() => isoDay(new Date()), [])
+
+  // ✅ mostrar selector A-E solo si NO es Periódico/Egreso
+  const showClasifPicker = useMemo(
+    () => !(draft.checks.periodico || draft.checks.egreso),
+    [draft.checks.periodico, draft.checks.egreso],
+  )
 
   const currentDocCompleto = useCallback(async () => buildPdfCompleto(draft, today), [draft, today])
   const currentDocVista = useCallback(async () => buildPdfVista(view, draft, today), [view, draft, today])
@@ -949,6 +977,7 @@ export default function PreocupacionalScreen() {
             Adicionales
           </button>
 
+          {/* ✅ NO deshabilitamos el tab: solo se oculta el selector A-E si corresponde */}
           <button
             type="button"
             className={'preocupacional__tab' + (view === 'clasificacion' ? ' preocupacional__tab--active' : '')}
@@ -1078,25 +1107,42 @@ export default function PreocupacionalScreen() {
               <div className="preocupacional__clasif">
                 <h3 className="preocupacional__section-title">Clasificación</h3>
 
-                <div className="clasif-grid" role="radiogroup" aria-label="Clasificación A a E">
-                  {(['A', 'B', 'C', 'D', 'E'] as ClasifKey[]).map((k) => {
-                    const sub = k === 'D' ? 'CON LIMITACION' : k === 'E' ? 'NO APTO' : 'SIN INCAPACIDAD'
-                    return (
-                      <button
-                        key={k}
-                        type="button"
-                        className={'clasif-item' + (draft.clasificacion === k ? ' clasif-item--active' : '')}
-                        onClick={() => setDraft((p) => ({ ...p, clasificacion: k }))}
-                      >
-                        <div className="clasif-item__top">
-                          <span className="clasif-item__letter">{k}</span>
-                          <span className="clasif-item__mark">( {draft.clasificacion === k ? 'X' : '-'} )</span>
-                        </div>
-                        <div className="clasif-item__sub">{sub}</div>
-                      </button>
-                    )
-                  })}
-                </div>
+                {showClasifPicker ? (
+                  <div className="clasif-grid" role="radiogroup" aria-label="Clasificación A a E">
+                    {(['A', 'B', 'C', 'D', 'E'] as ClasifKey[]).map((k) => {
+                      const sub = k === 'D' ? 'CON LIMITACION' : k === 'E' ? 'NO APTO' : 'SIN INCAPACIDAD'
+                      return (
+                        <button
+                          key={k}
+                          type="button"
+                          className={'clasif-item' + (draft.clasificacion === k ? ' clasif-item--active' : '')}
+                          onClick={() => setDraft((p) => ({ ...p, clasificacion: k }))}
+                        >
+                          <div className="clasif-item__top">
+                            <span className="clasif-item__letter">{k}</span>
+                            <span className="clasif-item__mark">( {draft.clasificacion === k ? 'X' : '-'} )</span>
+                          </div>
+                          <div className="clasif-item__sub">{sub}</div>
+                        </button>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <div
+                    className="preocupacional__clasif-disabled"
+                    style={{
+                      padding: '12px 14px',
+                      border: '1px dashed rgba(100,116,139,.45)',
+                      borderRadius: 12,
+                      background: 'rgba(148,163,184,.08)',
+                      color: 'var(--color-ink-soft)',
+                      marginTop: 10,
+                    }}
+                  >
+                    Para <b>Periódico</b> y <b>Egreso</b> no corresponde seleccionar clasificación A–E. Podés completar{' '}
+                    <b>Observaciones</b> igualmente.
+                  </div>
+                )}
               </div>
 
               <div className="preocupacional__obs">
