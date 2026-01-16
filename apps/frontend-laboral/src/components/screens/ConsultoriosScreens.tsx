@@ -183,6 +183,26 @@ function buildPdfConsultorios(turnosList: ConsultorioTurno[]) {
     y = margin
   }
 
+  // ===== columnas (SIN SOLAPARSE) =====
+  const gap = 2
+  const colFechaW = 20
+  const colDniW = 22
+  const colNombreW = 60
+  const colDiagW = pageW - margin - (margin + colFechaW + gap + colDniW + gap + colNombreW + gap)
+
+  const cols = {
+    fecha: { x: margin, w: colFechaW, label: 'Fecha' },
+    dni: { x: margin + colFechaW + gap, w: colDniW, label: 'DNI' },
+    nombre: { x: margin + colFechaW + gap + colDniW + gap, w: colNombreW, label: 'Nombre' },
+    diag: {
+      x: margin + colFechaW + gap + colDniW + gap + colNombreW + gap,
+      w: colDiagW,
+      label: 'Diagnóstico',
+    },
+  }
+
+  const lineH = 4.2
+
   empresas.forEach((empresa) => {
     const list = (byEmpresa.get(empresa) || []).slice()
     list.sort((a, b) => {
@@ -191,24 +211,26 @@ function buildPdfConsultorios(turnosList: ConsultorioTurno[]) {
       return (a.createdAt || '').localeCompare(b.createdAt || '')
     })
 
+    // ===== header empresa (wrap) =====
     ensureSpace(14)
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(11)
-    doc.text(empresa || '(Sin empresa)', margin, y)
-    y += 6
 
+    const empresaLines = doc.splitTextToSize(empresa || '(Sin empresa)', pageW - margin * 2)
+    doc.text(empresaLines, margin, y)
+    y += empresaLines.length * (lineH + 0.6)
+
+    y += 2
+
+    // ===== header tabla =====
     ensureSpace(10)
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(9.2)
 
-    const cols = [
-      { x: margin, w: 20, label: 'Fecha' },
-      { x: margin + 22, w: 22, label: 'DNI' },
-      { x: margin + 46, w: 58, label: 'Nombre' },
-      { x: margin + 106, w: 24, label: ' ' },
-      { x: margin + 80, w: pageW - margin - (margin + 80), label: 'Diagnóstico' },
-    ]
-    cols.forEach((c) => doc.text(c.label, c.x, y))
+    doc.text(cols.fecha.label, cols.fecha.x, y)
+    doc.text(cols.dni.label, cols.dni.x, y)
+    doc.text(cols.nombre.label, cols.nombre.x, y)
+    doc.text(cols.diag.label, cols.diag.x, y)
 
     y += 4
     doc.setFont('helvetica', 'normal')
@@ -216,20 +238,27 @@ function buildPdfConsultorios(turnosList: ConsultorioTurno[]) {
     doc.line(margin, y, pageW - margin, y)
     y += 5
 
+    // ===== filas =====
     list.forEach((t) => {
-      const linesDiag = doc.splitTextToSize(t.diagnostico || '-', cols[4].w)
-      const linesNombre = doc.splitTextToSize(t.nombre || '-', cols[2].w)
+      const nombreLines = doc.splitTextToSize(t.nombre || '-', cols.nombre.w)
+      const diagLines = doc.splitTextToSize(t.diagnostico || '-', cols.diag.w)
 
-      const rowH = Math.max(linesDiag.length, linesNombre.length, 1) * 4.2
-      ensureSpace(rowH + 6)
+      const maxLines = Math.max(nombreLines.length, diagLines.length, 1)
+      const rowH = maxLines * lineH
 
-      // ✅ Fecha en formato Argentina dentro del PDF
-      doc.text(t.fechaTurnoISO ? fmtArgDate(t.fechaTurnoISO) : '-', cols[0].x, y)
-      doc.text(t.dni || '-', cols[1].x, y)
-      doc.text(linesNombre, cols[2].x, y)
-      doc.text(linesDiag, cols[4].x, y)
+      ensureSpace(rowH + 8)
+
+      const yRow = y
+
+      doc.text(t.fechaTurnoISO ? fmtArgDate(t.fechaTurnoISO) : '-', cols.fecha.x, yRow)
+      doc.text(t.dni || '-', cols.dni.x, yRow)
+
+      // ✅ acá ya NO se superponen porque diag.x está después de nombre.x + nombre.w
+      doc.text(nombreLines, cols.nombre.x, yRow)
+      doc.text(diagLines, cols.diag.x, yRow)
 
       y += rowH
+
       doc.setDrawColor(0, 0, 0)
       doc.setLineWidth(0.1)
       doc.line(margin, y + 1.5, pageW - margin, y + 1.5)
@@ -241,6 +270,7 @@ function buildPdfConsultorios(turnosList: ConsultorioTurno[]) {
 
   return doc
 }
+
 
 /** Busca un DNI en el padrón de empresas activas (con cache + concurrencia). */
 async function findPersonByDniAcrossCompanies(opts: {
