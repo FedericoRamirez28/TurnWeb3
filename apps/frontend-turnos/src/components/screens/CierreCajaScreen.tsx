@@ -66,6 +66,7 @@ const swal = Swal.mixin({
 })
 
 /* ======================= PDF BUILDER  ======================= */
+/* ======================= PDF BUILDER  ======================= */
 async function generateCajaPdf(
   dateISO: string,
   rows: CajaRow[],
@@ -74,7 +75,7 @@ async function generateCajaPdf(
   if (!rows.length) return null
 
   const doc = new jsPDF({
-    orientation: 'landscape',
+    orientation: 'portrait', // ✅ vertical
     unit: 'pt',
     format: 'a4',
   })
@@ -82,7 +83,7 @@ async function generateCajaPdf(
   const PAGE_W = doc.internal.pageSize.getWidth()
   const PAGE_H = doc.internal.pageSize.getHeight()
 
-  const marginX = 32
+  const marginX = 28
   const marginTop = 24
   const bottomLimit = PAGE_H - 56
 
@@ -94,7 +95,7 @@ async function generateCajaPdf(
     img.src = medicLogo
     await img.decode()
 
-    const logoW = 160
+    const logoW = 150
     const logoH = (img.height / img.width) * logoW
 
     doc.addImage(img, 'PNG', (PAGE_W - logoW) / 2, marginTop, logoW, logoH)
@@ -104,7 +105,7 @@ async function generateCajaPdf(
   }
 
   /* ---------- HEADER ---------- */
-  const headerY = logoBottomY + 28
+  const headerY = logoBottomY + 22
 
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(18)
@@ -114,33 +115,39 @@ async function generateCajaPdf(
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(11)
   doc.setTextColor(...TEXT_SOFT)
-  doc.text(
-    `Fecha: ${formatDateDisplay(dateISO)} · Generado: ${new Date().toLocaleString('es-AR')}`,
-    PAGE_W / 2,
-    headerY + 18,
-    { align: 'center' }
-  )
+
+  // ✅ fuerza zona horaria BA (así no depende del navegador/servidor)
+  const generado = new Intl.DateTimeFormat('es-AR', {
+    dateStyle: 'short',
+    timeStyle: 'medium',
+    timeZone: 'America/Argentina/Buenos_Aires',
+  }).format(new Date())
+
+  doc.text(`Fecha: ${formatDateDisplay(dateISO)} · Generado: ${generado}`, PAGE_W / 2, headerY + 18, {
+    align: 'center',
+  })
 
   doc.setDrawColor(220)
   doc.setLineWidth(0.8)
-  doc.line(marginX, headerY + 34, PAGE_W - marginX, headerY + 34)
+  doc.line(marginX, headerY + 32, PAGE_W - marginX, headerY + 32)
 
   /* ---------- TABLE ---------- */
-  const tableStartY = headerY + 52
-  const padX = 7
+  const tableStartY = headerY + 48
+  const padX = 6
   const padY = 6
   const lineH = 12
 
+  // ✅ anchos base pensados para portrait (A4 vertical)
   const columns: PdfColumn[] = [
-    { label: 'Fecha', width: 72, value: (r) => safeText(r.fechaDisplay) },
-    { label: 'Nº Afiliado', width: 90, value: (r) => safeText(r.numeroAfiliado) },
-    { label: 'DNI / CUIT', width: 100, value: (r) => safeText(r.dni) },
-    { label: 'Apellido y nombre', width: 200, value: (r) => safeText(r.nombre) },
-    { label: 'Prestador', width: 150, value: (r) => safeText(r.prestador) },
-    { label: 'Esp. / Lab.', width: 200, value: (r) => safeText(r.practica) },
+    { label: 'Fecha', width: 62, value: (r) => safeText(r.fechaDisplay) },
+    { label: 'Nº Afiliado', width: 76, value: (r) => safeText(r.numeroAfiliado) },
+    { label: 'DNI / CUIT', width: 82, value: (r) => safeText(r.dni) },
+    { label: 'Apellido y nombre', width: 140, value: (r) => safeText(r.nombre) },
+    { label: 'Prestador', width: 110, value: (r) => safeText(r.prestador) },
+    { label: 'Esp. / Lab.', width: 150, value: (r) => safeText(r.practica) },
     {
       label: 'Monto',
-      width: 100,
+      width: 76,
       align: 'right',
       value: (r) => `$ ${Number(r.monto || 0).toFixed(2)}`,
     },
@@ -150,9 +157,12 @@ async function generateCajaPdf(
   const maxW = PAGE_W - marginX * 2
   const scale = rawW > maxW ? maxW / rawW : 1
 
+  // ✅ en portrait el “min width 70” te puede romper el ajuste; bajamos el mínimo
+  const MIN_COL_W = 48
+
   const cols = columns.map((c) => ({
     ...c,
-    width: Math.max(70, Math.floor(c.width * scale)),
+    width: Math.max(MIN_COL_W, Math.floor(c.width * scale)),
   }))
 
   const tableW = cols.reduce((a, c) => a + c.width, 0)
@@ -161,19 +171,19 @@ async function generateCajaPdf(
 
   const drawHeader = () => {
     doc.setFillColor(...MEDIC_BLUE)
-    doc.rect(marginX, y, tableW, 28, 'F')
+    doc.rect(marginX, y, tableW, 26, 'F')
 
     doc.setFont('helvetica', 'bold')
-    doc.setFontSize(10)
+    doc.setFontSize(9.5)
     doc.setTextColor(255, 255, 255)
 
     let x = marginX
     for (const c of cols) {
-      doc.text(c.label, x + padX, y + 19)
+      doc.text(c.label, x + padX, y + 18)
       x += c.width
     }
 
-    y += 28
+    y += 26
     doc.setTextColor(...TEXT_DARK)
   }
 
@@ -192,7 +202,7 @@ async function generateCajaPdf(
     )
 
     const maxLines = Math.max(...cellLines.map((l) => l.length))
-    const rowH = Math.max(24, padY * 2 + maxLines * lineH)
+    const rowH = Math.max(22, padY * 2 + maxLines * lineH)
 
     if (y + rowH > bottomLimit) {
       doc.addPage()
@@ -219,7 +229,7 @@ async function generateCajaPdf(
   }
 
   /* ---------- TOTAL ---------- */
-  y += 16
+  y += 14
   if (y > bottomLimit) {
     doc.addPage()
     y = marginTop
@@ -229,7 +239,7 @@ async function generateCajaPdf(
   doc.setLineWidth(1.4)
   doc.line(marginX, y, marginX + tableW, y)
 
-  y += 26
+  y += 24
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(14)
   doc.setTextColor(...MEDIC_GREEN)
@@ -246,6 +256,7 @@ async function generateCajaPdf(
   if (mode === 'tab') window.open(url, '_blank', 'noopener,noreferrer')
   return url
 }
+
 
 /* ======================= COMPONENT ======================= */
 export const CierreCajaScreen: React.FC<Props> = () => {
