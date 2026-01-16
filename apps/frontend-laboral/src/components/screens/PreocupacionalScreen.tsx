@@ -653,6 +653,12 @@ export default function PreocupacionalScreen() {
   const handleDownloadCompleto = useCallback(async () => {
     try {
       const doc = await currentDocCompleto()
+      const safeEmpresa =
+        (draft.empresa || 'examen')
+          .trim()
+          .replace(/\s+/g, '_')
+          .replace(/[^\w-]/g, '')
+          .slice(0, 40) || 'examen'
       const safeName =
         (draft.nombre || 'examen')
           .trim()
@@ -660,16 +666,22 @@ export default function PreocupacionalScreen() {
           .replace(/[^\w-]/g, '')
           .slice(0, 40) || 'examen'
 
-      doc.save(`Completo_${safeName}_${new Date().toISOString().slice(0, 10)}.pdf`)
+      doc.save(`${safeEmpresa}_${safeName}_${new Date().toISOString().slice(0, 10)}.pdf`)
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Error'
       Swal.fire({ icon: 'error', title: 'No se pudo descargar', text: msg })
     }
-  }, [currentDocCompleto, draft.nombre])
+  }, [currentDocCompleto, draft.nombre, draft.empresa])
 
   const handleDownloadVista = useCallback(async () => {
     try {
       const doc = await currentDocVista()
+      const safeEmpresa =
+        (draft.empresa || 'examen')
+          .trim()
+          .replace(/\s+/g, '_')
+          .replace(/[^\w-]/g, '')
+          .slice(0, 40) || 'examen'
       const safeName =
         (draft.nombre || 'examen')
           .trim()
@@ -678,12 +690,12 @@ export default function PreocupacionalScreen() {
           .slice(0, 40) || 'examen'
 
       const tag = view === 'planilla' ? 'Planilla' : view === 'adicionales' ? 'Adicionales' : 'Clasificacion'
-      doc.save(`${tag}_${safeName}_${new Date().toISOString().slice(0, 10)}.pdf`)
+      doc.save(`${tag}_${safeEmpresa}_${safeName}_${new Date().toISOString().slice(0, 10)}.pdf`)
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Error'
       Swal.fire({ icon: 'error', title: 'No se pudo descargar', text: msg })
     }
-  }, [currentDocVista, draft.nombre, view])
+  }, [currentDocVista, draft.nombre, view, draft.empresa])
 
   useEffect(() => {
     try {

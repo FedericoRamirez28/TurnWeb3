@@ -100,46 +100,45 @@ function buildPortadaPdf(p: PortadaEntry) {
 
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(15)
-  doc.text('HISTORIA CLINICA - PORTADA', margin, 18)
+  
 
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(10)
-  doc.text(fmtDate(new Date()), pageW - margin, 18, { align: 'right' })
 
   doc.setDrawColor(120)
-  doc.line(margin, 24, pageW - margin, 24)
+  
 
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(18)
-  doc.text((p.apellidoNombre || ' ').toUpperCase(), margin, 38)
+  doc.text((p.apellidoNombre || ' ').toUpperCase(), margin, 10)
 
-  const boxX = pageW - margin - 62
-  const boxY = 28
+  const boxX = pageW - margin - 50
+  const boxY = 4
   doc.setDrawColor(0)
-  doc.rect(boxX, boxY, 62, 22)
+  doc.rect(boxX, boxY, 62, 18)
   doc.setFontSize(10)
   doc.setFont('helvetica', 'bold')
   doc.text('N° SOCIO', boxX + 31, boxY + 7, { align: 'center' })
   doc.setFont('helvetica', 'normal')
   doc.text(p.nroSocio || ' ', boxX + 31, boxY + 14, { align: 'center' })
 
-  doc.rect(boxX, boxY + 22, 62, 16)
+  doc.rect(boxX, boxY + 18, 62, 14)
   doc.setFont('helvetica', 'bold')
-  doc.text('DNI', boxX + 31, boxY + 29, { align: 'center' })
+  doc.text('DNI', boxX + 31, boxY + 23, { align: 'center' })
   doc.setFont('helvetica', 'normal')
-  doc.text(p.dni || ' ', boxX + 31, boxY + 35, { align: 'center' })
+  doc.text(p.dni || ' ', boxX + 31, boxY + 30, { align: 'center' })
 
-  const y0 = 56
+  const y0 = 16
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(11)
   doc.text('DOMICILIO:', margin, y0)
   doc.setFont('helvetica', 'normal')
-  doc.text(p.domicilio || ' ', margin + 30, y0)
+  doc.text(p.domicilio || ' ', margin + 40, y0)
 
   doc.setFont('helvetica', 'bold')
-  doc.text('FECHA DE NAC.:', margin, y0 + 12)
+  doc.text('FECHA DE NAC.:', margin, y0 + 9)
   doc.setFont('helvetica', 'normal')
-  doc.text(fmtFechaNacimiento(p.fechaNacimiento || '') || ' ', margin + 40, y0 + 12)
+  doc.text(fmtFechaNacimiento(p.fechaNacimiento || '') || ' ', margin + 40, y0 + 9)
 
   doc.setDrawColor(200)
   doc.line(margin, 285, pageW - margin, 285)

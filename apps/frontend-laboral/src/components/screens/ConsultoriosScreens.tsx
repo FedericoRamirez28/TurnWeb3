@@ -37,11 +37,50 @@ type Draft = {
 
 const STORAGE_KEY_CONSULTORIOS_DRAFT = 'medic_laboral_consultorios_draft_v1'
 
-function isoDay(d = new Date()) {
-  const yyyy = d.getFullYear()
-  const mm = String(d.getMonth() + 1).padStart(2, '0')
-  const dd = String(d.getDate()).padStart(2, '0')
+// ✅ Buenos Aires timezone
+const TZ_AR = 'America/Argentina/Buenos_Aires'
+
+// ✅ YYYY-MM-DD (en zona horaria Buenos Aires)
+function isoDayAR(d = new Date()): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: TZ_AR,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(d)
+
+  const yyyy = parts.find((p) => p.type === 'year')?.value ?? '0000'
+  const mm = parts.find((p) => p.type === 'month')?.value ?? '00'
+  const dd = parts.find((p) => p.type === 'day')?.value ?? '00'
   return `${yyyy}-${mm}-${dd}`
+}
+
+// ✅ ISO -> DD/MM/YYYY (Argentina)
+function fmtArgDate(isoYmd: string): string {
+  const [y, m, d] = (isoYmd || '').split('-')
+  if (!y || !m || !d) return isoYmd || '-'
+  return `${d}/${m}/${y}`
+}
+
+// ✅ ISO -> DD-MM-YYYY (para nombre de archivo)
+function fmtArgDateFile(isoYmd: string): string {
+  const [y, m, d] = (isoYmd || '').split('-')
+  if (!y || !m || !d) return isoYmd || 'fecha'
+  return `${d}-${m}-${y}`
+}
+
+// ✅ Mes/Año (ARG) -> MM-YYYY (para nombre de archivo)
+function fmtMonthYearFile(year: number, monthIndex0: number): string {
+  const mm = String(monthIndex0 + 1).padStart(2, '0')
+  return `${mm}-${year}`
+}
+
+function safeFilePart(s: string): string {
+  return (s || '')
+    .trim()
+    .replaceAll(' ', '_')
+    .replace(/[\\/:*?"<>|]+/g, '-') // inválidos Windows
+    .replace(/_+/g, '_')
 }
 
 function normalizeText(s: string) {
@@ -92,6 +131,7 @@ function safeSaveDraft(d: Draft) {
 
 function fmtMonthTitle(year: number, monthIndex0: number) {
   const d = new Date(year, monthIndex0, 1)
+  // (esto es solo UI; el nombre del archivo lo hacemos con fmtMonthYearFile)
   return d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
 }
 
@@ -161,7 +201,6 @@ function buildPdfConsultorios(turnosList: ConsultorioTurno[]) {
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(9.2)
 
-    // ✅ sin Motivo
     const cols = [
       { x: margin, w: 20, label: 'Fecha' },
       { x: margin + 22, w: 22, label: 'DNI' },
@@ -184,7 +223,8 @@ function buildPdfConsultorios(turnosList: ConsultorioTurno[]) {
       const rowH = Math.max(linesDiag.length, linesNombre.length, 1) * 4.2
       ensureSpace(rowH + 6)
 
-      doc.text(t.fechaTurnoISO || '-', cols[0].x, y)
+      // ✅ Fecha en formato Argentina dentro del PDF
+      doc.text(t.fechaTurnoISO ? fmtArgDate(t.fechaTurnoISO) : '-', cols[0].x, y)
       doc.text(t.dni || '-', cols[1].x, y)
       doc.text(linesNombre, cols[2].x, y)
       doc.text(linesDiag, cols[4].x, y)
@@ -274,7 +314,8 @@ async function findPersonByDniAcrossCompanies(opts: {
 }
 
 export default function ConsultoriosScreen() {
-  const todayISO = useMemo(() => isoDay(new Date()), [])
+  // ✅ HOY calculado en zona horaria Buenos Aires (UTC-3)
+  const todayISO = useMemo(() => isoDayAR(new Date()), [])
 
   const [companies, setCompanies] = useState<Company[]>([])
   const [companiesLoading, setCompaniesLoading] = useState(true)
@@ -298,7 +339,7 @@ export default function ConsultoriosScreen() {
 
   const monthTitle = useMemo(() => fmtMonthTitle(year, monthIndex0), [year, monthIndex0])
 
-  // ✅ siempre guardar draft, pero con fecha forzada a hoy
+  // ✅ siempre guardar draft, pero con fecha forzada a hoy (AR)
   useEffect(() => {
     if (draft.fechaTurnoISO !== todayISO) {
       setDraft((p) => ({ ...p, fechaTurnoISO: todayISO }))
@@ -418,13 +459,12 @@ export default function ConsultoriosScreen() {
   const clearForm = useCallback(() => {
     setDraft((p) => ({
       ...p,
-      // si querés que NO se borre empresa, queda como estaba
       empresaId: p.empresaId,
       dni: '',
       nombre: '',
       nacimientoISO: '',
       diagnostico: '',
-      fechaTurnoISO: isoDay(new Date()), // ✅ hoy
+      fechaTurnoISO: isoDayAR(new Date()), // ✅ hoy AR
     }))
     lastAutoDniRef.current = ''
   }, [])
@@ -444,14 +484,8 @@ export default function ConsultoriosScreen() {
     const dni = normalizeDni(draft.dni)
     if (dni.length < 7) return
 
-    // no repetir búsqueda si ya autocompletamos ese mismo dni
     if (lastAutoDniRef.current === dni) return
-
-    // si ya está buscando, no solapamos
     if (searchingRef.current) return
-
-    // si ya hay nombre + empresa, no molestamos (igual si cambian dni, se vuelve a disparar)
-    // (lo dejamos igual: solo evitamos repetir con lastAutoDniRef)
 
     searchingRef.current = true
 
@@ -472,7 +506,6 @@ export default function ConsultoriosScreen() {
           ...p,
           empresaId: hit.company.id,
           nombre: (hit.person.nombre || '').trim() || p.nombre,
-          // nacimientoISO no viene en padrón, lo dejamos
         }))
 
         Swal.fire({
@@ -489,8 +522,8 @@ export default function ConsultoriosScreen() {
   }, [draft.dni, activeCompanies])
 
   const takeTurno = useCallback(async () => {
-    // ✅ forzamos fecha a HOY siempre (por si algo raro)
-    const fechaHoy = isoDay(new Date())
+    // ✅ fecha HOY AR
+    const fechaHoy = isoDayAR(new Date())
     if (draft.fechaTurnoISO !== fechaHoy) {
       setDraft((p) => ({ ...p, fechaTurnoISO: fechaHoy }))
     }
@@ -510,7 +543,7 @@ export default function ConsultoriosScreen() {
         nombre: draft.nombre.trim(),
         nacimientoISO: draft.nacimientoISO,
         diagnostico: draft.diagnostico.trim(),
-        fechaTurnoISO: fechaHoy, // ✅ HOY SIEMPRE
+        fechaTurnoISO: fechaHoy, // ✅ HOY SIEMPRE (AR)
       })
 
       Swal.fire({
@@ -553,20 +586,23 @@ export default function ConsultoriosScreen() {
     setMonthIndex0(d.getMonth())
   }, [])
 
+  // ✅ nombre archivo:
+  // - Día:  Empresa + DD-MM-YYYY
+  // - Mes:  Empresa + MM-YYYY
   const downloadPdf = useCallback(() => {
-    const empresaLabel = reportCompany?.nombre?.trim() || ''
-    const empresaSuffix = reportCompanyId ? `_Empresa_${(empresaLabel || 'Empresa').replaceAll(' ', '_')}` : ''
+    const empresaLabel = reportCompany?.nombre?.trim() || 'Todas'
+    const empresaPart = safeFilePart(empresaLabel)
+
+    const doc = buildPdfConsultorios(reportTurnos)
 
     if (selectedDayISO) {
-      const doc = buildPdfConsultorios(reportTurnos)
-      const file = `Consultorios_Dia_${selectedDayISO}${empresaSuffix}.pdf`
-      doc.save(file)
+      const dayArg = fmtArgDateFile(selectedDayISO) // DD-MM-YYYY
+      doc.save(`${empresaPart}_${dayArg}.pdf`)
     } else {
-      const doc = buildPdfConsultorios(reportTurnos)
-      const file = `Consultorios_Mes_${String(monthIndex0 + 1).padStart(2, '0')}-${year}${empresaSuffix}.pdf`
-      doc.save(file)
+      const my = fmtMonthYearFile(year, monthIndex0) // MM-YYYY
+      doc.save(`${empresaPart}_${my}.pdf`)
     }
-  }, [selectedDayISO, reportTurnos, monthTitle, monthIndex0, year, reportCompany, reportCompanyId])
+  }, [selectedDayISO, reportTurnos, monthIndex0, year, reportCompany])
 
   const grid = useMemo(() => {
     const first = new Date(year, monthIndex0, 1)
@@ -788,7 +824,7 @@ export default function ConsultoriosScreen() {
               <div className="consultorios__listTitle">
                 {selectedDayISO ? (
                   <>
-                    Turnos del día <b>{selectedDayISO}</b>
+                    Turnos del día <b>{fmtArgDate(selectedDayISO)}</b>
                     {reportCompany ? (
                       <>
                         {' '}· Empresa: <b>{reportCompany.nombre}</b>
@@ -833,7 +869,7 @@ export default function ConsultoriosScreen() {
                 <tbody>
                   {reportTurnos.slice(0, 200).map((t) => (
                     <tr key={t.id}>
-                      <td>{t.fechaTurnoISO}</td>
+                      <td>{t.fechaTurnoISO ? fmtArgDate(t.fechaTurnoISO) : '-'}</td>
                       <td>{t.empresaNombre}</td>
                       <td>{t.dni}</td>
                       <td>{t.nombre}</td>
