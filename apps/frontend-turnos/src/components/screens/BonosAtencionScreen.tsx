@@ -4,6 +4,7 @@ import React, { useMemo, useState } from 'react'
 import type { Affiliate, Appointment } from '@/components/screens/homeModels'
 import Swal from 'sweetalert2'
 import jsPDF from 'jspdf'
+import { useAuth } from '@/auth/useAuth'
 
 // ✅ IMPORTAR LOGO COMO ASSET (Vite)
 import logoMedic from '@/assets/logoMedic.png'
@@ -12,8 +13,6 @@ type Props = {
   affiliates: Affiliate[]
   appointments?: Appointment[] // opcional
 }
-
-type AffiliateWithBirth = Affiliate & { fechaNacimiento?: string | null }
 
 type PrestadorListItem = { id: string; nombre: string }
 const PRESTADORES: PrestadorListItem[] = [
@@ -55,33 +54,6 @@ function formatDateDDMMYYYY(isoDate: string): string {
   return `${dd}-${mm}-${yy}`
 }
 
-function calcAgeFromISO(iso?: string | null): number | null {
-  const s = safeStr(iso)
-  if (!s) return null
-  const datePart = s.length >= 10 ? s.slice(0, 10) : s
-  const d = new Date(datePart)
-  if (Number.isNaN(d.getTime())) return null
-
-  const now = new Date()
-  let age = now.getFullYear() - d.getFullYear()
-  const m = now.getMonth() - d.getMonth()
-  if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--
-  return age >= 0 && age <= 120 ? age : null
-}
-
-function setDashed(doc: jsPDF, dash: number[] = [1.0, 1.2]) {
-  ;(doc as unknown as { setLineDashPattern?: (dashArray: number[], dashPhase: number) => void }).setLineDashPattern?.(
-    dash,
-    0,
-  )
-}
-function clearDash(doc: jsPDF) {
-  ;(doc as unknown as { setLineDashPattern?: (dashArray: number[], dashPhase: number) => void }).setLineDashPattern?.(
-    [],
-    0,
-  )
-}
-
 function loadImageAsDataURL(src: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image()
@@ -101,80 +73,86 @@ function loadImageAsDataURL(src: string): Promise<string> {
 }
 
 /**
- * ✅ Watermark tile con LOGO ROTADO (diagonal “real”)
- * - angleDeg: ángulo del logo dentro del tile
- * - opacity: 0..1
- * - lighten: mezcla con blanco (0..1)
+ * ✅ Prepara un "watermark" único centrado, ocupando el máximo posible del PDF
+ * - opacity: opacidad final (0..1)
+ * - lighten: cuánto se lava con blanco (0..1) para que quede clarito
+ * Devuelve DataURL PNG listo para doc.addImage(...)
  */
-function makeWatermarkTileRotated(
+function makeSingleCenteredWatermark(
   logoSrc: string,
-  opts?: { basePx?: number; opacity?: number; lighten?: number; angleDeg?: number; scale?: number },
-) {
-  const basePx = opts?.basePx ?? 520
-  const opacity = opts?.opacity ?? 0.11
+  opts?: { opacity?: number; lighten?: number },
+): Promise<string> {
+  const opacity = opts?.opacity ?? 0.12
   const lighten = opts?.lighten ?? 0.62
-  const angleDeg = opts?.angleDeg ?? -25
-  const scale = opts?.scale ?? 0.78
 
-  return new Promise<string>((resolve, reject) => {
+  // canvas grande para que el escalado no pixele (alto)
+  const W = 1800
+  const H = 1200
+
+  return new Promise((resolve, reject) => {
     const img = new Image()
     img.crossOrigin = 'anonymous'
     img.onload = () => {
       const canvas = document.createElement('canvas')
-      canvas.width = basePx
-      canvas.height = basePx
+      canvas.width = W
+      canvas.height = H
       const ctx = canvas.getContext('2d')
       if (!ctx) return reject(new Error('No canvas ctx'))
 
-      ctx.clearRect(0, 0, basePx, basePx)
+      ctx.clearRect(0, 0, W, H)
 
-      // centro
-      const cx = basePx / 2
-      const cy = basePx / 2
-
-      // tamaño del logo dentro del tile
-      const maxW = basePx * scale
-      const maxH = basePx * 0.26
+      // Escalamos para que el logo "entre" máximo, manteniendo proporción
+      const maxW = W * 0.98
+      const maxH = H * 0.98
       const ratio = Math.min(maxW / img.width, maxH / img.height)
       const w = img.width * ratio
       const h = img.height * ratio
 
-      // dibujar rotado
-      ctx.save()
-      ctx.translate(cx, cy)
-      ctx.rotate((angleDeg * Math.PI) / 180)
-      ctx.translate(-w / 2, -h / 2)
-      ctx.drawImage(img, 0, 0, w, h)
-      ctx.restore()
+      const x = (W - w) / 2
+      const y = (H - h) / 2
+      ctx.drawImage(img, x, y, w, h)
 
       // lavar con blanco (apagar colores)
       ctx.globalCompositeOperation = 'source-atop'
       ctx.fillStyle = `rgba(255,255,255,${lighten})`
-      ctx.fillRect(0, 0, basePx, basePx)
+      ctx.fillRect(0, 0, W, H)
 
       // opacidad final
       ctx.globalCompositeOperation = 'source-over'
       ctx.globalAlpha = opacity
 
-      // “horneamos” a PNG
-      const out = canvas.toDataURL('image/png')
-      resolve(out)
+      resolve(canvas.toDataURL('image/png'))
     }
     img.onerror = () => reject(new Error(`No se pudo cargar imagen: ${logoSrc}`))
     img.src = logoSrc
   })
 }
 
+/** ✅ Número de seguimiento incremental (simple, por ahora local) */
+function nextSeguimiento(): string {
+  try {
+    const key = 'medic_bono_seguimiento'
+    const n = Number(localStorage.getItem(key) ?? '0')
+    const next = Number.isFinite(n) ? n + 1 : 1
+    localStorage.setItem(key, String(next))
+    return String(next).padStart(6, '0')
+  } catch {
+    return String(Date.now()).slice(-6)
+  }
+}
+
 async function generateBonoPdf(params: {
+  seguimiento: string
   obraSocial: string
   benefPlan: string
   nombre: string
   documento: string
-  edad: string
   fechaAtencionISO: string // YYYY-MM-DD
+  horaTurno: string // HH:mm
   especialidad: string
   diagnostico: string
   prestador: string
+  autoriza: string
 }) {
   const W = 170
   const H = 130
@@ -185,45 +163,31 @@ async function generateBonoPdf(params: {
     orientation: 'landscape',
   })
 
-  // ===== Background watermark (logo repetido diagonal) =====
+  // ===== Background watermark (UNO SOLO, centrado, max width/height) =====
   try {
-    // ✅ más “diagonal” y más repetición
-    const tile = await makeWatermarkTileRotated(logoMedic, {
-      basePx: 520,
-      opacity: 0.10, // subí/bajá si querés
-      lighten: 0.62,
-      angleDeg: -25,
-      scale: 0.82,
+    const wm = await makeSingleCenteredWatermark(logoMedic, {
+      opacity: 0.20, // subí/bajá
+      lighten: 0.80, // subí para más clarito
     })
 
-    // tamaño del tile en mm (más chico = más logos)
-    const tileMmW = 30
-    const tileMmH = 30
-
-    for (let y = -tileMmH * 20; y < H + tileMmH * 20; y += tileMmH) {
-      for (let x = -tileMmW * 20; x < W + tileMmW * 20; x += tileMmW) {
-        // offset tipo “damero” para que se vea más diagonal/fluido
-        const xOff = ((Math.floor(y / tileMmH) % 2) * tileMmW) / 2
-        doc.addImage(tile, 'PNG', x + xOff, y, tileMmW, tileMmH, undefined, 'FAST')
-      }
-    }
+    // ocupa TODO el área del PDF; el PNG ya viene centrado y escalado dentro
+    doc.addImage(wm, 'PNG', 0, 0, W, H, undefined, 'FAST')
   } catch {
-    // si falla watermark, seguimos sin
+    // sin watermark
   }
 
-  // ===== Estilo base =====
   doc.setTextColor(20, 20, 20)
   doc.setLineWidth(0.35)
 
-  // Marco
+  // marco
   doc.rect(4, 4, W - 8, H - 8)
 
-  // Logo header (chico, prolijo)
+  // Logo header (chico)
   try {
     const logoData = await loadImageAsDataURL(logoMedic)
-    const logoW = 36
-    const logoH = 36
-    doc.addImage(logoData, 'PNG', W - 10 - logoW, -2, logoW, logoH, undefined, 'FAST')
+    const logoW = 40
+    const logoH = 40
+    doc.addImage(logoData, 'PNG', W - 10 - logoW, -3, logoW, logoH, undefined, 'FAST')
   } catch {
     // sin logo
   }
@@ -233,90 +197,91 @@ async function generateBonoPdf(params: {
   doc.setFontSize(14)
   doc.text('BONO DE ATENCIÓN MÉDICA', 8, 14)
 
-  // Prestador
+  // Seguimiento
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(9.5)
-  doc.text(`Prestador: ${params.prestador || '-'}`, 8, 24)
+  doc.text(`N° Seguimiento: ${params.seguimiento}`, 8, 20)
 
-  // Layout filas
+  // Prestador
+  doc.setFontSize(9.5)
+  doc.text(`Prestador: ${params.prestador || '-'}`, 8, 26)
+
+  // Layout filas (SIN líneas punteadas)
   const leftX = 8
-  const labelW = 48
-  const lineX1 = leftX + labelW
-  const lineX2 = W - 10
-
-  let y = 33
-  const rowGap = 6.9
+  const valueX = 58
+  const rowGap = 7.0
+  let y = 36
 
   const row = (label: string, value: string) => {
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(10.5)
     doc.text(label, leftX, y)
 
-    setDashed(doc, [0.8, 1.1])
-    doc.line(lineX1, y + 0.8, lineX2, y + 0.8)
-    clearDash(doc)
-
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(10.5)
-    const v = safeStr(value)
-    if (v) doc.text(v, lineX1 + 1, y)
+    doc.text(safeStr(value) || '-', valueX, y)
 
     y += rowGap
   }
 
-  // ✅ filas base
   row('OBRA SOCIAL:', params.obraSocial)
   row('N° DE BENEF/PLAN:', params.benefPlan)
   row('NOM. Y APELL.:', params.nombre)
   row('DOCUMENTO:', params.documento)
-  row('EDAD:', params.edad)
+  row('HORA DEL TURNO:', params.horaTurno || '-')
   row('FECHA DE ATENC.:', formatDateDDMMYYYY(params.fechaAtencionISO))
   row('ESPECIALIDAD:', params.especialidad)
   row('DIAGNÓSTICO:', params.diagnostico)
 
-  // ✅ filas extra (líneas para escribir más) debajo de diagnóstico
-  const EXTRA_LINES = 0 // <-- subí a 4/5 si querés
-  for (let i = 0; i < EXTRA_LINES; i++) {
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(10.5)
-    doc.text('', leftX, y)
+  // ===== Firmas: profesional y paciente en la misma fila =====
+  y += 5
 
-    setDashed(doc, [0.8, 1.1])
-    doc.line(lineX1, y + 0.8, lineX2, y + 0.8)
-    clearDash(doc)
+  const boxY = y
+  const boxH = 20
+  const gap = 8
+  const innerW = W - 16
+  const boxW = (innerW - gap) / 2
 
-    y += rowGap
-  }
+  const leftBoxX = 8
+  const rightBoxX = 8 + boxW + gap
 
-  // Firmas
-  y += 2
   doc.setFont('helvetica', 'bold')
-  doc.setFontSize(9.3)
+  doc.setFontSize(9)
 
-  const firmaRow = (label: string) => {
-    doc.text(label, leftX, y)
-    setDashed(doc, [0.8, 1.1])
-    doc.line(leftX, y + 5.0, lineX2, y + 5.0)
-    clearDash(doc)
-    y += 11.2
-  }
+  doc.text('FIRMA DEL PROFESIONAL Y SELLO', leftBoxX, boxY)
+  doc.text('FIRMA Y ACLARACIÓN DEL PACIENTE', rightBoxX, boxY)
 
-  firmaRow('FIRMA DEL PROFESIONAL Y SELLO')
-  firmaRow('FIRMA Y ACLARACIÓN DEL PACIENTE')
-  firmaRow('DOC. DEL FIRMANTE')
+  doc.setLineWidth(0.25)
+  doc.line(leftBoxX, boxY + 10, leftBoxX + boxW, boxY + 10)
+  doc.line(rightBoxX, boxY + 10, rightBoxX + boxW, boxY + 10)
+
+  // ===== Autoriza =====
+  const autorizaY = boxY + boxH
+  doc.setLineWidth(0.35)
+
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(10)
+  doc.text('AUTORIZA:', leftX, autorizaY)
+
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(10)
+  doc.text(safeStr(params.autoriza) || '-', valueX, autorizaY)
 
   return doc
 }
 
 export default function BonosAtencionScreen({ affiliates }: Props) {
+  const { user } = useAuth()
+
   const [afiliadoId, setAfiliadoId] = useState('')
   const [prestadorId, setPrestadorId] = useState('')
 
   const [turnoFechaISO, setTurnoFechaISO] = useState(getTodayBuenosAiresISO())
   const [fechaISO, setFechaISO] = useState(getTodayBuenosAiresISO())
 
+  const [horaTurno, setHoraTurno] = useState('')
+
   const [obraSocial, setObraSocial] = useState('MEDIC')
-  const [edad, setEdad] = useState('')
   const [practica, setPractica] = useState('')
   const [observaciones, setObservaciones] = useState('')
 
@@ -330,12 +295,11 @@ export default function BonosAtencionScreen({ affiliates }: Props) {
     [prestadorId],
   )
 
-  const edadSugerida = useMemo(() => {
-    if (!selectedAffiliate) return ''
-    const a = selectedAffiliate as AffiliateWithBirth
-    const computed = calcAgeFromISO(a.fechaNacimiento ?? null)
-    return computed != null ? String(computed) : ''
-  }, [selectedAffiliate])
+  const autoriza = useMemo(() => {
+    const dn = safeStr((user as unknown as { displayName?: string })?.displayName)
+    const un = safeStr((user as unknown as { username?: string })?.username)
+    return dn || un || 'Recepción'
+  }, [user])
 
   const handleEmitir = async () => {
     if (!selectedAffiliate) return void Swal.fire('Error', 'Elegí un afiliado', 'error')
@@ -346,7 +310,7 @@ export default function BonosAtencionScreen({ affiliates }: Props) {
     const fechaAtencionISO = safeStr(turnoFechaISO) || safeStr(fechaISO)
     if (!fechaAtencionISO) return void Swal.fire('Error', 'Completá la fecha', 'error')
 
-    const edadFinal = safeStr(edad) || safeStr(edadSugerida) || ''
+    const seguimiento = nextSeguimiento()
 
     const benefPlan = `${safeStr(selectedAffiliate.numeroAfiliado)}${
       selectedAffiliate.plan ? ` / ${safeStr(selectedAffiliate.plan)}` : ''
@@ -354,18 +318,20 @@ export default function BonosAtencionScreen({ affiliates }: Props) {
 
     try {
       const pdf = await generateBonoPdf({
+        seguimiento,
         obraSocial: safeStr(obraSocial),
         benefPlan,
         nombre: safeStr(selectedAffiliate.nombreCompleto),
         documento: safeStr(selectedAffiliate.dni),
-        edad: edadFinal,
         fechaAtencionISO,
+        horaTurno: safeStr(horaTurno),
         especialidad: safeStr(practica),
         diagnostico: safeStr(observaciones),
         prestador: prestadorNombre || '-',
+        autoriza,
       })
 
-      pdf.save(`Bono-${safeStr(selectedAffiliate.dni) || 'sin-dni'}-${fechaAtencionISO}.pdf`)
+      pdf.save(`Bono-${seguimiento}-${safeStr(selectedAffiliate.dni) || 'sin-dni'}-${fechaAtencionISO}.pdf`)
     } catch (e) {
       console.error(e)
       void Swal.fire('Error', 'No se pudo generar el PDF.', 'error')
@@ -412,7 +378,12 @@ export default function BonosAtencionScreen({ affiliates }: Props) {
 
         <label className="field">
           <span className="field__label">Turno (opcional)</span>
-          <input type="date" className="input" value={turnoFechaISO} onChange={(e) => setTurnoFechaISO(e.target.value)} />
+          <input
+            type="date"
+            className="input"
+            value={turnoFechaISO}
+            onChange={(e) => setTurnoFechaISO(e.target.value)}
+          />
         </label>
 
         <label className="field">
@@ -421,45 +392,28 @@ export default function BonosAtencionScreen({ affiliates }: Props) {
         </label>
 
         <label className="field">
-          <span className="field__label">Obra social</span>
-          <input
-            className="input"
-            value={obraSocial}
-            onChange={(e) => setObraSocial(e.target.value)}
-            placeholder="Ej: MEDIC / OSDE / Swiss Medical…"
-          />
+          <span className="field__label">Hora del turno</span>
+          <input type="time" className="input" value={horaTurno} onChange={(e) => setHoraTurno(e.target.value)} />
         </label>
 
         <label className="field">
-          <span className="field__label">Edad</span>
-          <input
-            className="input"
-            value={edad}
-            onChange={(e) => setEdad(e.target.value.replace(/[^\d]/g, '').slice(0, 3))}
-            placeholder={edadSugerida ? `Sugerida: ${edadSugerida}` : 'Ej: 35'}
-            inputMode="numeric"
-          />
+          <span className="field__label">Obra social</span>
+          <input className="input" value={obraSocial} onChange={(e) => setObraSocial(e.target.value)} />
         </label>
 
         <label className="field">
           <span className="field__label">Especialidad / Práctica</span>
-          <input
-            className="input"
-            value={practica}
-            onChange={(e) => setPractica(e.target.value)}
-            placeholder="Ej: Cardiología / ECG / Laboratorio…"
-          />
+          <input className="input" value={practica} onChange={(e) => setPractica(e.target.value)} />
         </label>
 
         <label className="field field--full">
           <span className="field__label">Diagnóstico / Observaciones</span>
-          <textarea
-            className="input"
-            rows={5}
-            value={observaciones}
-            onChange={(e) => setObservaciones(e.target.value)}
-            placeholder="Notas / diagnóstico / indicaciones…"
-          />
+          <textarea className="input" rows={5} value={observaciones} onChange={(e) => setObservaciones(e.target.value)} />
+        </label>
+
+        <label className="field field--full">
+          <span className="field__label">Autoriza</span>
+          <input className="input" value={autoriza} readOnly />
         </label>
       </div>
     </section>
