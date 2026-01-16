@@ -699,13 +699,6 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
   )
   const [time, setTime] = useState(appointment?.time ?? initialTime ?? '10:00')
 
-  const [tipoAtencion, setTipoAtencion] = useState<'especialidad' | 'laboratorio'>(
-    appointment?.tipoAtencion ?? 'especialidad',
-  )
-
-  const [especialidad, setEspecialidad] = useState(appointment?.especialidad ?? '')
-  const [laboratorio, setLaboratorio] = useState(appointment?.laboratorio ?? '')
-
   const [plan, setPlan] = useState(appointment?.plan ?? affiliate.plan ?? '')
   const [prestador, setPrestador] = useState(appointment?.prestador ?? PRESTADORES[0])
   const [profesional, setProfesional] = useState(appointment?.profesional ?? '')
@@ -718,6 +711,50 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
   const [isMontoManual, setIsMontoManual] = useState(false)
 
   const isReadOnlyRecep = activeTab === 'recepcionar'
+
+  // ====== NUEVO: lista de prácticas dentro del turno ======
+ type PracticaKind = 'especialidad' | 'laboratorio'
+type PracticaItem = { kind: PracticaKind; name: string }
+
+const SEP = ' + '
+const ESP_PREFIX = 'ESP: '
+const LAB_PREFIX = 'LAB: '
+
+const parseExistingToItems = (appt?: Appointment): PracticaItem[] => {
+  if (!appt) return []
+
+  const raw =
+    (appt.tipoAtencion === 'laboratorio' ? appt.laboratorio : appt.especialidad) ?? ''
+  const s = String(raw).trim()
+  if (!s) return []
+
+  const inferredKind: PracticaKind =
+    appt.tipoAtencion === 'laboratorio' ? 'laboratorio' : 'especialidad'
+
+  const parts = s
+    .split(SEP)
+    .map((x) => x.trim())
+    .filter(Boolean)
+
+  return parts
+    .map((p): PracticaItem => {
+      if (p.startsWith(LAB_PREFIX)) {
+        return { kind: 'laboratorio', name: p.slice(LAB_PREFIX.length).trim() }
+      }
+      if (p.startsWith(ESP_PREFIX)) {
+        return { kind: 'especialidad', name: p.slice(ESP_PREFIX.length).trim() }
+      }
+      return { kind: inferredKind, name: p }
+    })
+    .filter((it): it is PracticaItem => Boolean(it.name))
+}
+
+const [items, setItems] = useState<PracticaItem[]>(() => parseExistingToItems(appointment))
+
+
+  // selector para agregar
+  const [pickKind, setPickKind] = useState<PracticaKind>('especialidad')
+  const [pickName, setPickName] = useState('')
 
   const dlEspId = useMemo(
     () => `dl-esp-${affiliate.id}-${appointment?.id ?? 'new'}`,
@@ -742,26 +779,51 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
     )
   }, [laboratorioOptions])
 
-  const calculateNewPrice = (
-    currentPrestador: string,
-    currentTipo: 'especialidad' | 'laboratorio',
-    currentEsp: string,
-    currentLab: string,
-    currentPlan: string,
-  ) => {
+  const uniqueKey = (it: PracticaItem) => `${it.kind}::${it.name}`
+
+  const addItem = () => {
+    const name = pickName.trim()
+    if (!name) return
+
+    // evitar duplicados exactos
+    const next = { kind: pickKind, name }
+    const exists = items.some((x) => uniqueKey(x) === uniqueKey(next))
+    if (exists) {
+      setPickName('')
+      return
+    }
+
+    setItems((prev) => [...prev, next])
+    setPickName('')
+  }
+
+  const removeItem = (idx: number) => {
+    setItems((prev) => prev.filter((_, i) => i !== idx))
+  }
+
+  const getItemPrice = (it: PracticaItem, currentPlan: string) => {
+    if (!it.name) return 0
+    if (it.kind === 'especialidad') return getEspecialidadPrice(it.name, currentPlan)
+    return getLaboratorioPrice(it.name, currentPlan)
+  }
+
+  const computeTotal = (currentPrestador: string, currentPlan: string, currentItems: PracticaItem[]) => {
     if (currentPrestador === 'MEDIC') return 0
-    if (currentTipo === 'especialidad' && currentEsp) {
-      return getEspecialidadPrice(currentEsp, currentPlan)
-    }
-    if (currentTipo === 'laboratorio' && currentLab) {
-      return getLaboratorioPrice(currentLab, currentPlan)
-    }
-    return 0
+    let sum = 0
+    for (const it of currentItems) sum += getItemPrice(it, currentPlan)
+    return sum
   }
 
   const updateMontoState = (newVal: number, forceUpdate = false) => {
     if (!isMontoManual || forceUpdate) setMontoInput(String(newVal))
   }
+
+  // recalcular monto cuando cambian plan/prestador/items (si no es manual)
+  useEffect(() => {
+    const total = computeTotal(prestador, plan, items)
+    updateMontoState(total)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prestador, plan, items])
 
   const handlePrestadorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value
@@ -769,52 +831,20 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
 
     if (val !== 'MEDIC') setProfesional('')
 
-    const newPrice = calculateNewPrice(val, tipoAtencion, especialidad, laboratorio, plan)
-
     if (val === 'MEDIC') {
       setMontoInput('0')
       setIsMontoManual(false)
     } else {
-      updateMontoState(newPrice)
+      const total = computeTotal(val, plan, items)
+      updateMontoState(total, true)
     }
   }
 
   const handlePlanChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value
     setPlan(val)
-
-    const newPrice = calculateNewPrice(prestador, tipoAtencion, especialidad, laboratorio, val)
-    updateMontoState(newPrice)
-  }
-
-  const handleTipoAtencionChange = (tipo: 'especialidad' | 'laboratorio') => {
-    setTipoAtencion(tipo)
-
-    if (tipo === 'especialidad') setLaboratorio('')
-    else setEspecialidad('')
-
-    const newPrice = calculateNewPrice(prestador, tipo, especialidad, laboratorio, plan)
-    updateMontoState(newPrice)
-  }
-
-  const handleEspecialidadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value
-    setEspecialidad(val)
-
-    if (tipoAtencion === 'especialidad') {
-      const newPrice = calculateNewPrice(prestador, 'especialidad', val, laboratorio, plan)
-      updateMontoState(newPrice)
-    }
-  }
-
-  const handleLaboratorioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value
-    setLaboratorio(val)
-
-    if (tipoAtencion === 'laboratorio') {
-      const newPrice = calculateNewPrice(prestador, 'laboratorio', especialidad, val, plan)
-      updateMontoState(newPrice)
-    }
+    const total = computeTotal(prestador, val, items)
+    updateMontoState(total)
   }
 
   const handleMontoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -829,14 +859,57 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
     setMontoInput(raw)
   }
 
+  const serializeItemsForBackend = (currentItems: PracticaItem[]) => {
+    const onlyEsp = currentItems.length > 0 && currentItems.every((x) => x.kind === 'especialidad')
+    const onlyLab = currentItems.length > 0 && currentItems.every((x) => x.kind === 'laboratorio')
+
+    if (onlyEsp) {
+      return {
+        tipoAtencion: 'especialidad' as const,
+        especialidad: currentItems.map((x) => x.name).join(SEP),
+        laboratorio: undefined as string | undefined,
+      }
+    }
+
+    if (onlyLab) {
+      return {
+        tipoAtencion: 'laboratorio' as const,
+        especialidad: undefined as string | undefined,
+        laboratorio: currentItems.map((x) => x.name).join(SEP),
+      }
+    }
+
+    // mixto => todo a "especialidad" con prefijos (compat)
+    const mixedStr = currentItems
+      .map((x) => (x.kind === 'especialidad' ? `${ESP_PREFIX}${x.name}` : `${LAB_PREFIX}${x.name}`))
+      .join(SEP)
+
+    return {
+      tipoAtencion: 'especialidad' as const,
+      especialidad: mixedStr,
+      laboratorio: undefined as string | undefined,
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!date || !time) return
+    if (items.length === 0) {
+      void Swal.fire({
+        title: 'Falta la práctica',
+        text: 'Agregá al menos 1 especialidad o laboratorio.',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      })
+      return
+    }
 
     const estado: AppointmentStatus = activeTab === 'tomar' ? 'tomado' : 'recepcionado'
 
     const parsed = Number(montoInput)
     const montoNumber = Number.isFinite(parsed) ? Math.max(0, parsed) : 0
+
+    const ser = serializeItemsForBackend(items)
 
     await onSave({
       id: appointment?.id,
@@ -844,9 +917,9 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
       date,
       controlDate: controlDate || undefined,
       time,
-      tipoAtencion,
-      especialidad: tipoAtencion === 'especialidad' ? especialidad || undefined : undefined,
-      laboratorio: tipoAtencion === 'laboratorio' ? laboratorio || undefined : undefined,
+      tipoAtencion: ser.tipoAtencion,
+      especialidad: ser.especialidad,
+      laboratorio: ser.laboratorio,
       plan,
       prestador,
       monto: montoNumber,
@@ -879,11 +952,7 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
 
             {(pricesLoading || pricesError) && (
               <p className="turno-modal__subtitle" style={{ marginTop: 6 }}>
-                {pricesLoading
-                  ? 'Cargando precios…'
-                  : pricesError
-                    ? `Precios: ${pricesError}`
-                    : null}
+                {pricesLoading ? 'Cargando precios…' : pricesError ? `Precios: ${pricesError}` : null}
               </p>
             )}
           </div>
@@ -921,7 +990,12 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
               <span className="field__label">
                 {activeTab === 'recepcionar' ? 'Fecha de recepción' : 'Fecha de hoy'}
               </span>
-              <input type="date" className="input" value={date} onChange={(e) => setDate(e.target.value)} />
+              <input
+                type="date"
+                className="input"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+              />
             </label>
 
             <label className="field">
@@ -945,9 +1019,7 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
                 disabled={isReadOnlyRecep}
               />
               {slotTaken && !appointment && (
-                <span className="field__hint field__hint--error">
-                  Ese horario ya está ocupado para este día.
-                </span>
+                <span className="field__hint field__hint--error">Ese horario ya está ocupado para este día.</span>
               )}
             </label>
 
@@ -965,7 +1037,12 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
 
             <label className="field">
               <span className="field__label">Prestador</span>
-              <select className="input" value={prestador} onChange={handlePrestadorChange} disabled={isReadOnlyRecep}>
+              <select
+                className="input"
+                value={prestador}
+                onChange={handlePrestadorChange}
+                disabled={isReadOnlyRecep}
+              >
                 {PRESTADORES.map((p) => (
                   <option key={p} value={p}>
                     {p}
@@ -974,69 +1051,119 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
               </select>
             </label>
 
-            <label className="field field--full">
-              <span className="field__label">Se atiende por</span>
-              <div className="field__segmented">
-                <button
-                  type="button"
-                  className={`field__segmented-btn ${
-                    tipoAtencion === 'especialidad' ? 'field__segmented-btn--active' : ''
-                  }`}
-                  onClick={() => handleTipoAtencionChange('especialidad')}
+            {/* ====== NUEVO BLOQUE: agregar múltiples prácticas ====== */}
+            <div className="field field--full">
+              <span className="field__label">Prácticas del turno (podés agregar varias)</span>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '170px 1fr 120px', gap: 10 }}>
+                <select
+                  className="input"
+                  value={pickKind}
+                  onChange={(e) => {
+                    setPickKind(e.target.value as PracticaKind)
+                    setPickName('')
+                  }}
                   disabled={isReadOnlyRecep}
                 >
-                  Especialidad
-                </button>
+                  <option value="especialidad">Especialidad</option>
+                  <option value="laboratorio">Laboratorio</option>
+                </select>
+
+                {pickKind === 'especialidad' ? (
+                  <>
+                    <input
+                      className="input"
+                      list={dlEspId}
+                      value={pickName}
+                      onChange={(e) => setPickName(e.target.value)}
+                      placeholder="Buscar especialidad…"
+                      disabled={isReadOnlyRecep}
+                    />
+                    <datalist id={dlEspId}>
+                      {especialidadesList.map((opt) => (
+                        <option key={opt} value={opt} />
+                      ))}
+                    </datalist>
+                  </>
+                ) : (
+                  <>
+                    <input
+                      className="input"
+                      list={dlLabId}
+                      value={pickName}
+                      onChange={(e) => setPickName(e.target.value)}
+                      placeholder="Buscar práctica de laboratorio…"
+                      disabled={isReadOnlyRecep}
+                    />
+                    <datalist id={dlLabId}>
+                      {laboratorioList.map((opt) => (
+                        <option key={opt} value={opt} />
+                      ))}
+                    </datalist>
+                  </>
+                )}
+
                 <button
                   type="button"
-                  className={`field__segmented-btn ${
-                    tipoAtencion === 'laboratorio' ? 'field__segmented-btn--active' : ''
-                  }`}
-                  onClick={() => handleTipoAtencionChange('laboratorio')}
-                  disabled={isReadOnlyRecep}
+                  className="btn btn--outline"
+                  onClick={addItem}
+                  disabled={isReadOnlyRecep || !pickName.trim()}
+                  title="Agregar práctica"
                 >
-                  Laboratorio
+                  + Agregar
                 </button>
               </div>
-            </label>
 
-            {tipoAtencion === 'especialidad' && (
-              <label className="field field--full">
-                <span className="field__label">Especialidad</span>
-                <input
-                  className="input"
-                  list={dlEspId}
-                  value={especialidad}
-                  onChange={handleEspecialidadChange}
-                  placeholder="Buscar especialidad…"
-                  disabled={isReadOnlyRecep}
-                />
-                <datalist id={dlEspId}>
-                  {especialidadesList.map((opt) => (
-                    <option key={opt} value={opt} />
-                  ))}
-                </datalist>
-              </label>
-            )}
+              {items.length > 0 && (
+                <div style={{ marginTop: 10, display: 'grid', gap: 8 }}>
+                  {items.map((it, idx) => {
+                    const price = prestador === 'MEDIC' ? 0 : getItemPrice(it, plan)
+                    return (
+                      <div
+                        key={`${uniqueKey(it)}-${idx}`}
+                        style={{
+                          display: 'grid',
+                          gridTemplateColumns: '1fr auto auto',
+                          gap: 10,
+                          alignItems: 'center',
+                          padding: '10px 12px',
+                          border: '1px solid var(--color-border, #cbd5e1)',
+                          borderRadius: 12,
+                          background: '#fff',
+                        }}
+                      >
+                        <div style={{ display: 'grid' }}>
+                          <b style={{ fontSize: 14 }}>
+                            {it.kind === 'especialidad' ? 'Especialidad' : 'Laboratorio'}:
+                          </b>
+                          <span style={{ fontSize: 14 }}>{it.name}</span>
+                        </div>
 
-            {tipoAtencion === 'laboratorio' && (
-              <label className="field field--full">
-                <span className="field__label">Laboratorio</span>
-                <input
-                  className="input"
-                  list={dlLabId}
-                  value={laboratorio}
-                  onChange={handleLaboratorioChange}
-                  placeholder="Buscar práctica de laboratorio…"
-                  disabled={isReadOnlyRecep}
-                />
-                <datalist id={dlLabId}>
-                  {laboratorioList.map((opt) => (
-                    <option key={opt} value={opt} />
-                  ))}
-                </datalist>
-              </label>
-            )}
+                        <div style={{ fontWeight: 700, whiteSpace: 'nowrap' }}>
+                          {price > 0 ? `$ ${price.toFixed(2)}` : '$ 0.00'}
+                        </div>
+
+                        {!isReadOnlyRecep && (
+                          <button
+                            type="button"
+                            className="btn btn--ghost"
+                            onClick={() => removeItem(idx)}
+                            title="Quitar"
+                            style={{ padding: '6px 10px' }}
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+
+              {items.length === 0 && (
+                <span className="field__hint">Agregá al menos una especialidad o laboratorio.</span>
+              )}
+            </div>
 
             <label className="field field--full">
               <span className="field__label">Profesional</span>
@@ -1065,13 +1192,11 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
                 className="input"
                 value={montoInput}
                 onChange={handleMontoChange}
-                placeholder="Se calcula según plan y práctica"
+                placeholder="Se calcula según plan y prácticas"
                 inputMode="decimal"
               />
               {isMontoManual && (
-                <span className="field__hint field__hint--error">
-                  Modificar el valor en caso de ser necesario.
-                </span>
+                <span className="field__hint field__hint--error">Modificar el valor en caso de ser necesario.</span>
               )}
             </label>
 
@@ -1101,5 +1226,6 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
     </div>
   )
 }
+
 
 export { Appointment, Affiliate }

@@ -10,12 +10,11 @@ import logoMedic from '@/assets/logoMedic.png'
 
 type Props = {
   affiliates: Affiliate[]
-  appointments?: Appointment[] // opcional (no se usa por ahora)
+  appointments?: Appointment[] // opcional
 }
 
 type AffiliateWithBirth = Affiliate & { fechaNacimiento?: string | null }
 
-// ===== Prestadores (helper local) =====
 type PrestadorListItem = { id: string; nombre: string }
 const PRESTADORES: PrestadorListItem[] = [
   { id: 'vitas', nombre: 'VITAS' },
@@ -27,12 +26,11 @@ const PRESTADORES: PrestadorListItem[] = [
   { id: 'medic', nombre: 'MEDIC' },
 ]
 
-// ===== Helpers =====
 function safeStr(v: unknown): string {
   return String(v ?? '').trim()
 }
 
-// Hoy en Buenos Aires (UTC-3) en formato YYYY-MM-DD (ideal para <input type="date">)
+// Hoy en Buenos Aires (UTC-3) en formato YYYY-MM-DD para <input type="date">
 function getTodayBuenosAiresISO(): string {
   const now = new Date()
   const parts = new Intl.DateTimeFormat('en-CA', {
@@ -48,13 +46,13 @@ function getTodayBuenosAiresISO(): string {
   return `${y}-${m}-${d}`
 }
 
-// ✅ Para el PDF: formatear YYYY-MM-DD -> DD-MM-YYYY (formato Argentina)
-function formatDateAR(iso: string): string {
-  const s = safeStr(iso)
+// ✅ para mostrar en el PDF: DD-MM-YYYY
+function formatDateDDMMYYYY(isoDate: string): string {
+  const s = safeStr(isoDate)
   if (!s) return ''
-  const [y, m, d] = s.split('-')
-  if (!y || !m || !d) return s
-  return `${d}-${m}-${y}`
+  const [yy, mm, dd] = s.split('-')
+  if (!yy || !mm || !dd) return s
+  return `${dd}-${mm}-${yy}`
 }
 
 function calcAgeFromISO(iso?: string | null): number | null {
@@ -72,12 +70,16 @@ function calcAgeFromISO(iso?: string | null): number | null {
 }
 
 function setDashed(doc: jsPDF, dash: number[] = [1.0, 1.2]) {
-  ;(doc as unknown as { setLineDashPattern?: (dashArray: number[], dashPhase: number) => void })
-    .setLineDashPattern?.(dash, 0)
+  ;(doc as unknown as { setLineDashPattern?: (dashArray: number[], dashPhase: number) => void }).setLineDashPattern?.(
+    dash,
+    0,
+  )
 }
 function clearDash(doc: jsPDF) {
-  ;(doc as unknown as { setLineDashPattern?: (dashArray: number[], dashPhase: number) => void })
-    .setLineDashPattern?.([], 0)
+  ;(doc as unknown as { setLineDashPattern?: (dashArray: number[], dashPhase: number) => void }).setLineDashPattern?.(
+    [],
+    0,
+  )
 }
 
 function loadImageAsDataURL(src: string): Promise<string> {
@@ -98,18 +100,82 @@ function loadImageAsDataURL(src: string): Promise<string> {
   })
 }
 
+/**
+ * ✅ Watermark tile con LOGO ROTADO (diagonal “real”)
+ * - angleDeg: ángulo del logo dentro del tile
+ * - opacity: 0..1
+ * - lighten: mezcla con blanco (0..1)
+ */
+function makeWatermarkTileRotated(
+  logoSrc: string,
+  opts?: { basePx?: number; opacity?: number; lighten?: number; angleDeg?: number; scale?: number },
+) {
+  const basePx = opts?.basePx ?? 520
+  const opacity = opts?.opacity ?? 0.11
+  const lighten = opts?.lighten ?? 0.62
+  const angleDeg = opts?.angleDeg ?? -25
+  const scale = opts?.scale ?? 0.78
+
+  return new Promise<string>((resolve, reject) => {
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = basePx
+      canvas.height = basePx
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return reject(new Error('No canvas ctx'))
+
+      ctx.clearRect(0, 0, basePx, basePx)
+
+      // centro
+      const cx = basePx / 2
+      const cy = basePx / 2
+
+      // tamaño del logo dentro del tile
+      const maxW = basePx * scale
+      const maxH = basePx * 0.26
+      const ratio = Math.min(maxW / img.width, maxH / img.height)
+      const w = img.width * ratio
+      const h = img.height * ratio
+
+      // dibujar rotado
+      ctx.save()
+      ctx.translate(cx, cy)
+      ctx.rotate((angleDeg * Math.PI) / 180)
+      ctx.translate(-w / 2, -h / 2)
+      ctx.drawImage(img, 0, 0, w, h)
+      ctx.restore()
+
+      // lavar con blanco (apagar colores)
+      ctx.globalCompositeOperation = 'source-atop'
+      ctx.fillStyle = `rgba(255,255,255,${lighten})`
+      ctx.fillRect(0, 0, basePx, basePx)
+
+      // opacidad final
+      ctx.globalCompositeOperation = 'source-over'
+      ctx.globalAlpha = opacity
+
+      // “horneamos” a PNG
+      const out = canvas.toDataURL('image/png')
+      resolve(out)
+    }
+    img.onerror = () => reject(new Error(`No se pudo cargar imagen: ${logoSrc}`))
+    img.src = logoSrc
+  })
+}
+
 async function generateBonoPdf(params: {
   obraSocial: string
   benefPlan: string
   nombre: string
   documento: string
   edad: string
-  fechaAtencionISO: string // "YYYY-MM-DD"
+  fechaAtencionISO: string // YYYY-MM-DD
   especialidad: string
   diagnostico: string
   prestador: string
 }) {
-  // ✅ Talón apaisado con alto para firmas
   const W = 170
   const H = 130
 
@@ -119,20 +185,47 @@ async function generateBonoPdf(params: {
     orientation: 'landscape',
   })
 
+  // ===== Background watermark (logo repetido diagonal) =====
+  try {
+    // ✅ más “diagonal” y más repetición
+    const tile = await makeWatermarkTileRotated(logoMedic, {
+      basePx: 520,
+      opacity: 0.10, // subí/bajá si querés
+      lighten: 0.62,
+      angleDeg: -25,
+      scale: 0.82,
+    })
+
+    // tamaño del tile en mm (más chico = más logos)
+    const tileMmW = 30
+    const tileMmH = 30
+
+    for (let y = -tileMmH * 20; y < H + tileMmH * 20; y += tileMmH) {
+      for (let x = -tileMmW * 20; x < W + tileMmW * 20; x += tileMmW) {
+        // offset tipo “damero” para que se vea más diagonal/fluido
+        const xOff = ((Math.floor(y / tileMmH) % 2) * tileMmW) / 2
+        doc.addImage(tile, 'PNG', x + xOff, y, tileMmW, tileMmH, undefined, 'FAST')
+      }
+    }
+  } catch {
+    // si falla watermark, seguimos sin
+  }
+
+  // ===== Estilo base =====
   doc.setTextColor(20, 20, 20)
   doc.setLineWidth(0.35)
 
   // Marco
   doc.rect(4, 4, W - 8, H - 8)
 
-  // Logo (más chico y prolijo)
+  // Logo header (chico, prolijo)
   try {
     const logoData = await loadImageAsDataURL(logoMedic)
     const logoW = 36
     const logoH = 36
-    doc.addImage(logoData, 'PNG', W - 10 - logoW, 1, logoW, logoH)
+    doc.addImage(logoData, 'PNG', W - 10 - logoW, -2, logoW, logoH, undefined, 'FAST')
   } catch {
-    // si falla, seguimos sin logo
+    // sin logo
   }
 
   // Título
@@ -171,20 +264,32 @@ async function generateBonoPdf(params: {
     y += rowGap
   }
 
+  // ✅ filas base
   row('OBRA SOCIAL:', params.obraSocial)
   row('N° DE BENEF/PLAN:', params.benefPlan)
   row('NOM. Y APELL.:', params.nombre)
   row('DOCUMENTO:', params.documento)
   row('EDAD:', params.edad)
-
-  // ✅ ACÁ: el PDF lo quiere en DD-MM-YYYY
-  row('FECHA DE ATENC.:', formatDateAR(params.fechaAtencionISO))
-
+  row('FECHA DE ATENC.:', formatDateDDMMYYYY(params.fechaAtencionISO))
   row('ESPECIALIDAD:', params.especialidad)
   row('DIAGNÓSTICO:', params.diagnostico)
 
-  // ===== Firmas =====
-  y += 3
+  // ✅ filas extra (líneas para escribir más) debajo de diagnóstico
+  const EXTRA_LINES = 0 // <-- subí a 4/5 si querés
+  for (let i = 0; i < EXTRA_LINES; i++) {
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(10.5)
+    doc.text('', leftX, y)
+
+    setDashed(doc, [0.8, 1.1])
+    doc.line(lineX1, y + 0.8, lineX2, y + 0.8)
+    clearDash(doc)
+
+    y += rowGap
+  }
+
+  // Firmas
+  y += 2
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(9.3)
 
@@ -207,13 +312,9 @@ export default function BonosAtencionScreen({ affiliates }: Props) {
   const [afiliadoId, setAfiliadoId] = useState('')
   const [prestadorId, setPrestadorId] = useState('')
 
-  // Turno (opcional) como fecha calendario (YYYY-MM-DD)
-  const [turnoFechaISO, setTurnoFechaISO] = useState('')
-
-  // Fecha sugerida BA UTC-3 como calendario (YYYY-MM-DD)
+  const [turnoFechaISO, setTurnoFechaISO] = useState(getTodayBuenosAiresISO())
   const [fechaISO, setFechaISO] = useState(getTodayBuenosAiresISO())
 
-  // Inputs libres
   const [obraSocial, setObraSocial] = useState('MEDIC')
   const [edad, setEdad] = useState('')
   const [practica, setPractica] = useState('')
@@ -242,7 +343,6 @@ export default function BonosAtencionScreen({ affiliates }: Props) {
     if (!safeStr(practica)) return void Swal.fire('Error', 'Completá la especialidad/práctica', 'error')
     if (!safeStr(obraSocial)) return void Swal.fire('Error', 'Completá Obra social', 'error')
 
-    // ✅ fecha ISO para guardar/filename (YYYY-MM-DD)
     const fechaAtencionISO = safeStr(turnoFechaISO) || safeStr(fechaISO)
     if (!fechaAtencionISO) return void Swal.fire('Error', 'Completá la fecha', 'error')
 
@@ -265,7 +365,6 @@ export default function BonosAtencionScreen({ affiliates }: Props) {
         prestador: prestadorNombre || '-',
       })
 
-      // filename: mantenemos ISO (más ordenado)
       pdf.save(`Bono-${safeStr(selectedAffiliate.dni) || 'sin-dni'}-${fechaAtencionISO}.pdf`)
     } catch (e) {
       console.error(e)
@@ -278,7 +377,7 @@ export default function BonosAtencionScreen({ affiliates }: Props) {
       <header className="card__header">
         <div>
           <h2 className="card__title">Bono de Atención</h2>
-          <p className="card__subtitle">Generá un bono imprimible (formato talón apaisado).</p>
+          <p className="card__subtitle">Generá un bono imprimible (formato talón apaisado) con fondo de seguridad.</p>
         </div>
 
         <button className="btn btn--primary" type="button" onClick={() => void handleEmitir()}>
@@ -313,22 +412,12 @@ export default function BonosAtencionScreen({ affiliates }: Props) {
 
         <label className="field">
           <span className="field__label">Turno (opcional)</span>
-          <input
-            type="date"
-            className="input"
-            value={turnoFechaISO}
-            onChange={(e) => setTurnoFechaISO(e.target.value)}
-          />
+          <input type="date" className="input" value={turnoFechaISO} onChange={(e) => setTurnoFechaISO(e.target.value)} />
         </label>
 
         <label className="field">
           <span className="field__label">Fecha sugerida</span>
-          <input
-            type="date"
-            className="input"
-            value={fechaISO}
-            onChange={(e) => setFechaISO(e.target.value)}
-          />
+          <input type="date" className="input" value={fechaISO} onChange={(e) => setFechaISO(e.target.value)} />
         </label>
 
         <label className="field">
