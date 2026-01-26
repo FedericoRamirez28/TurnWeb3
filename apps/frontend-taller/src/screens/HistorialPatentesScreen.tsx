@@ -1,15 +1,15 @@
-// src/screens/HistorialPatentesScreen.tsx
 import React, { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { api } from '@/lib/api'
 import type { ApiResult } from '@/lib/types'
 
+type Params = { movilId?: string }
 
 type HistorialItem = {
   id: string
   movilId: number
   patente: string
-  fecha: string // ISO o string
+  fecha: string
   anotaciones?: string | null
   tareas?: { id: string; text: string; done: boolean }[] | null
   prioridad?: 'baja' | 'alta' | 'urgente' | null
@@ -19,9 +19,12 @@ type HistorialResponse = ApiResult<HistorialItem[]>
 
 export default function HistorialPatentesScreen() {
   const nav = useNavigate()
+  const { movilId: movilIdParam } = useParams<Params>()
   const [params] = useSearchParams()
 
-  const movilId = params.get('movilId')?.trim() || ''
+  // ✅ soporta: /historial (global) | /movil/:movilId/historial | /historial?movilId=10
+  const movilId =
+    (movilIdParam?.trim() || params.get('movilId')?.trim() || '') || ''
   const movilIdNum = movilId ? Number(movilId) : null
 
   const [items, setItems] = useState<HistorialItem[]>([])
@@ -42,9 +45,8 @@ export default function HistorialPatentesScreen() {
 
         if (abort) return
 
-        if (j.ok) {
-          setItems(j.data || [])
-        } else {
+        if (j.ok) setItems(j.data || [])
+        else {
           console.error('Error cargando historial:', j.error)
           setItems([])
         }
@@ -82,9 +84,7 @@ export default function HistorialPatentesScreen() {
           <h2 className="hp-title">
             Historial por patente{movilIdNum ? ` — móvil ${movilIdNum}` : ''}
           </h2>
-          <p className="hp-subtitle">
-            Buscá por patente, móvil o anotaciones.
-          </p>
+          <p className="hp-subtitle">Buscá por patente, móvil o anotaciones.</p>
         </div>
 
         <div className="hp-top__right">
@@ -115,17 +115,24 @@ export default function HistorialPatentesScreen() {
                 key={it.id}
                 type="button"
                 className="hp-row"
-                onClick={() => nav(`/arreglos/${encodeURIComponent(String(it.movilId))}`)}
+                // ✅ tu router es /movil/:movilId
+                onClick={() => nav(`/movil/${encodeURIComponent(String(it.movilId))}`)}
               >
                 <div className="hp-row__main">
                   <div className="hp-row__title">
                     <span className="hp-chip">{it.movilId}</span>
                     <span className="hp-pat">{it.patente}</span>
                   </div>
+
                   <div className="hp-row__meta">
                     <span className="hp-date">{it.fecha}</span>
-                    {it.prioridad && <span className={`hp-prio hp-prio--${it.prioridad}`}>{it.prioridad}</span>}
+                    {it.prioridad && (
+                      <span className={`hp-prio hp-prio--${it.prioridad}`}>
+                        {it.prioridad}
+                      </span>
+                    )}
                   </div>
+
                   {it.anotaciones && <div className="hp-note">{it.anotaciones}</div>}
                 </div>
 

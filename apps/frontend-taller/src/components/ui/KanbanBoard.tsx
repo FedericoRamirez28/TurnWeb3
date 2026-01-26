@@ -1,6 +1,4 @@
-// src/components/ui/KanbanBoard.tsx
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-
 
 import ModalArregloDetalle from '../modales/ModalArregloDetalle'
 import type { ColKey, Tarea, Arreglo, Tablero } from '@/lib/tallerTypes'
@@ -48,7 +46,6 @@ export default function KanbanBoard({
   const [detalleOpen, setDetalleOpen] = useState(false)
   const [detalleItem, setDetalleItem] = useState<Arreglo | null>(null)
 
-  // ✅ refs compatibles con <div ref={...}>
   const inboxRef = useRef<HTMLDivElement>(null)
   const inProgRef = useRef<HTMLDivElement>(null)
   const doneRef = useRef<HTMLDivElement>(null)
@@ -82,7 +79,7 @@ export default function KanbanBoard({
     return out
   }, [tablero, filtroNorm])
 
-  // ======== REST (temporal) ========
+  // ======== REST ========
   async function putArreglo(a: Arreglo) {
     try {
       const res = await fetch(`${API_BASE}/arreglos/${encodeURIComponent(a.id)}`, {
@@ -128,26 +125,37 @@ export default function KanbanBoard({
     }
   }
 
-  // ======== helpers state ========
   const setColState = (next: Partial<Tablero>) => setTablero((prev) => ({ ...prev, ...next }))
   const removeFrom = (col: ColKey, id: string) => (tablero[col] || []).filter((a) => a.id !== id)
 
   function openDetalle(a: Arreglo) {
     setDetalleItem(a)
     setDetalleOpen(true)
+    ;(window as any).__ts_last_arreglo = a // ✅ para "Editar arreglo" del navbar
   }
+
+  // ✅ abrir detalle por evento desde TopNavbar (editar último)
+  useEffect(() => {
+    const onOpen = (e: any) => {
+      const arregloId = String(e?.detail?.arregloId || '')
+      if (!arregloId) return
+      const all = [...(tablero.Inbox || []), ...(tablero['In progress'] || []), ...(tablero.Done || [])]
+      const found = all.find((x) => String(x.id) === arregloId)
+      if (found) openDetalle(found)
+    }
+    window.addEventListener('ts:kanban:open-detalle', onOpen)
+    return () => window.removeEventListener('ts:kanban:open-detalle', onOpen)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tablero.Inbox.length, tablero['In progress'].length, tablero.Done.length])
 
   // persistencia de movimientos
   async function persistMove(a: Arreglo, from: ColKey, to: ColKey) {
-    const payload: Arreglo = {
-      ...a,
-      tareas: Array.isArray(a.tareas) ? a.tareas.map((t) => ({ ...t })) : [],
-    }
+    const payload: Arreglo = { ...a, tareas: Array.isArray(a.tareas) ? a.tareas.map((t) => ({ ...t })) : [] }
 
     if (to === 'Inbox') {
       payload.tareas = (payload.tareas || []).map((t) => ({ ...t, completa: false }))
       payload.hora_salida = null
-      payload.salida_indefinida = 0
+      payload.salida_indefinida = 0 as any
     } else if (to === 'In progress') {
       const tareas = payload.tareas || []
       if (!tareas.some((t) => t.completa)) {
@@ -158,7 +166,7 @@ export default function KanbanBoard({
       payload.tareas = tareas
     } else if (to === 'Done') {
       payload.tareas = (payload.tareas || []).map((t) => ({ ...t, completa: true }))
-      const indef = !!payload.salida_indefinida
+      const indef = !!(payload as any).salida_indefinida
       if (!indef && !payload.hora_salida) payload.hora_salida = nowLocal()
     }
 
@@ -171,8 +179,8 @@ export default function KanbanBoard({
 
     if (to === 'Done') {
       await updateHistorialSalida(payload.id, {
-        salida_indefinida: payload.salida_indefinida ? 1 : 0,
-        hora_salida: payload.salida_indefinida ? null : payload.hora_salida || null,
+        salida_indefinida: (payload as any).salida_indefinida ? 1 : 0,
+        hora_salida: (payload as any).salida_indefinida ? null : payload.hora_salida || null,
       })
     } else if (from === 'Done') {
       await updateHistorialSalida(payload.id, { salida_indefinida: 0, hora_salida: null })
@@ -191,11 +199,9 @@ export default function KanbanBoard({
     await persistMove(a, from, to)
   }
 
-  // Guardado desde modal
   async function handleSaveDesdeModal(actualizado: Arreglo, nuevasTareas: Tarea[], moverADone: boolean) {
     const payload: Arreglo = { ...actualizado, tareas: nuevasTareas }
-
-    if (moverADone && !payload.salida_indefinida && !payload.hora_salida) payload.hora_salida = nowLocal()
+    if (moverADone && !(payload as any).salida_indefinida && !payload.hora_salida) payload.hora_salida = nowLocal()
 
     const ok = await putArreglo(payload)
     if (!ok) return
@@ -210,12 +216,13 @@ export default function KanbanBoard({
     setColState({ [from]: nextFrom, [to]: nextTo } as Partial<Tablero>)
 
     await updateHistorialSalida(payload.id, {
-      salida_indefinida: payload.salida_indefinida ? 1 : 0,
-      hora_salida: payload.salida_indefinida ? null : payload.hora_salida || (moverADone ? nowLocal() : null),
+      salida_indefinida: (payload as any).salida_indefinida ? 1 : 0,
+      hora_salida: (payload as any).salida_indefinida ? null : payload.hora_salida || (moverADone ? nowLocal() : null),
     })
 
     window.dispatchEvent(new CustomEvent('ts:calendar:refresh'))
     setDetalleOpen(false)
+    ;(window as any).__ts_last_arreglo = payload
   }
 
   // ======== Drag (SortableJS) ========
@@ -269,10 +276,10 @@ export default function KanbanBoard({
   }, [tablero.Inbox.length, tablero['In progress'].length, tablero.Done.length])
 
   return (
-    <div className="kb-wrap">
+    <div className={'kb-wrap' + (modoEliminar ? ' modo-eliminar' : '')}>
       {modoEliminar && (
         <div className="kb-banner">
-          <strong>Modo eliminar</strong> — hacé clic en la ❌ de la tarjeta para eliminar{' '}
+          <strong>Modo eliminar</strong> — hacé clic en la ❌ de la tarjeta para eliminar
           <button className="kb-exit" onClick={salirModoEliminar} type="button">
             Salir
           </button>
@@ -293,6 +300,7 @@ export default function KanbanBoard({
                   key={a.id}
                   className={`kb-card prio-${String(a.prioridad || 'baja').toLowerCase()}`}
                   data-id={a.id}
+                  onClick={() => ((window as any).__ts_last_arreglo = a)}
                   onDoubleClick={() => openDetalle(a)}
                 >
                   <div className="kb-line">
@@ -306,7 +314,7 @@ export default function KanbanBoard({
                   {Array.isArray(a.tareas) && a.tareas.length > 0 && (
                     <div className="kb-tasks">
                       {a.tareas.slice(0, 3).map((t, i) => (
-                        <div key={String(t.id || i)} className={`kb-task ${t.completa ? 'done' : ''}`}>
+                        <div key={String((t as any).id || i)} className={`kb-task ${t.completa ? 'done' : ''}`}>
                           {t.completa ? '✔' : '•'} {t.texto}
                         </div>
                       ))}
@@ -326,7 +334,11 @@ export default function KanbanBoard({
                           →
                         </button>
                       )}
-                      <button title="Editar" onClick={() => openDetalle(a)} type="button">
+                      <button
+                        title="Editar"
+                        onClick={() => openDetalle(a)}
+                        type="button"
+                      >
                         ✏️
                       </button>
                     </div>
@@ -365,7 +377,11 @@ export default function KanbanBoard({
       </div>
 
       {detalleOpen && detalleItem && (
-        <ModalArregloDetalle arreglo={detalleItem} onSave={handleSaveDesdeModal} onCancel={() => setDetalleOpen(false)} />
+        <ModalArregloDetalle
+          arreglo={detalleItem}
+          onSave={handleSaveDesdeModal}
+          onCancel={() => setDetalleOpen(false)}
+        />
       )}
     </div>
   )

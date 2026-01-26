@@ -1,53 +1,53 @@
-import React, { useMemo, useState } from "react";
+// src/components/modales/ModalArregloEditar.tsx
+import React, { useMemo, useState } from 'react'
 
-
-type Priority = "baja" | "alta" | "urgente";
-type Tarea = { texto: string; completa: boolean };
+type Priority = 'baja' | 'alta' | 'urgente'
+export type Tarea = { texto: string; completa: boolean }
 
 export type ArregloEditDto = {
-  patente: string;
-  fecha: string;
-  motivo: string;
-  anotaciones: string;
-  prioridad: Priority;
-  hora_entrada: string;
-  hora_salida: string;
-  salida_indefinida: boolean;
-  tareas: Tarea[];
-};
+  patente: string
+  fecha: string
+  motivo: string
+  anotaciones: string
+  prioridad: Priority
+  hora_entrada: string
+  hora_salida: string
+  salida_indefinida: boolean
+  tareas: Tarea[]
+}
 
 type Props = {
-  initial: ArregloEditDto;
-  onClose: () => void;
-  onSave: (dto: ArregloEditDto) => Promise<void> | void;
-};
+  initial: ArregloEditDto
+  onClose: () => void
+  onSave: (dto: ArregloEditDto) => Promise<void> | void
+}
 
 export default function ModalArregloEditar({ initial, onClose, onSave }: Props) {
-  const [form, setForm] = useState<ArregloEditDto>(initial);
-  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState<ArregloEditDto>(initial)
+  const [saving, setSaving] = useState(false)
 
-  const canSave = useMemo(() => !!form.patente.trim() && !!form.fecha, [form.patente, form.fecha]);
+  const canSave = useMemo(() => !!form.patente.trim() && !!form.fecha, [form.patente, form.fecha])
 
   const handleSave = async () => {
-    if (!canSave) return;
-    setSaving(true);
+    if (!canSave) return
+    setSaving(true)
     try {
       await onSave({
         ...form,
         patente: form.patente.toUpperCase().trim(),
-        prioridad: String(form.prioridad || "baja").toLowerCase() as Priority,
-      });
-      onClose();
+        prioridad: String(form.prioridad || 'baja').toLowerCase() as Priority,
+      })
+      onClose()
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
-  };
+  }
 
   return (
     <div
       className="modal-overlay"
       onClick={(e) => {
-        if ((e.target as HTMLElement).classList.contains("modal-overlay")) onClose();
+        if ((e.target as HTMLElement).classList.contains('modal-overlay')) onClose()
       }}
     >
       <div className="modal">
@@ -82,7 +82,11 @@ export default function ModalArregloEditar({ initial, onClose, onSave }: Props) 
         <div className="row-2">
           <label>
             Hora de entrada:
-            <input type="time" value={form.hora_entrada} onChange={(e) => setForm({ ...form, hora_entrada: e.currentTarget.value })} />
+            <input
+              type="time"
+              value={form.hora_entrada}
+              onChange={(e) => setForm({ ...form, hora_entrada: e.currentTarget.value })}
+            />
           </label>
 
           <label>
@@ -90,7 +94,7 @@ export default function ModalArregloEditar({ initial, onClose, onSave }: Props) 
             <div className="row-gap">
               <input
                 type="time"
-                value={form.salida_indefinida ? "" : form.hora_salida}
+                value={form.salida_indefinida ? '' : form.hora_salida}
                 disabled={form.salida_indefinida}
                 onChange={(e) => setForm({ ...form, hora_salida: e.currentTarget.value })}
               />
@@ -113,11 +117,13 @@ export default function ModalArregloEditar({ initial, onClose, onSave }: Props) 
 
         <div className="acciones">
           <button onClick={handleSave} disabled={!canSave || saving} className="primary">
-            {saving ? "Guardando..." : "Guardar"}
+            {saving ? 'Guardando…' : 'Guardar'}
           </button>
-          <button onClick={onClose} className="ghost">Cancelar</button>
+          <button onClick={onClose} className="ghost">
+            Cancelar
+          </button>
         </div>
       </div>
     </div>
-  );
+  )
 }

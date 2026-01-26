@@ -1,0 +1,32 @@
+/* src/styles/components/modales/ModalArregloEditar.scss
+   (si tu modal editar usa las mismas clases, esto lo deja consistente)
+*/
+
+.modal--editar-arreglo {
+  .row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+
+    @media (max-width: 720px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .acciones {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    margin-top: 14px;
+  }
+
+  .btn-save {
+    border-radius: 999px;
+    padding: 10px 12px;
+    font-weight: 1000;
+    cursor: pointer;
+    border: 1px solid color-mix(in oklab, var(--color-primary) 28%, var(--color-border));
+    background: color-mix(in oklab, var(--color-primary) 12%, #fff);
+  }
+}

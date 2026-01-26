@@ -1,11 +1,12 @@
-// src/screens/ArreglosScreen.tsx
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Swal from 'sweetalert2'
 
+import '@/styles/screens/ArreglosScreen.scss'
+
 import BarraOpciones from '@/components/ui/BarraOpciones'
 import KanbanBoard from '@/components/ui/KanbanBoard'
-import type { Tablero, Arreglo, Tarea } from '@/lib/tallerTypes'
+import type { Tablero, Arreglo } from '@/lib/tallerTypes'
 
 import CalendarioMovil from '@/components/ui/CalendarioMovil'
 import NotificationsCenter, { pushMobilNotification } from '@/components/ui/NotificationsCenter'
@@ -13,6 +14,9 @@ import NotificationsCenter, { pushMobilNotification } from '@/components/ui/Noti
 import { api } from '@/lib/api'
 import { useMovilId } from '@/screens/useMovilId'
 import type { ApiResult } from '@/lib/types'
+
+// ✅ Modal Nuevo
+import ModalFormularioArreglo, { type NuevoArregloDto } from '@/components/modales/ModalFormularioArreglo'
 
 /* ===== Constantes mantenimiento (km) ===== */
 const KM_ACEITE = 10000
@@ -24,6 +28,7 @@ const KM_DISTRIBUCION = 150000
 
 /* ===== Utils ===== */
 const clamp01 = (x: number) => Math.max(0, Math.min(1, Number.isFinite(x) ? x : 0))
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const n = (x: any) => Number(x) || 0
 const toISO = (d: Date) =>
   d instanceof Date && !isNaN(d as any)
@@ -85,7 +90,14 @@ export default function ArreglosScreen({
   setSidebarAbierto: setSidebarProp,
 }: Props) {
   const nav = useNavigate()
-  const movilId = useMovilId()
+
+  const movilIdParam = useMovilId()
+  const movilIdSafe: string | number = movilIdParam ?? ''
+
+  // si entran sin móvil, lo mandamos a Home
+  useEffect(() => {
+    if (!movilIdParam) nav('/', { replace: true })
+  }, [movilIdParam, nav])
 
   const filtroActivo = String(filtroExterno || '')
 
@@ -105,8 +117,11 @@ export default function ArreglosScreen({
   const [parte, setParte] = useState<ParteDiario | null>(null)
   const [patenteFija, setPatenteFija] = useState('')
 
-  // ✅ Refresca el calendario (dots) cuando cambia este número
+  // ✅ Refresca el calendario (dots)
   const [calRefresh, setCalRefresh] = useState(0)
+
+  // ✅ Modal Nuevo desde navbar
+  const [nuevoOpen, setNuevoOpen] = useState(false)
 
   // permitir que otros componentes pidan refrescar el calendario
   useEffect(() => {
@@ -116,12 +131,12 @@ export default function ArreglosScreen({
   }, [])
 
   // ===== acumulado por partes (persistente) =====
-  const acumKey = movilId ? `ts_km_acum_${String(movilId)}` : null
-  const lastSigKey = movilId ? `ts_km_last_sig_${String(movilId)}` : null
+  const acumKey = movilIdParam ? `ts_km_acum_${String(movilIdParam)}` : null
+  const lastSigKey = movilIdParam ? `ts_km_last_sig_${String(movilIdParam)}` : null
   const [kmAcum, setKmAcum] = useState(0)
 
   // ===== base por service (UNA por barra) =====
-  const baseKey = (k: string) => (movilId ? `ts_km_base_${String(movilId)}_${k}` : null)
+  const baseKey = (k: string) => (movilIdParam ? `ts_km_base_${String(movilIdParam)}_${k}` : null)
   const getBase = (k: string) => n(localStorage.getItem(baseKey(k) || ''))
   const setBase = (k: string, v: number) => localStorage.setItem(baseKey(k) || '', String(n(v)))
 
@@ -141,9 +156,9 @@ export default function ArreglosScreen({
 
   /* ===== fetchers ===== */
   async function cargarInfoMovil() {
-    if (!movilId) return
+    if (!movilIdParam) return
     try {
-      const j = await api.get<MovilInfoResponse>(`/moviles/${encodeURIComponent(String(movilId))}/info`)
+      const j = await api.get<MovilInfoResponse>(`/moviles/${encodeURIComponent(String(movilIdParam))}/info`)
       if (j.ok) setPatenteFija(j.data?.patente_fija ?? '')
     } catch (e) {
       console.error(e)
@@ -151,9 +166,11 @@ export default function ArreglosScreen({
   }
 
   async function cargarParteDiario() {
-    if (!movilId) return
+    if (!movilIdParam) return
     try {
-      const j = await api.get<ParteDiarioResponse>(`/moviles/${encodeURIComponent(String(movilId))}/parte-diario/ultimo`)
+      const j = await api.get<ParteDiarioResponse>(
+        `/moviles/${encodeURIComponent(String(movilIdParam))}/parte-diario/ultimo`,
+      )
       if (!j.ok) {
         setParte(null)
         return
@@ -185,9 +202,9 @@ export default function ArreglosScreen({
   }
 
   async function cargarVTV() {
-    if (!movilId) return
+    if (!movilIdParam) return
     try {
-      const j = await api.get<VtvGetResponse>(`/moviles/${encodeURIComponent(String(movilId))}/vtv`)
+      const j = await api.get<VtvGetResponse>(`/moviles/${encodeURIComponent(String(movilIdParam))}/vtv`)
       if (j.ok) setVtvFecha(j.data?.fecha || '')
       else setVtvFecha('')
     } catch (e) {
@@ -196,9 +213,9 @@ export default function ArreglosScreen({
   }
 
   async function guardarVTV(fechaISO: string) {
-    if (!movilId) return
+    if (!movilIdParam) return
     try {
-      const j = await api.put<VtvPutResponse>(`/moviles/${encodeURIComponent(String(movilId))}/vtv`, {
+      const j = await api.put<VtvPutResponse>(`/moviles/${encodeURIComponent(String(movilIdParam))}/vtv`, {
         fecha: fechaISO || null,
       })
       if (!j.ok) throw new Error(j.error || 'No se pudo guardar la VTV')
@@ -213,9 +230,9 @@ export default function ArreglosScreen({
   }
 
   async function cargarArreglos() {
-    if (!movilId) return
+    if (!movilIdParam) return
     try {
-      const j = await api.get<ArreglosListResponse>(`/arreglos?movilId=${encodeURIComponent(String(movilId))}`)
+      const j = await api.get<ArreglosListResponse>(`/arreglos?movilId=${encodeURIComponent(String(movilIdParam))}`)
       if (!j.ok) throw new Error(j.error || 'No se pudo cargar arreglos')
 
       const arr = Array.isArray(j.data) ? j.data : []
@@ -240,13 +257,13 @@ export default function ArreglosScreen({
 
   // Carga inicial
   useEffect(() => {
-    if (!movilId) return
+    if (!movilIdParam) return
     cargarInfoMovil()
     cargarParteDiario()
     cargarArreglos()
     cargarVTV()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [movilId])
+  }, [movilIdParam])
 
   useEffect(() => {
     if (!patente && patenteFija) setPatente((patenteFija || '').toUpperCase())
@@ -261,21 +278,21 @@ export default function ArreglosScreen({
       { key: 'aire', label: 'Cambio de aire', km: KM_AIRE },
       { key: 'ac', label: 'Cambio de a/c', km: KM_AC },
       { key: 'combustible', label: 'Cambio de combustible', km: KM_COMBUSTIBLE },
-      { key: 'distribucion', label: 'Cambio de Distribucion', km: KM_DISTRIBUCION },
+      { key: 'distribucion', label: 'Cambio de Distribución', km: KM_DISTRIBUCION },
     ],
     [],
   )
 
   // inicializa base/flags si no existen
   useEffect(() => {
-    if (!movilId || !kmFinalParte) return
+    if (!movilIdParam || !kmFinalParte) return
     BARRAS.forEach(({ key }) => {
       const k = baseKey(key)
       if (k && localStorage.getItem(k) == null) setBase(key, kmFinalParte)
-      if (localStorage.getItem(kSeen(movilId, key)) == null) resetSeen(movilId, key)
+      if (localStorage.getItem(kSeen(movilIdParam, key)) == null) resetSeen(movilIdParam, key)
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [movilId, kmFinalParte, BARRAS])
+  }, [movilIdParam, kmFinalParte, BARRAS])
 
   const cicloDe = (key: string) => Math.max(0, kmFinalParte - getBase(key))
   const pctDe = (key: string, intervalo: number) => clamp01(cicloDe(key) / intervalo)
@@ -284,7 +301,7 @@ export default function ArreglosScreen({
   /* ===================== ALERTAS (50/75/100) ===================== */
   useEffect(() => {
     if (!Number.isFinite(kmFinalParte) || kmFinalParte <= 0) return
-    if (!movilId) return
+    if (!movilIdParam) return
 
     const queue: {
       key: string
@@ -298,17 +315,17 @@ export default function ArreglosScreen({
     BARRAS.forEach(({ key, label, km }) => {
       const pct = pctDe(key, km)
       const over = isOver(key, km)
-      const seen = getSeen(movilId, key)
+      const seen = getSeen(movilIdParam, key)
 
       const level: 'x50' | 'x75' | 'x100' | null = over ? 'x100' : pct >= 0.75 ? 'x75' : pct >= 0.5 ? 'x50' : null
 
       if (!level) {
-        if (pct < 0.1) resetSeen(movilId, key)
+        if (pct < 0.1) resetSeen(movilIdParam, key)
         return
       }
       if (seen[level]) return
 
-      setSeen(movilId, key, { ...seen, [level]: true })
+      setSeen(movilIdParam, key, { ...seen, [level]: true })
       queue.push({ key, label, km, level, pct, over })
     })
 
@@ -316,7 +333,8 @@ export default function ArreglosScreen({
 
     queue.sort(
       (a, b) =>
-        (a.level === 'x100' ? -1 : a.level === 'x75' ? -0.5 : 0) - (b.level === 'x100' ? -1 : b.level === 'x75' ? -0.5 : 0),
+        (a.level === 'x100' ? -1 : a.level === 'x75' ? -0.5 : 0) -
+        (b.level === 'x100' ? -1 : b.level === 'x75' ? -0.5 : 0),
     )
 
     const first = queue[0]
@@ -328,15 +346,15 @@ export default function ArreglosScreen({
       title: `Mantenimiento ${pctTxt}`,
       html: `<div style="text-align:left">
         <b>${first.label}</b><br/>
-        Móvil: <b>${movilId}</b><br/>
+        Móvil: <b>${movilIdParam}</b><br/>
         Ciclo: <b>${cicloDe(first.key)}</b> / ${first.km} km
       </div>`,
       confirmButtonText: 'OK',
     })
 
-    // además, deja notificación persistente (campana)
+    // notificación persistente
     try {
-      pushMobilNotification(movilId, {
+      pushMobilNotification(movilIdParam, {
         level: first.level === 'x100' ? 'danger' : first.level === 'x75' ? 'warn' : 'info',
         title: `Mantenimiento ${pctTxt}`,
         message: `${first.label} · ciclo ${cicloDe(first.key)} / ${first.km} km`,
@@ -346,7 +364,7 @@ export default function ArreglosScreen({
       // noop
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kmFinalParte, movilId])
+  }, [kmFinalParte, movilIdParam])
 
   // ===== helpers =====
   const reiniciarAcumulado = () => {
@@ -358,12 +376,11 @@ export default function ArreglosScreen({
     setTimeout(() => setToastMensaje(''), 1200)
   }
 
-  // ===== CRUD arreglos (desde sidebar “Nuevo”) =====
-  const handleNuevoArreglo = async (nuevo: any) => {
-    if (!movilId) return
+  // ===== CRUD arreglos =====
+  const handleNuevoArreglo = async (dto: NuevoArregloDto) => {
+    if (!movilIdParam) return
     try {
-      const payload = { ...nuevo, movil_id: String(movilId || '') }
-      await api.post(`/arreglos`, payload)
+      await api.post(`/arreglos`, dto)
       await cargarArreglos()
       setToastMensaje('✅ Arreglo agregado')
       setTimeout(() => setToastMensaje(''), 1500)
@@ -380,11 +397,25 @@ export default function ArreglosScreen({
   // ===== Finalizar arreglos =====
   const finalizarArreglos = async () => {
     const arreglosAfinalizar = [...tablero.Done]
-    if (!arreglosAfinalizar.length) return
-    if (!movilId) return
+    if (!arreglosAfinalizar.length) {
+      setToastMensaje('ℹ️ No hay arreglos en Done')
+      setTimeout(() => setToastMensaje(''), 1200)
+      return
+    }
+    if (!movilIdParam) return
 
     try {
-      await api.post(`/finalizados`, { arreglos: arreglosAfinalizar, movilId })
+      const ok = await Swal.fire({
+        icon: 'question',
+        title: 'Finalizar arreglos',
+        text: `Se moverán ${arreglosAfinalizar.length} arreglo(s) a Finalizados. ¿Continuar?`,
+        showCancelButton: true,
+        confirmButtonText: 'Sí, finalizar',
+        cancelButtonText: 'Cancelar',
+      })
+      if (!ok.isConfirmed) return
+
+      await api.post(`/finalizados`, { arreglos: arreglosAfinalizar, movilId: movilIdParam })
       setTablero((p) => ({ ...p, Done: [] }))
 
       setToastMensaje('✅ Arreglos finalizados correctamente.')
@@ -394,12 +425,54 @@ export default function ArreglosScreen({
       window.dispatchEvent(new CustomEvent('ts:calendar:refresh'))
       window.dispatchEvent(new Event('ts:historial-dia:refetch'))
 
-      nav(`/movil/${movilId}/finalizados`)
+      nav(`/movil/${movilIdParam}/finalizados`)
     } catch (e) {
       console.error(e)
       alert('No se pudo finalizar.')
     }
   }
+
+  // ✅ Integración con TopNavbar (eventos)
+  useEffect(() => {
+    const onNuevo = () => setNuevoOpen(true)
+
+    const onToggleEliminar = () => {
+      setModoEliminar((v) => !v)
+      setToastMensaje((prev) => (prev ? '' : '🗑️ Modo eliminar alternado'))
+      setTimeout(() => setToastMensaje(''), 1000)
+    }
+
+    const onEditarUltimo = () => {
+      // KanbanBoard guarda último arreglo seleccionado acá:
+      const last = (window as any).__ts_last_arreglo as Arreglo | undefined
+      if (!last?.id) {
+        Swal.fire({
+          icon: 'info',
+          title: 'Editar arreglo',
+          text: 'Primero abrí (doble click) o tocá ✏️ en una tarjeta para seleccionarla.',
+          confirmButtonText: 'OK',
+        })
+        return
+      }
+      // Abrimos el detalle desde Kanban (event)
+      window.dispatchEvent(new CustomEvent('ts:kanban:open-detalle', { detail: { arregloId: last.id } }))
+    }
+
+    const onFinalizar = () => finalizarArreglos()
+
+    window.addEventListener('ts:arreglos:nuevo', onNuevo)
+    window.addEventListener('ts:arreglos:toggle-eliminar', onToggleEliminar)
+    window.addEventListener('ts:arreglos:editar-ultimo', onEditarUltimo)
+    window.addEventListener('ts:arreglos:finalizar', onFinalizar)
+
+    return () => {
+      window.removeEventListener('ts:arreglos:nuevo', onNuevo)
+      window.removeEventListener('ts:arreglos:toggle-eliminar', onToggleEliminar)
+      window.removeEventListener('ts:arreglos:editar-ultimo', onEditarUltimo)
+      window.removeEventListener('ts:arreglos:finalizar', onFinalizar)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tablero.Done.length, movilIdParam])
 
   const vtvHeader = (
     <div className="vtv-body">
@@ -410,139 +483,155 @@ export default function ArreglosScreen({
         Próx. vencimiento: <strong>{vtvProximoVenc ? toISO(vtvProximoVenc) : '-'}</strong>
       </div>
       <div className="vtv-line">
-        Días restantes: <strong className={vtvVencida ? 'danger' : ''}>{diasRestantes != null ? diasRestantes : '-'}</strong>
+        Días restantes:{' '}
+        <strong className={vtvVencida ? 'danger' : ''}>{diasRestantes != null ? diasRestantes : '-'}</strong>
       </div>
       <progress className={`vtv-progress ${vtvVencida ? 'vtv-progress--danger' : ''}`} max={1} value={vtvProgreso} />
     </div>
   )
 
+  if (!movilIdParam) return <div style={{ padding: 16 }}>Cargando…</div>
+
   return (
     <>
-      <div className="arreglos-layout">
-        <section className="col-izquierda">
-          {/* Datos del móvil */}
-          <div className="datos-movil">
-            <div>
-              <label>Móvil:</label>
-              <input type="text" value={movilId ?? ''} disabled />
+      <div className="arreglos-page">
+        <div className="arreglos-layout">
+          <section className="col-izquierda">
+            {/* Datos del móvil */}
+            <div className="datos-movil">
+              <div>
+                <label>Móvil:</label>
+                <input type="text" value={String(movilIdSafe)} disabled />
+              </div>
+              <div>
+                <label>Patente:</label>
+                <input type="text" value={patente} disabled />
+              </div>
+              <div>
+                <label>Chofer:</label>
+                <input type="text" value={chofer} disabled />
+              </div>
             </div>
-            <div>
-              <label>Patente:</label>
-              <input type="text" value={patente} disabled />
-            </div>
-            <div>
-              <label>Chofer:</label>
-              <input type="text" value={chofer} disabled />
-            </div>
-          </div>
 
-          {/* KM acumulados */}
-          <div className="km-card">
-            <div className="km-title">Kilómetros acumulados</div>
-            <div className="km-value">{kmAcum} km</div>
-            <div className="km-meta">
-              Último parte: Km inicio <strong>{kmInicio}</strong> · Km final <strong>{kmFin}</strong> · Delta{' '}
-              <strong>{Math.max(0, kmFin - kmInicio)}</strong>
-            </div>
-            <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-              <button className="btn-refrescar" onClick={() => cargarParteDiario()} type="button">
-                ↻ Actualizar
-              </button>
-              <button className="btn-refrescar" onClick={reiniciarAcumulado} type="button">
-                🔁 Reiniciar contador
-              </button>
-            </div>
-          </div>
+            {/* KM acumulados */}
+            <div className="km-card">
+              <div className="km-title">Kilómetros acumulados</div>
+              <div className="km-value">{kmAcum} km</div>
+              <div className="km-meta">
+                Último parte: Km inicio <strong>{kmInicio}</strong> · Km final <strong>{kmFin}</strong> · Delta{' '}
+                <strong>{Math.max(0, kmFin - kmInicio)}</strong>
+              </div>
 
-          {/* VTV */}
-          <div className="vtv-summary">
-            <div className={`vtv-card ${vtvVencida ? 'vencida' : ''}`}>
-              <div className="vtv-header">
-                <div className="vtv-title">VTV</div>
-                <button className="btn-primary" onClick={() => setVtvModalAbierto(true)} type="button">
-                  📅 Cargar última VTV
+              <div className="km-actions">
+                <button className="btn-soft" onClick={() => cargarParteDiario()} type="button">
+                  ↻ Actualizar
+                </button>
+                <button className="btn-soft" onClick={reiniciarAcumulado} type="button">
+                  🔁 Reiniciar contador
                 </button>
               </div>
-              {vtvFecha ? vtvHeader : <div className="vtv-empty">Sin fecha cargada. Cargá la última VTV para iniciar el contador.</div>}
             </div>
-          </div>
 
-          {/* Calendario */}
-          <div className="calendar-card">
-            <h3 className="titulo-bloque">Calendario del móvil</h3>
-            <CalendarioMovil movilId={movilId} refreshToken={calRefresh} />
-          </div>
-        </section>
-
-        <section className="col-derecha">
-          <div className="top-row">
-            <h1 className="titulo-bloque">Gestión de Tareas</h1>
-            <NotificationsCenter movilId={movilId} />
-          </div>
-
-          <KanbanBoard
-            movilId={movilId}
-            tablero={tablero}
-            setTablero={setTablero}
-            filtro={filtroActivo}
-            modoEliminar={modoEliminar}
-            salirModoEliminar={() => setModoEliminar(false)}
-          />
-
-          {/* Barras por service */}
-          <div className="barra-progreso">
-            {BARRAS.map(({ key, label, km }) => {
-              const ciclo = Math.max(0, cicloDe(key))
-              const pct = pctDe(key, km)
-              const over = isOver(key, km)
-              const excedente = Math.max(0, ciclo - km)
-              const falta = Math.max(0, km - ciclo)
-
-              return (
-                <div key={key} className="mant-row">
-                  <div className="mant-head">
-                    <label>{label}</label>
-                    <div className="head-right">
-                      {over && <input className="mant-needed" value="Cambio necesario" readOnly />}
-                      <button
-                        className="btn-mini"
-                        type="button"
-                        onClick={() => {
-                          setBase(key, kmFinalParte)
-                          resetSeen(movilId, key)
-                          setToastMensaje('✅ Ciclo reiniciado')
-                          setTimeout(() => setToastMensaje(''), 1200)
-                        }}
-                      >
-                        Marcar realizado
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="mant-meta">
-                    ciclo: {ciclo} / {km} km {over ? `— excedente: ${excedente} km` : `— faltan ${falta} km`}
-                  </div>
-
-                  <progress
-                    max={1}
-                    value={over ? 1 : pct}
-                    className={
-                      over
-                        ? 'progress--over'
-                        : pct >= 1
-                          ? 'progress--over'
-                          : pct >= 0.75
-                            ? 'progress--75'
-                            : pct >= 0.5
-                              ? 'progress--50'
-                              : ''
-                    }
-                  />
+            {/* VTV */}
+            <div className="vtv-summary">
+              <div className={`vtv-card ${vtvVencida ? 'vencida' : ''}`}>
+                <div className="vtv-header">
+                  <div className="vtv-title">VTV</div>
+                  <button className="btn-primary" onClick={() => setVtvModalAbierto(true)} type="button">
+                    📅 Cargar última VTV
+                  </button>
                 </div>
-              )
-            })}
-          </div>
-        </section>
+                {vtvFecha ? vtvHeader : <div className="vtv-empty">Sin fecha cargada. Cargá la última VTV.</div>}
+              </div>
+            </div>
+
+            {/* Calendario */}
+            <div className="calendar-card">
+              <h3 className="titulo-bloque">Calendario del móvil</h3>
+              <div className="calendar-inner">
+                <CalendarioMovil movilId={movilIdSafe} refreshToken={calRefresh} />
+              </div>
+            </div>
+          </section>
+
+          <section className="col-derecha">
+            <div className="top-row">
+              <h1 className="titulo-bloque">Gestión de Tareas</h1>
+              <NotificationsCenter movilId={movilIdSafe} />
+            </div>
+
+            <div className="kanban-card">
+              <KanbanBoard
+                movilId={movilIdSafe}
+                tablero={tablero}
+                setTablero={setTablero}
+                filtro={filtroActivo}
+                modoEliminar={modoEliminar}
+                salirModoEliminar={() => setModoEliminar(false)}
+              />
+            </div>
+
+            {/* Barras por service */}
+            <div className="mant-card">
+              <div className="mant-card__head">
+                <div className="mant-card__title">Mantenimiento</div>
+                <div className="mant-card__hint">Contadores por service</div>
+              </div>
+
+              <div className="mant-scroll">
+                {BARRAS.map(({ key, label, km }) => {
+                  const ciclo = Math.max(0, cicloDe(key))
+                  const pct = pctDe(key, km)
+                  const over = isOver(key, km)
+                  const excedente = Math.max(0, ciclo - km)
+                  const falta = Math.max(0, km - ciclo)
+
+                  return (
+                    <div key={key} className="mant-row">
+                      <div className="mant-head">
+                        <label>{label}</label>
+                        <div className="head-right">
+                          {over && <span className="pill-needed">Cambio necesario</span>}
+                          <button
+                            className="btn-mini"
+                            type="button"
+                            onClick={() => {
+                              setBase(key, kmFinalParte)
+                              resetSeen(movilIdParam, key)
+                              setToastMensaje('✅ Ciclo reiniciado')
+                              setTimeout(() => setToastMensaje(''), 1200)
+                            }}
+                          >
+                            Marcar realizado
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="mant-meta">
+                        ciclo: <strong>{ciclo}</strong> / {km} km{' '}
+                        {over ? `— excedente: ${excedente} km` : `— faltan ${falta} km`}
+                      </div>
+
+                      <progress
+                        max={1}
+                        value={over ? 1 : pct}
+                        className={
+                          over
+                            ? 'progress--over'
+                            : pct >= 0.75
+                              ? 'progress--75'
+                              : pct >= 0.5
+                                ? 'progress--50'
+                                : ''
+                        }
+                      />
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
 
       {/* Modal VTV */}
@@ -559,7 +648,7 @@ export default function ArreglosScreen({
 
             <div className="modal-actions">
               <button
-                className="btn"
+                className="btn primary"
                 type="button"
                 onClick={() => {
                   guardarVTV(vtvFecha)
@@ -570,7 +659,7 @@ export default function ArreglosScreen({
               </button>
 
               <button
-                className="btn btn-ghost"
+                className="btn ghost"
                 type="button"
                 onClick={() => {
                   guardarVTV('')
@@ -580,7 +669,7 @@ export default function ArreglosScreen({
                 Borrar
               </button>
 
-              <button className="btn btn-ghost" type="button" onClick={() => setVtvModalAbierto(false)}>
+              <button className="btn ghost" type="button" onClick={() => setVtvModalAbierto(false)}>
                 Cerrar
               </button>
             </div>
@@ -588,7 +677,17 @@ export default function ArreglosScreen({
         </div>
       )}
 
-      {/* Sidebar */}
+      {/* ✅ Modal Nuevo Arreglo */}
+      {nuevoOpen && (
+        <ModalFormularioArreglo
+          movilId={movilIdSafe}
+          defaultPatente={patente || patenteFija}
+          onClose={() => setNuevoOpen(false)}
+          onAgregar={handleNuevoArreglo}
+        />
+      )}
+
+      {/* Sidebar (lo podés dejar oculto si no lo querés más) */}
       <BarraOpciones
         abierto={sidebarAbierto}
         onOpen={() => setSidebarAbierto(true)}
@@ -598,10 +697,10 @@ export default function ArreglosScreen({
         salirModoEliminar={() => setModoEliminar(false)}
         modoEliminar={modoEliminar}
         onFinalizarArreglos={finalizarArreglos}
-        mostrarFinalizados={() => nav(`/movil/${movilId}/finalizados`)}
-        verHistorialPorPatente={() => nav(`/movil/${movilId}/historial`)}
-        verHistorialDelDia={() => nav(`/movil/${movilId}/historial-dia`)}
-        movilId={movilId}
+        mostrarFinalizados={() => nav(`/movil/${movilIdParam}/finalizados`)}
+        verHistorialPorPatente={() => nav(`/movil/${movilIdParam}/historial`)}
+        verHistorialDelDia={() => nav(`/movil/${movilIdParam}/historial-dia`)}
+        movilId={movilIdSafe}
         mostrarHamburguesa={false}
       />
 

@@ -1,0 +1,293 @@
+/* src/styles/screens/ArreglosScreen.scss
+   ✅ Este archivo SOLO contiene layout de la pantalla.
+   ✅ Los componentes (Kanban/Calendario/Notif/Modales) van en sus SCSS propios
+*/
+
+:root {
+  /* helpers pastel */
+  --ts-pastel-blue: color-mix(in oklab, var(--color-primary) 14%, #ffffff);
+  --ts-pastel-green: color-mix(in oklab, var(--color-success) 14%, #ffffff);
+  --ts-pastel-yellow: color-mix(in oklab, var(--color-warn) 16%, #ffffff);
+  --ts-pastel-red: color-mix(in oklab, var(--color-danger) 14%, #ffffff);
+
+  --ts-stroke: color-mix(in oklab, var(--color-border) 80%, #ffffff 20%);
+  --ts-shadow: 0 18px 40px rgba(15, 23, 42, 0.10);
+}
+
+/* =============== PAGE WRAP =============== */
+.arreglos-page {
+  min-height: calc(100vh - 72px);
+  padding: var(--space-lg);
+  background:
+    radial-gradient(1200px 500px at 20% 10%, var(--ts-pastel-blue), transparent 60%),
+    radial-gradient(900px 500px at 80% 90%, var(--ts-pastel-green), transparent 55%),
+    var(--color-bg);
+}
+
+.arreglos-layout {
+  max-width: 1440px;
+  margin: 0 auto;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(380px, 560px);
+  gap: var(--space-lg);
+  align-items: start;
+
+  @media (max-width: 1180px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.col-izquierda,
+.col-derecha {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space);
+}
+
+/* =============== TITLES =============== */
+.titulo-bloque {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 950;
+  letter-spacing: 0.2px;
+  color: var(--color-ink);
+}
+
+/* ✅ Top row (título + notificaciones) */
+.top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space);
+
+  /* evita que la campana “empuje” el layout */
+  min-width: 0;
+}
+
+/* =============== CARDS BASE =============== */
+.km-card,
+.vtv-card,
+.calendar-card,
+.kanban-card,
+.mant-card {
+  background: color-mix(in oklab, var(--color-surface) 92%, #ffffff 8%);
+  border: 1px solid var(--ts-stroke);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--ts-shadow);
+  padding: var(--space);
+}
+
+/* =============== DATA MOBILE =============== */
+.datos-movil {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space);
+
+  @media (max-width: 820px) {
+    grid-template-columns: 1fr;
+  }
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  label {
+    font-size: 0.95rem;
+    font-weight: 850;
+    color: var(--color-ink);
+  }
+
+  input {
+    width: 100%;
+    border: 1px solid var(--ts-stroke);
+    background: #fff;
+    border-radius: 14px;
+    padding: 10px 12px;
+    font-size: 0.95rem;
+    color: var(--color-ink);
+    box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
+  }
+}
+
+/* =============== BUTTONS (PASTEL) =============== */
+.btn-soft {
+  border: 1px solid color-mix(in oklab, var(--color-primary) 18%, var(--ts-stroke));
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 9px 12px;
+  font-weight: 900;
+  font-size: 0.86rem;
+  color: color-mix(in oklab, var(--color-ink) 80%, var(--color-primary));
+  background: var(--ts-pastel-blue);
+  transition: transform var(--transition-fast), filter var(--transition-fast);
+  white-space: nowrap;
+
+  &:hover {
+    transform: translateY(-1px);
+    filter: brightness(0.99);
+  }
+}
+
+.btn-primary {
+  border: 1px solid color-mix(in oklab, var(--color-primary) 35%, var(--ts-stroke));
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 9px 12px;
+  font-weight: 900;
+  font-size: 0.86rem;
+  color: #fff;
+  background: color-mix(in oklab, var(--color-primary) 88%, #1d4ed8 12%);
+  box-shadow: 0 10px 24px rgba(0, 143, 107, 0.12);
+  transition: transform var(--transition-fast), filter var(--transition-fast);
+  white-space: nowrap;
+
+  &:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.03);
+  }
+}
+
+/* =============== KM CARD =============== */
+.km-title {
+  font-weight: 950;
+  color: var(--color-ink);
+  margin-bottom: 8px;
+}
+
+.km-value {
+  font-size: 1.9rem;
+  font-weight: 1000;
+  line-height: 1.05;
+  margin-bottom: 6px;
+  color: var(--color-ink);
+}
+
+.km-meta {
+  font-size: 0.88rem;
+  color: var(--color-ink-soft);
+}
+
+.km-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+/* =============== VTV =============== */
+.vtv-summary {
+  margin-top: 0;
+}
+
+.vtv-card {
+  .vtv-header {
+    display: flex;
+    gap: var(--space);
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .vtv-title {
+    font-weight: 1000;
+    color: var(--color-ink);
+  }
+
+  .vtv-line {
+    font-size: 0.88rem;
+    color: var(--color-ink-soft);
+    margin: 3px 0;
+  }
+
+  .vtv-empty {
+    font-size: 0.92rem;
+    color: var(--color-ink-soft);
+  }
+
+  .vtv-progress {
+    width: 100%;
+    height: 10px;
+    appearance: none;
+    margin-top: 12px;
+
+    &::-webkit-progress-bar {
+      background: color-mix(in oklab, #e5e7eb 55%, var(--ts-pastel-blue));
+      border-radius: 999px;
+    }
+
+    &::-webkit-progress-value {
+      background: color-mix(in oklab, var(--color-primary) 78%, var(--color-success));
+      border-radius: 999px;
+    }
+  }
+
+  &.vencida {
+    border-color: color-mix(in oklab, var(--color-danger) 35%, var(--ts-stroke));
+  }
+}
+
+/* =============== CALENDAR CARD =============== */
+.calendar-card {
+  .calendar-inner {
+    margin-top: var(--space);
+    min-width: 0;
+  }
+}
+
+/* =============== KANBAN WRAP CARD =============== */
+.kanban-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+/* =============== MAINTENANCE CARD =============== */
+.mant-card {
+  padding: 14px;
+}
+
+.mant-card__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 4px 10px 4px;
+  flex-wrap: wrap;
+}
+
+.mant-card__title {
+  font-weight: 1000;
+  font-size: 1.1rem;
+  color: var(--color-ink);
+}
+
+.mant-card__hint {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--color-ink-soft);
+}
+
+.mant-scroll {
+  max-height: clamp(220px, 34vh, 420px);
+  overflow: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+}
+
+/* =============== TOAST =============== */
+.toast {
+  position: fixed;
+  bottom: 18px;
+  right: 18px;
+  background: color-mix(in oklab, var(--color-success) 30%, var(--color-primary));
+  color: #fff;
+  padding: 12px 14px;
+  border-radius: var(--radius-lg);
+  font-weight: 950;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.18);
+  z-index: 9999;
+}

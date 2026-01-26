@@ -1,0 +1,200 @@
+/* src/styles/components/ui/KanbanBoard.scss */
+
+.kb-wrap {
+  padding: 14px;
+}
+
+.kb-banner {
+  background: color-mix(in oklab, var(--color-danger) 12%, #fff);
+  border: 1px solid color-mix(in oklab, var(--color-danger) 25%, var(--color-border));
+  border-radius: var(--radius-lg);
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-weight: 900;
+  color: var(--color-ink);
+  margin-bottom: 12px;
+}
+
+.kb-exit {
+  border: 1px solid color-mix(in oklab, var(--color-danger) 25%, var(--color-border));
+  background: #fff;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+/* ✅ grid responsive */
+.kb-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(240px, 1fr));
+  gap: 14px;
+
+  @media (max-width: 1180px) {
+    grid-template-columns: repeat(2, minmax(240px, 1fr));
+  }
+  @media (max-width: 760px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kb-col {
+  min-width: 0;
+}
+
+.kb-colhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+
+  h3 {
+    margin: 0;
+    font-size: 0.98rem;
+    font-weight: 1000;
+    color: var(--color-ink);
+    background: color-mix(in oklab, var(--color-primary) 10%, #fff);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 8px 12px;
+    white-space: nowrap;
+  }
+}
+
+.kb-count {
+  font-size: 0.9rem;
+  font-weight: 1000;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in oklab, var(--color-success) 12%, #fff);
+  border: 1px solid var(--color-border);
+  color: var(--color-ink);
+}
+
+/* ✅ lista con altura y scroll interno */
+.kb-list {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 10px;
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  max-height: clamp(260px, 36vh, 520px);
+  overflow: auto;
+  scrollbar-width: thin;
+}
+
+.kb-card {
+  background: color-mix(in oklab, var(--color-primary) 7%, #ffffff);
+  border: 1px solid var(--color-border);
+  color: var(--color-ink);
+  padding: 10px 12px;
+  border-radius: 16px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.kb-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.10);
+}
+
+/* Prioridad */
+.kb-card.prio-baja { background: color-mix(in oklab, var(--color-success) 12%, #fff); }
+.kb-card.prio-alta { background: color-mix(in oklab, var(--color-warn) 14%, #fff); }
+.kb-card.prio-urgente { background: color-mix(in oklab, var(--color-danger) 12%, #fff); }
+
+.kb-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+
+.kb-tag {
+  background: rgba(255, 255, 255, 0.75);
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 1000;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.kb-date {
+  font-size: 0.82rem;
+  font-weight: 900;
+  color: var(--color-ink-soft);
+}
+
+.kb-motivo {
+  font-weight: 950;
+  font-size: 0.92rem;
+}
+
+.kb-note {
+  font-size: 0.88rem;
+  color: var(--color-ink-soft);
+}
+
+.kb-tasks {
+  display: grid;
+  gap: 4px;
+}
+
+.kb-task {
+  font-size: 0.85rem;
+  color: var(--color-ink);
+}
+.kb-task.done {
+  text-decoration: line-through;
+  opacity: 0.75;
+}
+
+.kb-more {
+  font-size: 0.82rem;
+  font-weight: 900;
+  color: var(--color-ink-soft);
+}
+
+.kb-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.kb-actions button {
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  color: var(--color-ink);
+  padding: 6px 9px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 950;
+}
+
+.kb-actions button:hover {
+  filter: brightness(0.98);
+}
+
+.kb-del {
+  border: 1px solid color-mix(in oklab, var(--color-danger) 25%, rgba(15, 23, 42, 0.1));
+  background: rgba(255, 255, 255, 0.85);
+  color: color-mix(in oklab, var(--color-danger) 80%, #ef4444);
+  font-size: 1rem;
+  cursor: pointer;
+}

@@ -1,11 +1,9 @@
 // src/screens/HomeScreen.tsx
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import type { ApiResult, Movil } from '@/lib/types'
-
+import type { ApiResult } from '@/lib/types'
 
 import ambulanceImg from '../../assets/images/ambulance.png'
-import BarraOpciones from '@/components/ui/BarraOpciones'
 import { api } from '@/lib/api'
 
 const AMBULANCIAS = [
@@ -32,34 +30,12 @@ const AMBULANCIAS = [
   { id: 50, tamano: 'Grande', modelo: 'Ford Transit' },
 ] as const
 
-const ML_URL = 'https://listado.mercadolibre.com.ar/repuestos-autos-camionetas/'
-
 type StripeStatus = 'alert' | 'warn' | 'ok'
-
 type Prioridad = 'baja' | 'alta' | 'urgente'
 type Filtro = 'todos' | Prioridad
 
 type PrioridadesMap = Record<string, Prioridad>
 type PatentesMap = Record<string, string>
-
-type PdUrlResponse = ApiResult<{ key: string }>
-
-function buildParteDiariaUrl({ movil, key }: { movil?: number; key?: string }) {
-  const base =
-    ((window as any).env && (window as any).env.PD_BASE) ||
-    (import.meta as any).env?.VITE_PD_BASE ||
-    window.location.origin
-
-  const path = '/#/parte-diaria'
-  const qs = new URLSearchParams()
-  if (movil) qs.set('movil', String(movil))
-  if (key) qs.set('key', String(key))
-  return `${base}${path}?${qs.toString()}`
-}
-
-function openCalculator() {
-  window.open('https://www.google.com/search?q=calculadora', '_blank', 'noopener,noreferrer')
-}
 
 function StatusStripe({ status }: { status?: StripeStatus | null }) {
   if (!status) return null
@@ -98,30 +74,11 @@ function AmbulanceCard({
   )
 }
 
-export default function HomeScreen({
-  sidebarAbierto: sbProp,
-  setSidebarAbierto: setSbProp,
-}: {
-  sidebarAbierto?: boolean
-  setSidebarAbierto?: (v: boolean) => void
-}) {
-  const nav = useNavigate()
-
-  const [sbLocal, setSbLocal] = useState(false)
-  const sidebarAbierto = typeof sbProp === 'boolean' ? sbProp : sbLocal
-  const setSidebarAbierto = typeof setSbProp === 'function' ? setSbProp : setSbLocal
-
+export default function HomeScreen() {
   const [prioMap, setPrioMap] = useState<PrioridadesMap>({})
   const [patentesMap, setPatentesMap] = useState<PatentesMap>({})
   const [filtro, setFiltro] = useState<Filtro>('todos')
   const [q, setQ] = useState('')
-
-  const [pdUrl, setPdUrl] = useState('')
-  const [pdQr, setPdQr] = useState('')
-  const [showPdModal, setShowPdModal] = useState(false)
-  const [pdMovil, setPdMovil] = useState('')
-  const [pdRegen, setPdRegen] = useState(false)
-  const [pdLoading, setPdLoading] = useState(false)
 
   // === Fetch prioridades (mock/legacy endpoint) ===
   useEffect(() => {
@@ -209,187 +166,27 @@ export default function HomeScreen({
     </button>
   )
 
-  const openML = () => window.open(ML_URL, '_blank', 'noopener,noreferrer')
-  const scanner = () => alert('🔧 Escáner: funcionalidad próximamente.')
-  const verFin = () => nav('/finalizados')
-  const verHist = () => nav('/historial-patentes')
-
-  function abrirModalPD() {
-    setPdMovil('')
-    setPdRegen(false)
-    setPdUrl('')
-    setPdQr('')
-    setShowPdModal(true)
-  }
-
-  async function confirmarPD() {
-    const movilNum = Number(String(pdMovil).trim())
-    if (!movilNum) {
-      alert('Ingresá un número de móvil válido.')
-      return
-    }
-
-    try {
-      setPdLoading(true)
-
-      const j = await api.post<PdUrlResponse>(
-        `/moviles/${encodeURIComponent(String(movilNum))}/pd-url`,
-        { regen: !!pdRegen },
-      )
-
-      if (!j.ok) throw new Error(j.error || 'No se pudo generar la URL')
-
-      const url = buildParteDiariaUrl({ movil: movilNum, key: j.data.key })
-      setPdUrl(url)
-
-      const encoded = encodeURIComponent(url)
-      const qr = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encoded}`
-      setPdQr(qr)
-
-      try {
-        await navigator.clipboard?.writeText(url)
-      } catch {
-        // noop
-      }
-    } catch (e) {
-      console.error(e)
-      alert('Error generando URL')
-    } finally {
-      setPdLoading(false)
-    }
-  }
-
   return (
     <div className="ts-home">
-      <BarraOpciones
-        abierto={sidebarAbierto}
-        onOpen={() => setSidebarAbierto(true)}
-        onClose={() => setSidebarAbierto(false)}
-        mostrarAgregar={false}
-        mostrarQuitar={false}
-        mostrarSalirQuitar={false}
-        mostrarFinalizar={false}
-        mostrarVerFinalizados
-        mostrarHistorial
-        mostrarFinalizados={verFin}
-        verHistorialPorPatente={verHist}
-        mostrarHamburguesa={false}
-        // props requeridas pero no usadas
-        onNuevoArreglo={async () => {}}
-        activarModoEliminar={() => {}}
-        salirModoEliminar={() => {}}
-        modoEliminar={false}
-        onFinalizarArreglos={() => {}}
-        verHistorialDelDia={() => {}}
-      />
-
-      <div className="top-actions">
-        <div className="segmented">
+      {/* ✅ BarraOpciones ELIMINADA: ahora todo va por TopNavbar */}
+      <div style={{ padding: '10px 14px', display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <Btn value="todos">Todos</Btn>
-          <Btn value="baja">🟢 Baja</Btn>
-          <Btn value="alta">🟡 Alta</Btn>
-          <Btn value="urgente">🔴 Urgente</Btn>
+          <Btn value="urgente">Urgente</Btn>
+          <Btn value="alta">Alta</Btn>
+          <Btn value="baja">Baja</Btn>
         </div>
 
-        <div className="actions-right">
-          <button type="button" className="pill" onClick={openCalculator}>
-            Calculadora
-          </button>
-          <button type="button" className="pill" onClick={scanner}>
-            Escáner
-          </button>
-          <button type="button" className="pill" onClick={openML}>
-            Mercado Libre
-          </button>
-          <button type="button" className="pill" onClick={abrirModalPD}>
-            URL Parte Diaria
-          </button>
-
-          <input
-            className="search"
-            placeholder="Buscar móvil, patente, tamaño o modelo…"
-            value={q}
-            onChange={(e) => setQ(e.currentTarget.value)}
-          />
-        </div>
+        <input
+          className="input"
+          style={{ minWidth: 260, flex: '1 1 320px' }}
+          value={q}
+          onChange={(e) => setQ(e.currentTarget.value)}
+          placeholder="Buscar por móvil, patente, tamaño o modelo…"
+        />
       </div>
 
       <main className="list">{cards}</main>
-
-      {showPdModal && (
-        <div
-          className="modal-overlay"
-          onClick={(e) =>
-            (e.target as HTMLElement).classList.contains('modal-overlay') && setShowPdModal(false)
-          }
-        >
-          <div className="modal">
-            <h3 style={{ margin: '0 0 8px' }}>Parte diaria — URL privada</h3>
-
-            <label className="modal-label">Nº de móvil</label>
-            <input
-              className="modal-input"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              value={pdMovil}
-              onChange={(e) => setPdMovil(e.currentTarget.value.replace(/\D/g, ''))}
-              placeholder="Ej: 3"
-            />
-
-            <label className="modal-checkbox">
-              <input
-                type="checkbox"
-                checked={pdRegen}
-                onChange={(e) => setPdRegen(e.currentTarget.checked)}
-              />
-              Regenerar clave privada (invalidará la anterior)
-            </label>
-
-            {pdUrl && (
-              <>
-                <label className="modal-label" style={{ marginTop: 10 }}>
-                  URL generada
-                </label>
-                <input className="modal-input" value={pdUrl} readOnly />
-
-                <div className="qr-box">
-                  <img src={pdQr} alt="QR Parte Diaria" />
-                </div>
-              </>
-            )}
-
-            <div className="modal-actions">
-              {!pdUrl && (
-                <button type="button" className="btn" onClick={confirmarPD} disabled={pdLoading}>
-                  {pdLoading ? 'Generando…' : 'Generar URL'}
-                </button>
-              )}
-
-              {pdUrl && (
-                <>
-                  <button
-                    type="button"
-                    className="btn"
-                    onClick={() => navigator.clipboard?.writeText(pdUrl)}
-                  >
-                    Copiar
-                  </button>
-
-                  <a href={pdUrl} target="_blank" rel="noreferrer">
-                    <button type="button" className="btn">
-                      Abrir
-                    </button>
-                  </a>
-                </>
-              )}
-
-              <button type="button" className="btn btn--ghost" onClick={() => setShowPdModal(false)}>
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

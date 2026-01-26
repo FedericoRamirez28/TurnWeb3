@@ -1,33 +1,44 @@
-// src/routes/AppRouter.tsx
-import React from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import React from 'react'
+import { Navigate, Route, Routes } from 'react-router-dom'
 
-import HomeScreen from "../screens/HomeScreen";
-import ArreglosScreen from "../screens/ArreglosScreen";
-import VerFinalizadosScreen from "../screens/VerFinalizadosScreen";
-import HistorialPatentesScreen from "../screens/HistorialPatentesScreen";
-import HistorialDelDiaScreen from "../screens/HistorialDelDiaScreen";
-import ParteDiariaScreen from "../screens/ParteDiariaScreen";
+import { TallerUIProvider } from '@/context/TallerUIContext'
+import AppLayout from './AppLayout'
+
+import HomeScreen from '../screens/HomeScreen'
+import ArreglosScreen from '../screens/ArreglosScreen'
+import VerFinalizadosScreen from '../screens/VerFinalizadosScreen'
+import HistorialPatentesScreen from '../screens/HistorialPatentesScreen'
+import HistorialDelDiaScreen from '../screens/HistorialDelDiaScreen'
+import ParteDiariaScreen from '../screens/ParteDiariaScreen'
 
 export default function AppRouter() {
   return (
-    <Routes>
-      {/* Home (lista de móviles) */}
-      <Route path="/" element={<HomeScreen />} />
+    <TallerUIProvider>
+      <Routes>
+        <Route element={<AppLayout />}>
+          {/* Home (lista de móviles) */}
+          <Route path="/" element={<HomeScreen />} />
 
-      {/* ✅ Click en ambulancia: /movil/:movilId */}
-      <Route path="/movil/:movilId" element={<ArreglosScreen />} />
+          {/* ✅ Global (todos los móviles) */}
+          <Route path="/finalizados" element={<VerFinalizadosScreen />} />
+          <Route path="/historial" element={<HistorialPatentesScreen />} />
+          <Route path="/historial-dia" element={<HistorialDelDiaScreen />} />
 
-      {/* Rutas relacionadas al móvil */}
-      <Route path="/movil/:movilId/finalizados" element={<VerFinalizadosScreen />} />
-      <Route path="/movil/:movilId/historial" element={<HistorialPatentesScreen />} />
-      <Route path="/movil/:movilId/historial-dia" element={<HistorialDelDiaScreen />} />
+          {/* ✅ Click en ambulancia: /movil/:movilId */}
+          <Route path="/movil/:movilId" element={<ArreglosScreen />} />
 
-      {/* Parte diaria (QR / url privada) */}
-      <Route path="/parte-diaria" element={<ParteDiariaScreen />} />
+          {/* ✅ Rutas relacionadas al móvil (filtradas por movilId) */}
+          <Route path="/movil/:movilId/finalizados" element={<VerFinalizadosScreen />} />
+          <Route path="/movil/:movilId/historial" element={<HistorialPatentesScreen />} />
+          <Route path="/movil/:movilId/historial-dia" element={<HistorialDelDiaScreen />} />
 
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
-  );
+          {/* Parte diaria (QR / url privada) */}
+          <Route path="/parte-diaria" element={<ParteDiariaScreen />} />
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Route>
+      </Routes>
+    </TallerUIProvider>
+  )
 }

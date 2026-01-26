@@ -1,0 +1,103 @@
+/* src/styles/components/ui/CalendarioMovil.scss */
+
+.ts-calendar {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  padding: 12px;
+  box-shadow: var(--shadow-soft);
+}
+
+.ts-calendar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.title-calendar {
+  font-size: 1.05rem;
+  font-weight: 1000;
+  color: var(--color-ink);
+  text-transform: capitalize;
+}
+
+.ts-btn {
+  border: 1px solid var(--color-border);
+  background: color-mix(in oklab, var(--color-primary) 10%, #fff);
+  color: var(--color-ink);
+  border-radius: 14px;
+  padding: 7px 10px;
+  font-weight: 1000;
+  cursor: pointer;
+}
+
+.ts-calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.ts-calendar__dow {
+  font-size: 0.78rem;
+  font-weight: 1000;
+  color: var(--color-ink-soft);
+  text-align: center;
+  padding: 6px 0;
+}
+
+.ts-calendar__cell {
+  position: relative;
+  min-height: 56px;
+  border-radius: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: color-mix(in oklab, var(--color-surface) 85%, #ffffff);
+  padding: 8px;
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.ts-calendar__cell:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 22px rgba(15, 23, 42, 0.10);
+}
+
+.ts-calendar__cell--empty {
+  border: none;
+  background: transparent;
+  cursor: default;
+}
+
+.ts-calendar__cell.is-today {
+  border-color: color-mix(in oklab, var(--color-primary) 40%, rgba(15, 23, 42, 0.08));
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary) 12%, transparent);
+}
+
+.ts-calendar__date {
+  font-weight: 1000;
+  color: var(--color-ink);
+  font-size: 0.9rem;
+}
+
+.ts-calendar__dot {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 8px;
+  height: 7px;
+  border-radius: 999px;
+  opacity: 0.95;
+}
+
+.ts-calendar__dot--baja { background: color-mix(in oklab, var(--color-success) 70%, #10b981); }
+.ts-calendar__dot--alta { background: color-mix(in oklab, var(--color-warn) 70%, #f59e0b); }
+.ts-calendar__dot--urgente { background: color-mix(in oklab, var(--color-danger) 70%, #ef4444); }
+.ts-calendar__dot--default { background: color-mix(in oklab, var(--color-primary) 40%, #60a5fa); }
+
+.ts-calendar__loading {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  font-weight: 900;
+  color: var(--color-ink-soft);
+}

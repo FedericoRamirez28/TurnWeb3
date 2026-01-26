@@ -1,0 +1,187 @@
+/* src/styles/components/ui/NotificationsCenter.scss
+   ✅ FIX: ícono gigante -> clamp + overflow hidden + scope de helpers para no “ensuciar” global
+*/
+
+.notif {
+  position: relative;
+  z-index: 20; /* sobre el kanban */
+
+  .notif__button {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-lg);
+    background: color-mix(in oklab, var(--color-primary) 10%, var(--color-surface));
+    border: 1px solid var(--color-border);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-soft);
+    overflow: hidden; /* ✅ evita que la imagen se “desborde” */
+  }
+
+  .notif__button.has {
+    border-color: color-mix(in oklab, var(--color-danger) 30%, var(--color-border));
+  }
+
+  /* ✅ evita ícono gigante aunque venga un PNG enorme */
+  .notif__icon {
+    width: clamp(18px, 2.2vw, 22px);
+    height: clamp(18px, 2.2vw, 22px);
+    max-width: 22px;
+    max-height: 22px;
+    object-fit: contain;
+    display: block;
+  }
+
+  .notif__badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 18px;
+    height: 18px;
+    background: var(--color-danger);
+    color: #fff;
+    font-size: 0.72rem;
+    padding: 0 6px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    font-weight: 900;
+    border: 2px solid #fff;
+  }
+
+  .notif__panel {
+    position: absolute;
+    right: 0;
+    top: 52px;
+    width: min(520px, 86vw);
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    box-shadow: 0 18px 46px rgba(15, 23, 42, 0.18);
+    padding: 12px;
+    z-index: 999;
+  }
+
+  .notif__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+
+    strong {
+      font-weight: 1000;
+      color: var(--color-ink);
+    }
+  }
+
+  .notif__actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  /* ✅ scoped (antes era global .btn-ghost) */
+  .btn-ghost {
+    border: 1px solid var(--color-border);
+    background: transparent;
+    border-radius: 999px;
+    padding: 7px 10px;
+    font-weight: 950;
+    cursor: pointer;
+    color: var(--color-ink);
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+  }
+
+  .notif__empty {
+    padding: 12px;
+    font-weight: 900;
+    color: var(--color-ink-soft);
+  }
+
+  .notif__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 320px;
+    overflow: auto;
+    display: grid;
+    gap: 10px;
+    scrollbar-width: thin;
+  }
+
+  .notif__item {
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 10px 12px;
+    background: color-mix(in oklab, var(--color-surface) 88%, var(--color-bg));
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+
+    &.read {
+      opacity: 0.85;
+    }
+  }
+
+  .notif__item.info {
+    border-left: 4px solid var(--color-primary);
+  }
+  .notif__item.warn {
+    border-left: 4px solid var(--color-warn);
+  }
+  .notif__item.danger {
+    border-left: 4px solid var(--color-danger);
+  }
+  .notif__item.success {
+    border-left: 4px solid var(--color-success);
+  }
+
+  .notif__item__title {
+    font-weight: 1000;
+    color: var(--color-ink);
+  }
+
+  .notif__item__msg {
+    margin-top: 4px;
+    color: var(--color-ink-soft);
+    font-weight: 800;
+    font-size: 0.9rem;
+  }
+
+  .notif__item__time {
+    margin-top: 6px;
+    font-size: 0.78rem;
+    color: var(--color-ink-soft);
+    font-weight: 900;
+  }
+
+  .notif__item__right {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  /* ✅ scoped (antes era global .chip) */
+  .chip {
+    border: 1px solid var(--color-border);
+    background: #fff;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-weight: 950;
+    cursor: pointer;
+    color: var(--color-ink);
+  }
+
+  .chip.danger {
+    border-color: color-mix(in oklab, var(--color-danger) 25%, var(--color-border));
+    background: color-mix(in oklab, var(--color-danger) 12%, #ffffff);
+  }
+}

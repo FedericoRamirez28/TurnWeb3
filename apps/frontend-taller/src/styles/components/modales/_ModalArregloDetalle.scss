@@ -1,0 +1,87 @@
+/* src/styles/components/modales/ModalArregloDetalle.scss */
+
+.modal--arreglo-detalle {
+  .head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+
+    @media (max-width: 720px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .section {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .mini {
+    font-size: 0.88rem;
+    color: var(--color-ink-soft);
+    font-weight: 800;
+  }
+
+  .checklist {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+
+    input {
+      flex: 1;
+      min-width: 220px;
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-weight: 850;
+      color: var(--color-ink);
+      background: #fff;
+    }
+
+    button {
+      border-radius: 999px;
+      padding: 10px 12px;
+      font-weight: 1000;
+      cursor: pointer;
+      border: 1px solid color-mix(in oklab, var(--color-success) 28%, var(--color-border));
+      background: color-mix(in oklab, var(--color-success) 12%, #fff);
+      color: var(--color-ink);
+      white-space: nowrap;
+    }
+  }
+
+  ul {
+    margin: 10px 0 0;
+    padding-left: 18px;
+    color: var(--color-ink);
+    font-weight: 850;
+
+    li {
+      margin: 6px 0;
+    }
+  }
+
+  .pill {
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-weight: 950;
+    border: 1px solid var(--color-border);
+    background: color-mix(in oklab, var(--color-primary) 10%, #fff);
+  }
+
+  .pill.danger {
+    background: color-mix(in oklab, var(--color-danger) 12%, #fff);
+    border-color: color-mix(in oklab, var(--color-danger) 28%, var(--color-border));
+  }
+}

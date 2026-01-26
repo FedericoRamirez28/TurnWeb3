@@ -1,6 +1,16 @@
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from 'react-router-dom'
 
-export function useMovilId(): string {
-  const p = useParams();
-  return String(p.id ?? p.movilId ?? "");
+type Params = { movilId?: string }
+
+export function useMovilId(): string | null {
+  const { movilId: movilIdParam } = useParams<Params>()
+  const [sp] = useSearchParams()
+
+  const fromParam = movilIdParam?.trim()
+  if (fromParam) return fromParam
+
+  const fromQuery = sp.get('movilId')?.trim()
+  if (fromQuery) return fromQuery
+
+  return null
 }
