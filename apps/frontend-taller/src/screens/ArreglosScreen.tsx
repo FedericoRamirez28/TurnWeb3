@@ -1,10 +1,8 @@
+// src/screens/ArreglosScreen.tsx
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Swal from 'sweetalert2'
 
-import '@/styles/screens/ArreglosScreen.scss'
-
-import BarraOpciones from '@/components/ui/BarraOpciones'
 import KanbanBoard from '@/components/ui/KanbanBoard'
 import type { Tablero, Arreglo } from '@/lib/tallerTypes'
 
@@ -13,10 +11,12 @@ import NotificationsCenter, { pushMobilNotification } from '@/components/ui/Noti
 
 import { api } from '@/lib/api'
 import { useMovilId } from '@/screens/useMovilId'
-import type { ApiResult } from '@/lib/types'
 
 // ✅ Modal Nuevo
 import ModalFormularioArreglo, { type NuevoArregloDto } from '@/components/modales/ModalFormularioArreglo'
+
+// ✅ Modal Día Calendario (modo lectura)
+import ModalCalendarioDia from '@/components/modales/ModalCalendarioDia'
 
 /* ===== Constantes mantenimiento (km) ===== */
 const KM_ACEITE = 10000
@@ -30,14 +30,17 @@ const KM_DISTRIBUCION = 150000
 const clamp01 = (x: number) => Math.max(0, Math.min(1, Number.isFinite(x) ? x : 0))
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const n = (x: any) => Number(x) || 0
+
 const toISO = (d: Date) =>
   d instanceof Date && !isNaN(d as any)
     ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
     : ''
+
 const parseISO = (s: string) => {
   const d = new Date((s || '') + 'T00:00:00')
   return isNaN(d as any) ? null : d
 }
+
 const addYears = (d: Date, k: number) => new Date(d.getFullYear() + k, d.getMonth(), d.getDate())
 
 /* ===== Persistencia de umbrales por barra ===== */
@@ -70,19 +73,53 @@ type Props = {
 }
 
 type MovilInfo = { patente_fija?: string | null }
-type MovilInfoResponse = ApiResult<MovilInfo>
 
 type ParteDiario = {
+  id?: string | null
   chofer?: string | null
+
+  // ✅ compat: pueden venir en snake o camel
   km_inicio?: number | string | null
   km_fin?: number | string | null
+  kmInicio?: number | string | null
+  kmFin?: number | string | null
+
+  // ✅ NUEVO: lo que te falta mostrar
+  patente?: string | null
+  observaciones?: string | null
+
+  createdAt?: string | null
+  fecha?: string | null
+  fechaISO?: string | null
 }
-type ParteDiarioResponse = ApiResult<ParteDiario | null>
 
-type VtvGetResponse = ApiResult<{ fecha: string | null }>
-type VtvPutResponse = ApiResult<{ ok: true }>
+type VtvGet = { fecha: string | null }
+type VtvPut = { ok: true }
 
-type ArreglosListResponse = ApiResult<Arreglo[]>
+type Prioridad = 'baja' | 'alta' | 'urgente'
+
+type DiaDetalle = {
+  fecha: string
+  prioridadMax: Prioridad
+  arreglos: Array<{
+    id: string
+    patente: string | null
+    fechaISO: string | null
+    motivo: string | null
+    anotaciones: string | null
+    prioridad: Prioridad
+    createdAt: string
+    tareas: Array<{ id: string; texto: string; completa: boolean; orden: number }>
+  }>
+  partes: Array<{
+    id: string
+    fechaISO: string
+    chofer: string | null
+    km_inicio: number | null
+    km_fin: number | null
+    createdAt: string
+  }>
+}
 
 export default function ArreglosScreen({
   filtroExterno = '',
@@ -107,6 +144,8 @@ export default function ArreglosScreen({
   const [sidebarLocal, setSidebarLocal] = useState(false)
   const sidebarAbierto = typeof sidebarProp === 'boolean' ? sidebarProp : sidebarLocal
   const setSidebarAbierto = typeof setSidebarProp === 'function' ? setSidebarProp : setSidebarLocal
+  void sidebarAbierto
+  void setSidebarAbierto
 
   const [tablero, setTablero] = useState<Tablero>({ Inbox: [], 'In progress': [], Done: [] })
 
@@ -115,7 +154,12 @@ export default function ArreglosScreen({
   const [kmInicio, setKmInicio] = useState(0)
   const [kmFin, setKmFin] = useState(0)
   const [parte, setParte] = useState<ParteDiario | null>(null)
+
   const [patenteFija, setPatenteFija] = useState('')
+
+  // ✅ NUEVO: último texto de observaciones (para mostrar abajo de mantenimiento)
+  const [obsUltimo, setObsUltimo] = useState('')
+  const [obsUltimoAt, setObsUltimoAt] = useState('')
 
   // ✅ Refresca el calendario (dots)
   const [calRefresh, setCalRefresh] = useState(0)
@@ -123,11 +167,26 @@ export default function ArreglosScreen({
   // ✅ Modal Nuevo desde navbar
   const [nuevoOpen, setNuevoOpen] = useState(false)
 
+  // ✅ Modal Día Calendario (modo lectura)
+  const [diaModalOpen, setDiaModalOpen] = useState(false)
+  const [diaDetalle, setDiaDetalle] = useState<DiaDetalle | null>(null)
+
   // permitir que otros componentes pidan refrescar el calendario
   useEffect(() => {
     const onCal = () => setCalRefresh((v) => v + 1)
     window.addEventListener('ts:calendar:refresh', onCal)
     return () => window.removeEventListener('ts:calendar:refresh', onCal)
+  }, [])
+
+  // ✅ CLAVE: cuando ParteDiariaScreen guarda, recargamos patente + observaciones acá
+  useEffect(() => {
+    const onParteUpdated = () => {
+      cargarParteDiario()
+      setCalRefresh((v) => v + 1) // opcional: actualiza dots del calendario
+    }
+    window.addEventListener('ts:parte-diario:updated', onParteUpdated)
+    return () => window.removeEventListener('ts:parte-diario:updated', onParteUpdated)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // ===== acumulado por partes (persistente) =====
@@ -143,6 +202,7 @@ export default function ArreglosScreen({
   // ===== VTV (persistente en backend) =====
   const [vtvFecha, setVtvFecha] = useState('')
   const [vtvModalAbierto, setVtvModalAbierto] = useState(false)
+
   const vtvParsed = parseISO(vtvFecha)
   const vtvProximoVenc = vtvParsed ? addYears(vtvParsed, 1) : null
   const hoy = new Date()
@@ -157,102 +217,130 @@ export default function ArreglosScreen({
   /* ===== fetchers ===== */
   async function cargarInfoMovil() {
     if (!movilIdParam) return
-    try {
-      const j = await api.get<MovilInfoResponse>(`/moviles/${encodeURIComponent(String(movilIdParam))}/info`)
-      if (j.ok) setPatenteFija(j.data?.patente_fija ?? '')
-    } catch (e) {
-      console.error(e)
-    }
+    const j = await api.get<MovilInfo>(`/moviles/${encodeURIComponent(String(movilIdParam))}/info`)
+    if (j.ok) setPatenteFija(j.data?.patente_fija ?? '')
+    else console.warn('infoMovil:', j.error)
   }
 
   async function cargarParteDiario() {
     if (!movilIdParam) return
-    try {
-      const j = await api.get<ParteDiarioResponse>(
-        `/moviles/${encodeURIComponent(String(movilIdParam))}/parte-diario/ultimo`,
-      )
-      if (!j.ok) {
-        setParte(null)
-        return
+
+    const j = await api.get<ParteDiario | null>(`/moviles/${encodeURIComponent(String(movilIdParam))}/parte-diario/ultimo`)
+
+    if (!j.ok) {
+      console.warn('parteDiario:', j.error)
+      setParte(null)
+      setChofer('')
+      setKmInicio(0)
+      setKmFin(0)
+      setObsUltimo('')
+      setObsUltimoAt('')
+      return
+    }
+
+    setParte(j.data ?? null)
+
+    const p = j.data
+
+    // ✅ Chofer
+    setChofer(p?.chofer ?? '')
+
+    // ✅ Km (compat snake/camel)
+    const kIni = n(p?.km_inicio ?? p?.kmInicio)
+    const kFin = n(p?.km_fin ?? p?.kmFin)
+    setKmInicio(kIni)
+    setKmFin(kFin)
+
+    // ✅ Patente: prioridad parte -> patente fija
+    const pat = String(p?.patente || '').trim()
+    if (pat) setPatente(pat.toUpperCase())
+    else if (patenteFija) setPatente((patenteFija || '').toUpperCase())
+
+    // ✅ Observaciones
+    const obs = String(p?.observaciones || '').trim()
+    setObsUltimo(obs)
+    setObsUltimoAt(String(p?.createdAt || p?.fechaISO || p?.fecha || '').trim())
+
+    // acumulado persistente
+    const lastSig = lastSigKey ? n(localStorage.getItem(lastSigKey)) : 0
+    const delta = Math.max(0, kFin - kIni)
+    const sig = kFin
+
+    if (acumKey) {
+      const prev = n(localStorage.getItem(acumKey))
+      if (!lastSig || sig !== lastSig) {
+        localStorage.setItem(acumKey, String(prev + delta))
+        if (lastSigKey) localStorage.setItem(lastSigKey, String(sig))
       }
-
-      setParte(j.data ?? null)
-
-      const p = j.data
-      setChofer(p?.chofer ?? '')
-      setKmInicio(n(p?.km_inicio))
-      setKmFin(n(p?.km_fin))
-
-      // acumulado persistente
-      const lastSig = lastSigKey ? n(localStorage.getItem(lastSigKey)) : 0
-      const delta = Math.max(0, n(p?.km_fin) - n(p?.km_inicio))
-      const sig = n(p?.km_fin)
-
-      if (acumKey) {
-        const prev = n(localStorage.getItem(acumKey))
-        if (!lastSig || sig !== lastSig) {
-          localStorage.setItem(acumKey, String(prev + delta))
-          if (lastSigKey) localStorage.setItem(lastSigKey, String(sig))
-        }
-        setKmAcum(n(localStorage.getItem(acumKey)))
-      }
-    } catch (e) {
-      console.error(e)
+      setKmAcum(n(localStorage.getItem(acumKey)))
     }
   }
 
   async function cargarVTV() {
     if (!movilIdParam) return
-    try {
-      const j = await api.get<VtvGetResponse>(`/moviles/${encodeURIComponent(String(movilIdParam))}/vtv`)
-      if (j.ok) setVtvFecha(j.data?.fecha || '')
-      else setVtvFecha('')
-    } catch (e) {
-      console.error('VTV get:', e)
+    const j = await api.get<VtvGet>(`/moviles/${encodeURIComponent(String(movilIdParam))}/vtv`)
+    if (j.ok) setVtvFecha(j.data?.fecha || '')
+    else {
+      console.warn('VTV get:', j.error)
+      setVtvFecha('')
     }
   }
 
   async function guardarVTV(fechaISO: string) {
     if (!movilIdParam) return
-    try {
-      const j = await api.put<VtvPutResponse>(`/moviles/${encodeURIComponent(String(movilIdParam))}/vtv`, {
-        fecha: fechaISO || null,
-      })
-      if (!j.ok) throw new Error(j.error || 'No se pudo guardar la VTV')
+    const j = await api.put<VtvPut>(`/moviles/${encodeURIComponent(String(movilIdParam))}/vtv`, {
+      fecha: fechaISO || null,
+    })
 
-      setVtvFecha(fechaISO || '')
-      setToastMensaje(fechaISO ? '✅ VTV guardada' : '✅ VTV borrada')
-      setTimeout(() => setToastMensaje(''), 1500)
-    } catch (e) {
-      console.error('VTV put:', e)
+    if (!j.ok) {
+      console.error('VTV put:', j.error)
       alert('No se pudo guardar la VTV')
+      return
     }
+
+    setVtvFecha(fechaISO || '')
+    setToastMensaje(fechaISO ? '✅ VTV guardada' : '✅ VTV borrada')
+    setTimeout(() => setToastMensaje(''), 1500)
   }
 
   async function cargarArreglos() {
     if (!movilIdParam) return
-    try {
-      const j = await api.get<ArreglosListResponse>(`/arreglos?movilId=${encodeURIComponent(String(movilIdParam))}`)
-      if (!j.ok) throw new Error(j.error || 'No se pudo cargar arreglos')
-
-      const arr = Array.isArray(j.data) ? j.data : []
-      const nuevo: Tablero = { Inbox: [], 'In progress': [], Done: [] }
-
-      arr.forEach((a) => {
-        const tareas = Array.isArray(a.tareas) ? a.tareas : []
-        const todas = tareas.length > 0 && tareas.every((t) => !!t?.completa)
-        const alguna = tareas.some((t) => !!t?.completa)
-
-        if (todas) nuevo.Done.push(a)
-        else if (alguna) nuevo['In progress'].push(a)
-        else nuevo.Inbox.push(a)
-      })
-
-      setTablero(nuevo)
-    } catch (e) {
-      console.error(e)
-      alert('No se pudo conectar al backend.')
+    const j = await api.get<Arreglo[]>(`/arreglos?movilId=${encodeURIComponent(String(movilIdParam))}`)
+    if (!j.ok) {
+      console.error(j.error)
+      return
     }
+
+    const arr = Array.isArray(j.data) ? j.data : []
+    const nuevo: Tablero = { Inbox: [], 'In progress': [], Done: [] }
+
+    arr.forEach((a) => {
+      const tareas = Array.isArray((a as any).tareas) ? (a as any).tareas : []
+      const todas = tareas.length > 0 && tareas.every((t: { completa?: boolean }) => !!t?.completa)
+      const alguna = tareas.some((t: { completa?: boolean }) => !!t?.completa)
+
+      if (todas) nuevo.Done.push(a)
+      else if (alguna) nuevo['In progress'].push(a)
+      else nuevo.Inbox.push(a)
+    })
+
+    setTablero(nuevo)
+  }
+
+  async function abrirDiaCalendario(fechaISO: string) {
+    if (!movilIdParam) return
+
+    const r = await api.get<DiaDetalle>(
+      `/moviles/${encodeURIComponent(String(movilIdParam))}/calendario/dia?fecha=${encodeURIComponent(fechaISO)}`,
+    )
+
+    if (!r.ok) {
+      Swal.fire({ icon: 'error', title: 'Calendario', text: r.error || 'No se pudo cargar el día' })
+      return
+    }
+
+    setDiaDetalle(r.data)
+    setDiaModalOpen(true)
   }
 
   // Carga inicial
@@ -265,6 +353,7 @@ export default function ArreglosScreen({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [movilIdParam])
 
+  // si no vino patente por parte, usamos patente fija cuando llegue
   useEffect(() => {
     if (!patente && patenteFija) setPatente((patenteFija || '').toUpperCase())
   }, [patente, patenteFija])
@@ -317,7 +406,8 @@ export default function ArreglosScreen({
       const over = isOver(key, km)
       const seen = getSeen(movilIdParam, key)
 
-      const level: 'x50' | 'x75' | 'x100' | null = over ? 'x100' : pct >= 0.75 ? 'x75' : pct >= 0.5 ? 'x50' : null
+      const level: 'x50' | 'x75' | 'x100' | null =
+        over ? 'x100' : pct >= 0.75 ? 'x75' : pct >= 0.5 ? 'x50' : null
 
       if (!level) {
         if (pct < 0.1) resetSeen(movilIdParam, key)
@@ -352,7 +442,6 @@ export default function ArreglosScreen({
       confirmButtonText: 'OK',
     })
 
-    // notificación persistente
     try {
       pushMobilNotification(movilIdParam, {
         level: first.level === 'x100' ? 'danger' : first.level === 'x75' ? 'warn' : 'info',
@@ -379,19 +468,43 @@ export default function ArreglosScreen({
   // ===== CRUD arreglos =====
   const handleNuevoArreglo = async (dto: NuevoArregloDto) => {
     if (!movilIdParam) return
-    try {
-      await api.post(`/arreglos`, dto)
-      await cargarArreglos()
-      setToastMensaje('✅ Arreglo agregado')
-      setTimeout(() => setToastMensaje(''), 1500)
 
-      setCalRefresh((v) => v + 1)
-      window.dispatchEvent(new CustomEvent('ts:calendar:refresh'))
-      window.dispatchEvent(new Event('ts:historial-dia:refetch'))
-    } catch (e) {
-      console.error(e)
-      alert('No se pudo conectar al backend.')
+    const payload: any = {
+      ...dto,
+      movilId: String(movilIdParam),
+      patente: dto.patente ?? patente ?? patenteFija ?? null,
+      fechaISO: (dto as any).fechaISO ?? (dto as any).fecha ?? null,
     }
+
+    const r = await api.post<Arreglo>('/arreglos', payload)
+
+    if (!r.ok) {
+      Swal.fire({
+        icon: 'error',
+        title: 'No se pudo crear el arreglo',
+        text: r.error || 'Error desconocido',
+      })
+      return
+    }
+
+    const creado = r.data
+
+    setTablero((prev) => {
+      const tareas = Array.isArray((creado as any).tareas) ? (creado as any).tareas : []
+      const todas = tareas.length > 0 && tareas.every((t: { completa?: boolean }) => !!t?.completa)
+      const alguna = tareas.some((t: { completa?: boolean }) => !!t?.completa)
+
+      const col = (todas ? 'Done' : alguna ? 'In progress' : 'Inbox') as keyof Tablero
+      return { ...prev, [col]: [creado, ...(prev[col] || [])] }
+    })
+
+    setNuevoOpen(false)
+    setToastMensaje('✅ Arreglo creado')
+    setTimeout(() => setToastMensaje(''), 1500)
+
+    window.dispatchEvent(new Event('ts:calendar:refresh'))
+    window.dispatchEvent(new Event('ts:historial-dia:refetch'))
+    window.dispatchEvent(new Event('ts:home:refresh'))
   }
 
   // ===== Finalizar arreglos =====
@@ -415,15 +528,18 @@ export default function ArreglosScreen({
       })
       if (!ok.isConfirmed) return
 
-      await api.post(`/finalizados`, { arreglos: arreglosAfinalizar, movilId: movilIdParam })
+      const r = await api.post<any>(`/finalizados`, { arreglos: arreglosAfinalizar, movilId: movilIdParam })
+      if (!r.ok) throw new Error(r.error || 'No se pudo finalizar')
+
       setTablero((p) => ({ ...p, Done: [] }))
 
       setToastMensaje('✅ Arreglos finalizados correctamente.')
       setTimeout(() => setToastMensaje(''), 2000)
 
       setCalRefresh((v) => v + 1)
-      window.dispatchEvent(new CustomEvent('ts:calendar:refresh'))
+      window.dispatchEvent(new Event('ts:calendar:refresh'))
       window.dispatchEvent(new Event('ts:historial-dia:refetch'))
+      window.dispatchEvent(new Event('ts:home:refresh'))
 
       nav(`/movil/${movilIdParam}/finalizados`)
     } catch (e) {
@@ -443,7 +559,6 @@ export default function ArreglosScreen({
     }
 
     const onEditarUltimo = () => {
-      // KanbanBoard guarda último arreglo seleccionado acá:
       const last = (window as any).__ts_last_arreglo as Arreglo | undefined
       if (!last?.id) {
         Swal.fire({
@@ -454,7 +569,6 @@ export default function ArreglosScreen({
         })
         return
       }
-      // Abrimos el detalle desde Kanban (event)
       window.dispatchEvent(new CustomEvent('ts:kanban:open-detalle', { detail: { arregloId: last.id } }))
     }
 
@@ -480,11 +594,10 @@ export default function ArreglosScreen({
         Última VTV: <strong>{vtvFecha}</strong>
       </div>
       <div className="vtv-line">
-        Próx. vencimiento: <strong>{vtvProximoVenc ? toISO(vtvProximoVenc) : '-'}</strong>
+        Próx. vencimiento: <strong>{vtvParsed ? toISO(addYears(vtvParsed, 1)) : '-'}</strong>
       </div>
       <div className="vtv-line">
-        Días restantes:{' '}
-        <strong className={vtvVencida ? 'danger' : ''}>{diasRestantes != null ? diasRestantes : '-'}</strong>
+        Días restantes: <strong className={vtvVencida ? 'danger' : ''}>{diasRestantes != null ? diasRestantes : '-'}</strong>
       </div>
       <progress className={`vtv-progress ${vtvVencida ? 'vtv-progress--danger' : ''}`} max={1} value={vtvProgreso} />
     </div>
@@ -537,7 +650,7 @@ export default function ArreglosScreen({
               <div className={`vtv-card ${vtvVencida ? 'vencida' : ''}`}>
                 <div className="vtv-header">
                   <div className="vtv-title">VTV</div>
-                  <button className="btn-primary" onClick={() => setVtvModalAbierto(true)} type="button">
+                  <button className="btn-soft" onClick={() => setVtvModalAbierto(true)} type="button">
                     📅 Cargar última VTV
                   </button>
                 </div>
@@ -549,7 +662,14 @@ export default function ArreglosScreen({
             <div className="calendar-card">
               <h3 className="titulo-bloque">Calendario del móvil</h3>
               <div className="calendar-inner">
-                <CalendarioMovil movilId={movilIdSafe} refreshToken={calRefresh} />
+                <CalendarioMovil
+                  movilId={movilIdSafe}
+                  refreshToken={calRefresh}
+                  onSelectDate={(iso, dayEvents) => {
+                    if (!dayEvents?.length) return
+                    abrirDiaCalendario(iso)
+                  }}
+                />
               </div>
             </div>
           </section>
@@ -580,9 +700,9 @@ export default function ArreglosScreen({
 
               <div className="mant-scroll">
                 {BARRAS.map(({ key, label, km }) => {
-                  const ciclo = Math.max(0, cicloDe(key))
-                  const pct = pctDe(key, km)
-                  const over = isOver(key, km)
+                  const ciclo = Math.max(0, Math.max(0, kmFinalParte - getBase(key)))
+                  const pct = clamp01(ciclo / km)
+                  const over = ciclo >= km
                   const excedente = Math.max(0, ciclo - km)
                   const falta = Math.max(0, km - ciclo)
 
@@ -608,26 +728,38 @@ export default function ArreglosScreen({
                       </div>
 
                       <div className="mant-meta">
-                        ciclo: <strong>{ciclo}</strong> / {km} km{' '}
-                        {over ? `— excedente: ${excedente} km` : `— faltan ${falta} km`}
+                        ciclo: <strong>{ciclo}</strong> / {km} km {over ? `— excedente: ${excedente} km` : `— faltan ${falta} km`}
                       </div>
 
                       <progress
                         max={1}
                         value={over ? 1 : pct}
-                        className={
-                          over
-                            ? 'progress--over'
-                            : pct >= 0.75
-                              ? 'progress--75'
-                              : pct >= 0.5
-                                ? 'progress--50'
-                                : ''
-                        }
+                        className={over ? 'progress--over' : pct >= 0.75 ? 'progress--75' : pct >= 0.5 ? 'progress--50' : ''}
                       />
                     </div>
                   )
                 })}
+              </div>
+            </div>
+
+            {/* ✅ Observaciones del chofer */}
+            <div className="obs-card">
+              <div className="obs-head">
+                <div className="obs-title">Observaciones</div>
+                <button className="btn-mini" type="button" onClick={() => cargarParteDiario()} title="Actualizar parte diario">
+                  ↻ Actualizar
+                </button>
+              </div>
+
+              <div className="obs-meta">
+                <span>
+                  Último parte: <strong>{chofer || '-'}</strong>
+                </span>
+                {obsUltimoAt ? <span className="obs-date">{obsUltimoAt}</span> : null}
+              </div>
+
+              <div className={`obs-body ${obsUltimo ? '' : 'empty'}`}>
+                {obsUltimo ? obsUltimo : 'Sin observaciones cargadas en el último parte.'}
               </div>
             </div>
           </section>
@@ -687,21 +819,14 @@ export default function ArreglosScreen({
         />
       )}
 
-      {/* Sidebar (lo podés dejar oculto si no lo querés más) */}
-      <BarraOpciones
-        abierto={sidebarAbierto}
-        onOpen={() => setSidebarAbierto(true)}
-        onClose={() => setSidebarAbierto(false)}
-        onNuevoArreglo={handleNuevoArreglo}
-        activarModoEliminar={() => setModoEliminar(true)}
-        salirModoEliminar={() => setModoEliminar(false)}
-        modoEliminar={modoEliminar}
-        onFinalizarArreglos={finalizarArreglos}
-        mostrarFinalizados={() => nav(`/movil/${movilIdParam}/finalizados`)}
-        verHistorialPorPatente={() => nav(`/movil/${movilIdParam}/historial`)}
-        verHistorialDelDia={() => nav(`/movil/${movilIdParam}/historial-dia`)}
-        movilId={movilIdSafe}
-        mostrarHamburguesa={false}
+      {/* ✅ Modal Día Calendario */}
+      <ModalCalendarioDia
+        open={diaModalOpen}
+        data={diaDetalle}
+        onClose={() => {
+          setDiaModalOpen(false)
+          setDiaDetalle(null)
+        }}
       />
 
       {toastMensaje && <div className="toast">{toastMensaje}</div>}

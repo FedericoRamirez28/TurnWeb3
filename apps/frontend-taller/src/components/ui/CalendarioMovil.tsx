@@ -1,4 +1,6 @@
+// apps/frontend-taller/src/components/ui/CalendarioMovil.tsx
 import React, { useMemo, useState, useEffect } from 'react'
+import { api } from '@/lib/api'
 
 type Prioridad = 'baja' | 'alta' | 'urgente'
 
@@ -8,7 +10,7 @@ type Evento = {
   prioridad_cache?: string | null
   prio?: string | null
   p?: string | null
-  [k: string]: any
+  [k: string]: unknown
 }
 
 type Props = {
@@ -21,7 +23,6 @@ function normalizePriority(ev: Evento): Prioridad | '' {
   const pr = String(ev?.prioridad ?? ev?.prioridad_cache ?? ev?.prio ?? ev?.p ?? '')
     .trim()
     .toLowerCase()
-
   if (pr === 'urgente' || pr === 'alta' || pr === 'baja') return pr
   return ''
 }
@@ -42,7 +43,6 @@ const PR_WEIGHT: Record<Prioridad, number> = { baja: 1, alta: 2, urgente: 3 }
 function pickMaxPriority(arr: Evento[]): Prioridad {
   let best: Prioridad = 'baja'
   let bestW = -1
-
   for (const ev of arr) {
     const p = (normalizePriority(ev) || 'baja') as Prioridad
     const w = PR_WEIGHT[p] ?? 1
@@ -55,11 +55,6 @@ function pickMaxPriority(arr: Evento[]): Prioridad {
 }
 
 export default function CalendarioMovil({ movilId, onSelectDate, refreshToken = 0 }: Props) {
-  const API =
-    (import.meta as any)?.env?.VITE_TALLER_API_BASE_URL ||
-    (import.meta as any)?.env?.VITE_API_BASE ||
-    'http://localhost:3003'
-
   const [current, setCurrent] = useState<Date>(() => startOfMonth(new Date()))
   const [loading, setLoading] = useState(false)
   const [eventos, setEventos] = useState<Evento[]>([])
@@ -79,18 +74,23 @@ export default function CalendarioMovil({ movilId, onSelectDate, refreshToken = 
 
   useEffect(() => {
     if (!movilId) return
-
     let abort = false
 
     ;(async () => {
       try {
         setLoading(true)
-        const url = `${API}/moviles/${encodeURIComponent(String(movilId))}/calendario?from=${from}&to=${to}`
-        const res = await fetch(url)
-        const json = await res.json()
+        const r = await api.get<Evento[]>(
+          `/moviles/${encodeURIComponent(String(movilId))}/calendario?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
+        )
 
-        const list: Evento[] = Array.isArray(json) ? json : json?.data || []
-        if (!abort) setEventos(Array.isArray(list) ? list : [])
+        if (abort) return
+        if (!r.ok) {
+          setEventos([])
+          return
+        }
+
+        const list = Array.isArray(r.data) ? r.data : []
+        setEventos(list)
       } catch (e) {
         console.error('CalendarioMovil fetch error:', e)
         if (!abort) setEventos([])
@@ -102,7 +102,7 @@ export default function CalendarioMovil({ movilId, onSelectDate, refreshToken = 
     return () => {
       abort = true
     }
-  }, [movilId, from, to, API, refreshToken])
+  }, [movilId, from, to, refreshToken])
 
   const monthLabel = useMemo(
     () =>
@@ -113,7 +113,6 @@ export default function CalendarioMovil({ movilId, onSelectDate, refreshToken = 
     [current],
   )
 
-  // ✅ grid de 7 columnas: dows + celdas
   const cells = useMemo(() => {
     const first = startOfMonth(current)
     const last = endOfMonth(current)
@@ -155,7 +154,6 @@ export default function CalendarioMovil({ movilId, onSelectDate, refreshToken = 
           const dayEvents = eventosByDay.get(iso) || []
           const has = dayEvents.length > 0
           const isToday = iso === todayISO
-
           const dayPriority = has ? pickMaxPriority(dayEvents) : null
 
           return (
@@ -164,7 +162,7 @@ export default function CalendarioMovil({ movilId, onSelectDate, refreshToken = 
               type="button"
               className={`ts-calendar__cell ${isToday ? 'is-today' : ''} ${has ? 'has-events' : ''}`}
               onClick={() => onSelectDate?.(iso, dayEvents)}
-              title={has ? 'Tiene eventos' : ''}
+              title={has ? 'Tiene eventos (click para ver)' : ''}
             >
               <div className="ts-calendar__date">{date.getDate()}</div>
               {has && <div className={`ts-calendar__dot ts-calendar__dot--${dayPriority || 'default'}`} />}

@@ -1,33 +1,32 @@
+// src/screens/HistorialPatentesScreen.tsx
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
+
 import { api } from '@/lib/api'
 import type { ApiResult } from '@/lib/types'
 
 type Params = { movilId?: string }
 
-type HistorialItem = {
-  id: string
-  movilId: number
+type ResumenItem = {
   patente: string
-  fecha: string
-  anotaciones?: string | null
-  tareas?: { id: string; text: string; done: boolean }[] | null
-  prioridad?: 'baja' | 'alta' | 'urgente' | null
+  movil_id?: number | null
+  veces: number
+  ultima_fecha?: string | null
+  pr_baja?: number
+  pr_alta?: number
+  pr_urgente?: number
 }
-
-type HistorialResponse = ApiResult<HistorialItem[]>
 
 export default function HistorialPatentesScreen() {
   const nav = useNavigate()
   const { movilId: movilIdParam } = useParams<Params>()
   const [params] = useSearchParams()
 
-  // ✅ soporta: /historial (global) | /movil/:movilId/historial | /historial?movilId=10
-  const movilId =
-    (movilIdParam?.trim() || params.get('movilId')?.trim() || '') || ''
-  const movilIdNum = movilId ? Number(movilId) : null
+  const movilId = (movilIdParam?.trim() || params.get('movilId')?.trim() || '') || ''
 
-  const [items, setItems] = useState<HistorialItem[]>([])
+  const [items, setItems] = useState<ResumenItem[]>([])
   const [cargando, setCargando] = useState(true)
   const [q, setQ] = useState('')
 
@@ -37,17 +36,14 @@ export default function HistorialPatentesScreen() {
 
     ;(async () => {
       try {
-        const url = movilId
-          ? `/historial?movilId=${encodeURIComponent(movilId)}`
-          : `/historial`
-
-        const j = await api.get<HistorialResponse>(url)
+        const url = movilId ? `/historial?movilId=${encodeURIComponent(movilId)}` : `/historial`
+        const r = await api.get<ResumenItem[]>(url) // ApiResult<T>
 
         if (abort) return
 
-        if (j.ok) setItems(j.data || [])
+        if (r.ok) setItems(r.data ?? [])
         else {
-          console.error('Error cargando historial:', j.error)
+          console.error('Error cargando historial:', r.error)
           setItems([])
         }
       } catch (e) {
@@ -68,80 +64,104 @@ export default function HistorialPatentesScreen() {
   const filtrados = useMemo(() => {
     const term = q.trim().toLowerCase()
     if (!term) return items
-
-    return items.filter((it) => {
-      const p = String(it.patente || '').toLowerCase()
-      const m = String(it.movilId)
-      const a = String(it.anotaciones || '').toLowerCase()
-      return p.includes(term) || m.includes(term) || a.includes(term)
-    })
+    return items.filter((it) =>
+      `${it.patente} ${it.movil_id ?? ''} ${it.ultima_fecha ?? ''}`.toLowerCase().includes(term),
+    )
   }, [items, q])
 
-  return (
-    <div className="hp-screen">
-      <div className="hp-top card">
-        <div className="hp-top__left">
-          <h2 className="hp-title">
-            Historial por patente{movilIdNum ? ` — móvil ${movilIdNum}` : ''}
-          </h2>
-          <p className="hp-subtitle">Buscá por patente, móvil o anotaciones.</p>
-        </div>
+  const exportarPDF = () => {
+    const doc = new jsPDF()
+    doc.setFontSize(16)
+    doc.text(`Historial por patente ${movilId ? `(Móvil #${movilId})` : ''}`, 14, 16)
 
-        <div className="hp-top__right">
-          <button type="button" className="btn btn--outline" onClick={() => nav('/')}>
+    const body = filtrados.map((x) => [
+      x.patente,
+      x.movil_id ?? '',
+      x.veces ?? 0,
+      x.ultima_fecha || '-',
+      x.pr_baja || 0,
+      x.pr_alta || 0,
+      x.pr_urgente || 0,
+    ])
+
+    autoTable(doc, {
+      head: [['Patente', 'Móvil', 'Ingresos', 'Último', 'Baja', 'Alta', 'Urgente']],
+      body,
+      startY: 28,
+    })
+
+    doc.save(`historial_${movilId || 'global'}.pdf`)
+  }
+
+  return (
+    <div className="historial-patentes">
+      {/* HEADER estilo HistorialDelDia */}
+      <header className="hp-header">
+        <div className="hp-left">
+          <button className="btn btn--outline" onClick={() => nav(movilId ? `/movil/${movilId}` : `/`)} type="button">
             Volver
           </button>
+
+          <div className="hp-titlewrap">
+            <h1 className="hp-title">Historial por patente</h1>
+            <div className="hp-subtitle">{movilId ? `Móvil ${movilId}` : 'Todos los móviles'}</div>
+          </div>
         </div>
 
-        <div className="hp-search">
+        <div className="hp-right">
           <input
-            className="input"
-            placeholder="Buscar…"
+            className="input hp-search"
+            placeholder="Buscar (patente o móvil)"
             value={q}
             onChange={(e) => setQ(e.currentTarget.value)}
           />
+
+          <div className="hp-actions">
+            <button className="btn btn--primary" onClick={exportarPDF} type="button" disabled={cargando}>
+              🗂 Exportar PDF
+            </button>
+          </div>
         </div>
-      </div>
+      </header>
 
-      <div className="hp-body card">
-        {cargando ? (
-          <div className="hp-loading">Cargando…</div>
-        ) : filtrados.length === 0 ? (
-          <div className="hp-empty">No hay registros.</div>
-        ) : (
-          <div className="hp-list">
-            {filtrados.map((it) => (
-              <button
-                key={it.id}
-                type="button"
-                className="hp-row"
-                // ✅ tu router es /movil/:movilId
-                onClick={() => nav(`/movil/${encodeURIComponent(String(it.movilId))}`)}
-              >
-                <div className="hp-row__main">
-                  <div className="hp-row__title">
-                    <span className="hp-chip">{it.movilId}</span>
-                    <span className="hp-pat">{it.patente}</span>
-                  </div>
+      {/* BODY */}
+      {cargando ? (
+        <div className="hp-card hp-muted">Cargando…</div>
+      ) : filtrados.length === 0 ? (
+        <div className="hp-card hp-muted">No hay resultados.</div>
+      ) : (
+        <div className="hp-grid">
+          {filtrados.map((it) => (
+            <article className="hp-card" key={`${it.patente}-${it.movil_id ?? 'global'}`}>
+              <header className="hp-card__head">
+                <div className="hp-patente">{it.patente}</div>
+                {!!it.movil_id && <div className="hp-movil">Móvil #{it.movil_id}</div>}
+              </header>
 
-                  <div className="hp-row__meta">
-                    <span className="hp-date">{it.fecha}</span>
-                    {it.prioridad && (
-                      <span className={`hp-prio hp-prio--${it.prioridad}`}>
-                        {it.prioridad}
-                      </span>
-                    )}
-                  </div>
-
-                  {it.anotaciones && <div className="hp-note">{it.anotaciones}</div>}
+              <dl className="hp-stats">
+                <div>
+                  <dt>Ingresos</dt>
+                  <dd>{it.veces ?? 0}</dd>
                 </div>
 
-                <div className="hp-row__cta">Abrir</div>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+                <div>
+                  <dt>Último ingreso</dt>
+                  <dd>{it.ultima_fecha || '-'}</dd>
+                </div>
+
+                <div className="full">
+                  <dt>Prioridades</dt>
+                  <dd className="hp-prioridades">
+                    <span className="hp-chip hp-chip--baja">🟢 {it.pr_baja || 0}</span>
+                    <span className="hp-chip hp-chip--alta">🟡 {it.pr_alta || 0}</span>
+                    <span className="hp-chip hp-chip--urgente">🔴 {it.pr_urgente || 0}</span>
+                  </dd>
+                </div>
+              </dl>
+            </article>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

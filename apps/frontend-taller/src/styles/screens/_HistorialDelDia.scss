@@ -1,158 +1,208 @@
+/* src/styles/screens/HistorialDelDia.scss */
+
 .historial-dia {
-  padding: var(--space-lg, 16px);
-  color: var(--ink, #0f172a);
+  min-height: calc(100vh - 72px);
+  padding: var(--space-lg);
 
-  .hd-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: var(--space-md, 12px);
-    margin-bottom: var(--space-md, 14px);
+  background:
+    radial-gradient(1100px 420px at 15% 8%, color-mix(in oklab, var(--color-primary) 14%, #ffffff), transparent 60%),
+    radial-gradient(900px 420px at 85% 92%, color-mix(in oklab, var(--color-success) 12%, #ffffff), transparent 58%),
+    var(--color-bg);
+}
 
-    .hd-left {
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm, 10px);
-    }
+/* ===== Header ===== */
+.hd-header {
+  max-width: 1560px;
+  margin: 0 auto var(--space);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space);
+  flex-wrap: wrap;
 
-    h1 {
-      font-size: 1.25rem;
-      margin: 0;
-      font-weight: 900;
-    }
+  background: color-mix(in oklab, var(--color-surface) 92%, #ffffff 8%);
+  border: 1px solid color-mix(in oklab, var(--color-border) 82%, #ffffff 18%);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  padding: 14px 14px;
+}
 
-    .hd-right {
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm, 8px);
-      flex-wrap: wrap;
-    }
+.hd-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
 
-    .field {
-      display: flex;
-      align-items: center;
-      gap: 6px;
+.hd-titlewrap {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
 
-      span {
-        font-weight: 800;
-      }
-    }
+.hd-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 950;
+  color: var(--color-ink);
+  line-height: 1.15;
+}
 
-    .search {
-      min-width: 280px;
-      padding: 9px 10px;
-      border: 1px solid var(--color-border, #d5dbe8);
-      border-radius: var(--radius-md, 10px);
-      background: var(--surface, #fff);
-      color: var(--ink, #0f172a);
-    }
-  }
+.hd-subtitle {
+  margin-top: 3px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--color-ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-  .btn-back {
-    border: 1px solid var(--color-border, #cfd6e4);
-    background: var(--surface, #fff);
-    padding: 8px 10px;
-    border-radius: var(--radius-md, 10px);
-    cursor: pointer;
+.hd-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-width: 0;
+  justify-content: flex-end;
 
-    &:hover {
-      background: var(--surface-2, #eef3fb);
-    }
-  }
-
-  .btn {
-    border: 1px solid var(--color-border, #cfd6e4);
-    background: var(--surface-2, #eef3fb);
-    padding: 9px 12px;
-    border-radius: var(--radius-md, 10px);
-    cursor: pointer;
-
-    &:hover {
-      background: color-mix(in oklab, var(--surface-2, #eef3fb) 75%, #000 5%);
-    }
-  }
-
-  .btn-ghost {
-    background: var(--surface, #fff);
-    border: 1px dashed var(--color-border, #cbd3e2);
-    padding: 8px 10px;
-    border-radius: var(--radius-md, 10px);
-    cursor: pointer;
-
-    &:hover {
-      background: var(--surface-2, #eef3fb);
-    }
-  }
-
-  .hd-tablewrap {
-    overflow: auto;
-    background: var(--surface, #fff);
-    border: 1px solid var(--color-border, #e2e7f1);
-    border-radius: var(--radius-lg, 14px);
-    box-shadow: var(--shadow-1, 0 2px 10px rgba(0, 0, 0, 0.08));
-  }
-
-  .hd-table {
+  @media (max-width: 860px) {
     width: 100%;
-    border-collapse: collapse;
+    justify-content: flex-start;
+  }
+}
 
-    th,
-    td {
-      padding: 10px 12px;
-      border-bottom: 1px solid color-mix(in oklab, var(--color-border, #eef2f8) 70%, transparent);
-      vertical-align: top;
-    }
+.hd-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 900;
+  color: var(--color-ink);
+  white-space: nowrap;
 
-    thead th {
-      background: var(--surface-2, #eef3fb);
-      text-align: left;
-      font-weight: 900;
-    }
+  span {
+    font-size: 0.9rem;
+    color: var(--color-ink);
+  }
+}
 
-    tbody tr:hover {
-      background: color-mix(in oklab, var(--surface-2, #eef3fb) 55%, transparent);
-    }
+.hd-date {
+  width: 170px;
 
-    .muted {
-      color: var(--muted-ink, #64748b);
-      text-align: center;
-    }
+}
 
-    .anot {
-      max-width: 520px;
-      white-space: pre-wrap;
-    }
+.hd-search {
+  min-width: 340px;
+  max-width: 520px;
+    width: 100%;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  padding: 8px 10px;
+  font-size: 0.9rem;
 
-    .actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
+  @media (max-width: 860px) {
+    min-width: 100%;
+    max-width: 100%;
+  }
+}
+
+.hd-actions {
+  display: inline-flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ===== Table ===== */
+.hd-tablewrap {
+  max-width: 1560px;
+  margin: 0 auto;
+  overflow: auto;
+
+  background: var(--color-surface);
+  border: 1px solid color-mix(in oklab, var(--color-border) 86%, #ffffff 14%);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+}
+
+.hd-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.92rem;
+
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+
+    background: color-mix(in oklab, var(--color-primary) 10%, #ffffff 90%);
+    color: var(--color-ink);
+    text-align: left;
+    font-weight: 950;
+    padding: 12px 12px;
+    border-bottom: 1px solid color-mix(in oklab, var(--color-border) 85%, #ffffff 15%);
+    white-space: nowrap;
   }
 
-  .pill {
-    padding: 3px 8px;
-    border-radius: 999px;
-    font-size: 0.825rem;
-    text-transform: capitalize;
-    font-weight: 800;
+  tbody td {
+    padding: 12px 12px;
+    border-bottom: 1px solid color-mix(in oklab, var(--color-border) 82%, #ffffff 18%);
+    vertical-align: top;
+    background: #fff;
+  }
 
-    &--baja {
-      background: color-mix(in oklab, var(--success, #22c55e) 14%, var(--surface, #fff));
-      color: color-mix(in oklab, var(--success, #22c55e) 65%, #000 10%);
-      border: 1px solid color-mix(in oklab, var(--success, #22c55e) 30%, transparent);
-    }
+  tbody tr:hover td {
+    background: color-mix(in oklab, var(--color-primary) 4%, #ffffff 96%);
+  }
+}
 
-    &--alta {
-      background: color-mix(in oklab, var(--warn, #f59e0b) 16%, var(--surface, #fff));
-      color: color-mix(in oklab, var(--warn, #f59e0b) 65%, #000 15%);
-      border: 1px solid color-mix(in oklab, var(--warn, #f59e0b) 30%, transparent);
-    }
+.hd-muted {
+  color: var(--color-ink-soft);
+  text-align: center;
+  padding: 18px 10px !important;
+}
 
-    &--urgente {
-      background: color-mix(in oklab, var(--danger, #ef4444) 14%, var(--surface, #fff));
-      color: color-mix(in oklab, var(--danger, #ef4444) 65%, #000 15%);
-      border: 1px solid color-mix(in oklab, var(--danger, #ef4444) 30%, transparent);
-    }
+.hd-anot {
+  max-width: 520px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.hd-strong {
+  font-weight: 950;
+}
+
+.hd-mono {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== Prioridad pills ===== */
+.hd-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 950;
+  text-transform: capitalize;
+  border: 1px solid transparent;
+  white-space: nowrap;
+
+  &--baja {
+    background: color-mix(in oklab, var(--color-success) 14%, #ffffff);
+    color: color-mix(in oklab, var(--color-success) 75%, var(--color-ink));
+    border-color: color-mix(in oklab, var(--color-success) 22%, var(--color-border));
+  }
+
+  &--alta {
+    background: color-mix(in oklab, var(--color-warn) 18%, #ffffff);
+    color: color-mix(in oklab, var(--color-warn) 72%, var(--color-ink));
+    border-color: color-mix(in oklab, var(--color-warn) 24%, var(--color-border));
+  }
+
+  &--urgente {
+    background: color-mix(in oklab, var(--color-danger) 14%, #ffffff);
+    color: color-mix(in oklab, var(--color-danger) 78%, var(--color-ink));
+    border-color: color-mix(in oklab, var(--color-danger) 22%, var(--color-border));
   }
 }

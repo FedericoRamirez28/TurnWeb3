@@ -18,19 +18,31 @@
 
 .title-calendar {
   font-size: 1.05rem;
-  font-weight: 1000;
+  font-weight: 900;
   color: var(--color-ink);
   text-transform: capitalize;
 }
 
 .ts-btn {
   border: 1px solid var(--color-border);
-  background: color-mix(in oklab, var(--color-primary) 10%, #fff);
+  background: color-mix(in oklab, var(--color-primary) 12%, #fff);
   color: var(--color-ink);
   border-radius: 14px;
   padding: 7px 10px;
-  font-weight: 1000;
+  font-weight: 900;
   cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.ts-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.12);
+}
+
+.ts-btn:focus-visible {
+  outline: none;
+  border-color: color-mix(in oklab, var(--color-primary) 40%, var(--color-border));
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary) 18%, transparent);
 }
 
 .ts-calendar__grid {
@@ -41,7 +53,7 @@
 
 .ts-calendar__dow {
   font-size: 0.78rem;
-  font-weight: 1000;
+  font-weight: 900;
   color: var(--color-ink-soft);
   text-align: center;
   padding: 6px 0;
@@ -54,19 +66,23 @@
   border: 1px solid rgba(15, 23, 42, 0.08);
   background: color-mix(in oklab, var(--color-surface) 85%, #ffffff);
   padding: 8px;
-  cursor: pointer;
+  cursor: default;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
-.ts-calendar__cell:hover {
+.ts-calendar__cell.has-events {
+  cursor: pointer;
+}
+
+.ts-calendar__cell.has-events:hover {
   transform: translateY(-1px);
   box-shadow: 0 12px 22px rgba(15, 23, 42, 0.10);
+  border-color: rgba(15, 23, 42, 0.12);
 }
 
 .ts-calendar__cell--empty {
   border: none;
   background: transparent;
-  cursor: default;
 }
 
 .ts-calendar__cell.is-today {
@@ -75,7 +91,7 @@
 }
 
 .ts-calendar__date {
-  font-weight: 1000;
+  font-weight: 900;
   color: var(--color-ink);
   font-size: 0.9rem;
 }
@@ -90,14 +106,141 @@
   opacity: 0.95;
 }
 
-.ts-calendar__dot--baja { background: color-mix(in oklab, var(--color-success) 70%, #10b981); }
-.ts-calendar__dot--alta { background: color-mix(in oklab, var(--color-warn) 70%, #f59e0b); }
-.ts-calendar__dot--urgente { background: color-mix(in oklab, var(--color-danger) 70%, #ef4444); }
-.ts-calendar__dot--default { background: color-mix(in oklab, var(--color-primary) 40%, #60a5fa); }
+.ts-calendar__dot--baja {
+  background: color-mix(in oklab, var(--color-success) 70%, #10b981);
+}
+.ts-calendar__dot--alta {
+  background: color-mix(in oklab, var(--color-warn) 70%, #f59e0b);
+}
+.ts-calendar__dot--urgente {
+  background: color-mix(in oklab, var(--color-danger) 70%, #ef4444);
+}
+.ts-calendar__dot--default {
+  background: color-mix(in oklab, var(--color-primary) 40%, #60a5fa);
+}
 
 .ts-calendar__loading {
   margin-top: 10px;
   font-size: 0.9rem;
-  font-weight: 900;
+  font-weight: 800;
   color: var(--color-ink-soft);
+}
+/* ===== Modal detalle día (SweetAlert2) ===== */
+
+.ts-cal-modal {
+  text-align: left;
+}
+
+.ts-cal-modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.ts-cal-modal__date {
+  font-size: 1rem;
+  font-weight: 1000;
+  color: var(--color-ink);
+}
+
+.ts-cal-modal__section {
+  margin-top: 12px;
+}
+
+.ts-cal-modal__title {
+  font-weight: 1000;
+  color: var(--color-ink);
+  margin: 10px 0 8px;
+}
+
+.ts-cal-modal__muted {
+  color: var(--color-ink-soft);
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+
+.ts-cal-modal__empty {
+  color: var(--color-ink-soft);
+  font-weight: 800;
+  padding: 8px 0;
+}
+
+.ts-cal-card {
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 10px;
+  background: color-mix(in oklab, var(--color-surface) 92%, #fff);
+  box-shadow: var(--shadow-soft);
+  margin-bottom: 10px;
+}
+
+.ts-cal-card__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.ts-cal-card__strong {
+  font-weight: 1000;
+  color: var(--color-ink);
+}
+
+.ts-cal-card__muted {
+  color: var(--color-ink-soft);
+  font-weight: 900;
+  font-size: 0.85rem;
+}
+
+.ts-cal-card__notes {
+  margin-top: 6px;
+  color: var(--color-ink);
+  font-weight: 700;
+  white-space: pre-wrap;
+}
+
+.ts-cal-tasks {
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+
+.ts-cal-task {
+  margin: 4px 0;
+  font-weight: 800;
+  color: var(--color-ink);
+}
+
+.ts-cal-task.is-done {
+  opacity: 0.75;
+  text-decoration: line-through;
+}
+
+.ts-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 1000;
+  font-size: 0.8rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.ts-pill--baja {
+  background: color-mix(in oklab, var(--color-success) 18%, #fff);
+  color: color-mix(in oklab, var(--color-success) 70%, #10b981);
+}
+
+.ts-pill--alta {
+  background: color-mix(in oklab, var(--color-warn) 18%, #fff);
+  color: color-mix(in oklab, var(--color-warn) 75%, #f59e0b);
+}
+
+.ts-pill--urgente {
+  background: color-mix(in oklab, var(--color-danger) 14%, #fff);
+  color: color-mix(in oklab, var(--color-danger) 75%, #ef4444);
 }

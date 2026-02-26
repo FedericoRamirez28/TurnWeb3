@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import ModalArregloDetalle from '../modales/ModalArregloDetalle'
 import type { ColKey, Tarea, Arreglo, Tablero } from '@/lib/tallerTypes'
+import { api } from '@/lib/api'
 
 const COLS: ColKey[] = ['Inbox', 'In progress', 'Done']
 const COL_LABEL: Record<ColKey, string> = {
@@ -29,6 +30,24 @@ type Props = {
   salirModoEliminar?: () => void
 }
 
+function toUpdateDto(a: Arreglo) {
+  return {
+    patente: (a as any).patente ?? null,
+    // ✅ tu backend acepta fecha o fechaISO
+    fecha: (a as any).fecha ?? (a as any).fechaISO ?? null,
+    motivo: (a as any).motivo ?? null,
+    anotaciones: (a as any).anotaciones ?? null,
+    prioridad: (a as any).prioridad ?? 'baja',
+    tareas: Array.isArray((a as any).tareas)
+      ? (a as any).tareas.map((t: any, i: number) => ({
+          texto: String(t?.texto ?? '').trim(),
+          completa: !!t?.completa,
+          orden: Number.isFinite(Number(t?.orden)) ? Number(t.orden) : i,
+        }))
+      : [],
+  }
+}
+
 export default function KanbanBoard({
   movilId,
   tablero,
@@ -37,12 +56,6 @@ export default function KanbanBoard({
   modoEliminar = false,
   salirModoEliminar = () => {},
 }: Props) {
-  const API_BASE =
-    (import.meta as any)?.env?.VITE_TALLER_API_BASE_URL ||
-    (import.meta as any)?.env?.VITE_API_BASE ||
-    (typeof window !== 'undefined' && (window as any).env?.API_BASE) ||
-    'http://localhost:3003'
-
   const [detalleOpen, setDetalleOpen] = useState(false)
   const [detalleItem, setDetalleItem] = useState<Arreglo | null>(null)
 
@@ -65,11 +78,11 @@ export default function KanbanBoard({
     for (const col of COLS) {
       out[col] = (tablero[col] || []).filter((a) => {
         const txt = [
-          a?.patente,
-          a?.motivo,
-          a?.anotaciones,
-          ...(Array.isArray(a?.tareas) ? a.tareas.map((t) => t?.texto) : []),
-          a?.prioridad,
+          (a as any)?.patente,
+          (a as any)?.motivo,
+          (a as any)?.anotaciones,
+          ...(Array.isArray((a as any)?.tareas) ? (a as any).tareas.map((t: any) => t?.texto) : []),
+          (a as any)?.prioridad,
         ]
           .join(' ')
           .toLowerCase()
@@ -79,94 +92,84 @@ export default function KanbanBoard({
     return out
   }, [tablero, filtroNorm])
 
-  // ======== REST ========
+  // ======== REST (usa api.ts con token) ========
   async function putArreglo(a: Arreglo) {
-    try {
-      const res = await fetch(`${API_BASE}/arreglos/${encodeURIComponent(a.id)}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(a),
-      })
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      return true
-    } catch (e) {
-      console.error('PUT /arreglos/:id', e)
+    const dto = toUpdateDto(a)
+    const r = await api.put<any>(`/arreglos/${encodeURIComponent(String((a as any).id))}`, dto)
+    if (!r.ok) {
+      console.error('PUT /arreglos/:id', r.error)
       alert('No se pudo actualizar el arreglo')
       return false
     }
+    return true
   }
 
   async function deleteArreglo(id: string) {
-    try {
-      const res = await fetch(`${API_BASE}/arreglos/${encodeURIComponent(id)}`, { method: 'DELETE' })
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      return true
-    } catch (e) {
-      console.error('DELETE /arreglos/:id', e)
+    const r = await api.del<any>(`/arreglos/${encodeURIComponent(String(id))}`)
+    if (!r.ok) {
+      console.error('DELETE /arreglos/:id', r.error)
       alert('No se pudo eliminar el arreglo')
       return false
     }
+    return true
   }
 
   async function updateHistorialSalida(
     arregloId: string,
     { hora_salida = null, salida_indefinida = 0 }: { hora_salida?: string | null; salida_indefinida?: number },
   ) {
-    try {
-      const res = await fetch(`${API_BASE}/historial-dia/update-by-arreglo-id`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ arreglo_id: arregloId, hora_salida, salida_indefinida }),
-      })
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    // Este endpoint lo conectamos cuando armemos historial-dia del backend.
+    // Lo dejamos “best effort” para no cortar flujo.
+    const r = await api.put<any>(`/historial-dia/update-by-arreglo-id`, {
+      arreglo_id: arregloId,
+      hora_salida,
+      salida_indefinida,
+    })
+    if (r.ok) {
       window.dispatchEvent(new CustomEvent('ts:historial-dia:refetch'))
-    } catch (e) {
-      console.warn('PUT /historial-dia/update-by-arreglo-id', e)
     }
   }
 
   const setColState = (next: Partial<Tablero>) => setTablero((prev) => ({ ...prev, ...next }))
-  const removeFrom = (col: ColKey, id: string) => (tablero[col] || []).filter((a) => a.id !== id)
+  const removeFrom = (col: ColKey, id: string) => (tablero[col] || []).filter((a: any) => String(a.id) !== String(id))
 
   function openDetalle(a: Arreglo) {
     setDetalleItem(a)
     setDetalleOpen(true)
-    ;(window as any).__ts_last_arreglo = a // ✅ para "Editar arreglo" del navbar
+    ;(window as any).__ts_last_arreglo = a
   }
 
-  // ✅ abrir detalle por evento desde TopNavbar (editar último)
   useEffect(() => {
     const onOpen = (e: any) => {
       const arregloId = String(e?.detail?.arregloId || '')
       if (!arregloId) return
-      const all = [...(tablero.Inbox || []), ...(tablero['In progress'] || []), ...(tablero.Done || [])]
+      const all = [...(tablero.Inbox || []), ...(tablero['In progress'] || []), ...(tablero.Done || [])] as any[]
       const found = all.find((x) => String(x.id) === arregloId)
-      if (found) openDetalle(found)
+      if (found) openDetalle(found as any)
     }
     window.addEventListener('ts:kanban:open-detalle', onOpen)
     return () => window.removeEventListener('ts:kanban:open-detalle', onOpen)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tablero.Inbox.length, tablero['In progress'].length, tablero.Done.length])
 
-  // persistencia de movimientos
   async function persistMove(a: Arreglo, from: ColKey, to: ColKey) {
-    const payload: Arreglo = { ...a, tareas: Array.isArray(a.tareas) ? a.tareas.map((t) => ({ ...t })) : [] }
+    const payload: any = { ...(a as any), tareas: Array.isArray((a as any).tareas) ? (a as any).tareas.map((t: any) => ({ ...t })) : [] }
 
     if (to === 'Inbox') {
-      payload.tareas = (payload.tareas || []).map((t) => ({ ...t, completa: false }))
+      payload.tareas = (payload.tareas || []).map((t: any) => ({ ...t, completa: false }))
       payload.hora_salida = null
-      payload.salida_indefinida = 0 as any
+      payload.salida_indefinida = 0
     } else if (to === 'In progress') {
       const tareas = payload.tareas || []
-      if (!tareas.some((t) => t.completa)) {
-        const idx = tareas.findIndex((t) => !t.completa)
+      if (!tareas.some((t: any) => t.completa)) {
+        const idx = tareas.findIndex((t: any) => !t.completa)
         if (idx >= 0) tareas[idx].completa = true
         else if (tareas.length) tareas[0].completa = true
       }
       payload.tareas = tareas
     } else if (to === 'Done') {
-      payload.tareas = (payload.tareas || []).map((t) => ({ ...t, completa: true }))
-      const indef = !!(payload as any).salida_indefinida
+      payload.tareas = (payload.tareas || []).map((t: any) => ({ ...t, completa: true }))
+      const indef = !!payload.salida_indefinida
       if (!indef && !payload.hora_salida) payload.hora_salida = nowLocal()
     }
 
@@ -179,8 +182,8 @@ export default function KanbanBoard({
 
     if (to === 'Done') {
       await updateHistorialSalida(payload.id, {
-        salida_indefinida: (payload as any).salida_indefinida ? 1 : 0,
-        hora_salida: (payload as any).salida_indefinida ? null : payload.hora_salida || null,
+        salida_indefinida: payload.salida_indefinida ? 1 : 0,
+        hora_salida: payload.salida_indefinida ? null : payload.hora_salida || null,
       })
     } else if (from === 'Done') {
       await updateHistorialSalida(payload.id, { salida_indefinida: 0, hora_salida: null })
@@ -200,14 +203,14 @@ export default function KanbanBoard({
   }
 
   async function handleSaveDesdeModal(actualizado: Arreglo, nuevasTareas: Tarea[], moverADone: boolean) {
-    const payload: Arreglo = { ...actualizado, tareas: nuevasTareas }
-    if (moverADone && !(payload as any).salida_indefinida && !payload.hora_salida) payload.hora_salida = nowLocal()
+    const payload: any = { ...(actualizado as any), tareas: nuevasTareas }
+    if (moverADone && !payload.salida_indefinida && !payload.hora_salida) payload.hora_salida = nowLocal()
 
     const ok = await putArreglo(payload)
     if (!ok) return
 
-    const inInbox = (tablero.Inbox || []).some((x) => x.id === payload.id)
-    const inProg = (tablero['In progress'] || []).some((x) => x.id === payload.id)
+    const inInbox = (tablero.Inbox || []).some((x: any) => String(x.id) === String(payload.id))
+    const inProg = (tablero['In progress'] || []).some((x: any) => String(x.id) === String(payload.id))
     const from: ColKey = inInbox ? 'Inbox' : inProg ? 'In progress' : 'Done'
     const to: ColKey = moverADone ? 'Done' : from
 
@@ -216,8 +219,8 @@ export default function KanbanBoard({
     setColState({ [from]: nextFrom, [to]: nextTo } as Partial<Tablero>)
 
     await updateHistorialSalida(payload.id, {
-      salida_indefinida: (payload as any).salida_indefinida ? 1 : 0,
-      hora_salida: (payload as any).salida_indefinida ? null : payload.hora_salida || (moverADone ? nowLocal() : null),
+      salida_indefinida: payload.salida_indefinida ? 1 : 0,
+      hora_salida: payload.salida_indefinida ? null : payload.hora_salida || (moverADone ? nowLocal() : null),
     })
 
     window.dispatchEvent(new CustomEvent('ts:calendar:refresh'))
@@ -253,10 +256,12 @@ export default function KanbanBoard({
             if (!id || !from || !to) return
 
             const item =
-              (tablero[from] || []).find((x) => String(x.id) === id) ||
-              [...tablero.Inbox, ...tablero['In progress'], ...tablero.Done].find((x) => String(x.id) === id)
+              (tablero[from] || []).find((x: any) => String(x.id) === id) ||
+              [...(tablero.Inbox || []), ...(tablero['In progress'] || []), ...(tablero.Done || [])].find(
+                (x: any) => String(x.id) === id,
+              )
 
-            if (item) await persistMove(item, from, to)
+            if (item) await persistMove(item as any, from, to)
           },
         })
 
@@ -295,7 +300,7 @@ export default function KanbanBoard({
             </header>
 
             <div className="kb-list" ref={colRefs[col]} data-col={col}>
-              {(filtrado[col] || []).map((a) => (
+              {(filtrado[col] || []).map((a: any) => (
                 <article
                   key={a.id}
                   className={`kb-card prio-${String(a.prioridad || 'baja').toLowerCase()}`}
@@ -313,8 +318,8 @@ export default function KanbanBoard({
 
                   {Array.isArray(a.tareas) && a.tareas.length > 0 && (
                     <div className="kb-tasks">
-                      {a.tareas.slice(0, 3).map((t, i) => (
-                        <div key={String((t as any).id || i)} className={`kb-task ${t.completa ? 'done' : ''}`}>
+                      {a.tareas.slice(0, 3).map((t: any, i: number) => (
+                        <div key={String(t?.id || i)} className={`kb-task ${t.completa ? 'done' : ''}`}>
                           {t.completa ? '✔' : '•'} {t.texto}
                         </div>
                       ))}
@@ -334,11 +339,7 @@ export default function KanbanBoard({
                           →
                         </button>
                       )}
-                      <button
-                        title="Editar"
-                        onClick={() => openDetalle(a)}
-                        type="button"
-                      >
+                      <button title="Editar" onClick={() => openDetalle(a)} type="button">
                         ✏️
                       </button>
                     </div>
@@ -357,7 +358,7 @@ export default function KanbanBoard({
                             if (!done) return
 
                             const upd: Partial<Tablero> = {}
-                            for (const c of COLS) upd[c] = removeFrom(c, a.id)
+                            for (const c of COLS) (upd as any)[c] = removeFrom(c, a.id)
                             setColState(upd)
 
                             await updateHistorialSalida(a.id, { salida_indefinida: 0, hora_salida: null })
@@ -377,11 +378,7 @@ export default function KanbanBoard({
       </div>
 
       {detalleOpen && detalleItem && (
-        <ModalArregloDetalle
-          arreglo={detalleItem}
-          onSave={handleSaveDesdeModal}
-          onCancel={() => setDetalleOpen(false)}
-        />
+        <ModalArregloDetalle arreglo={detalleItem} onSave={handleSaveDesdeModal} onCancel={() => setDetalleOpen(false)} />
       )}
     </div>
   )

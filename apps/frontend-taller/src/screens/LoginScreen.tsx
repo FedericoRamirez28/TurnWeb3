@@ -1,46 +1,68 @@
-import React, { useState } from "react";
-import logo from "../../assets/images/logo-hd.png";
+import React, { useMemo, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import logo from '../../assets/images/logo-hd.png'
 
-type Props = {
-  apiBase?: string;
-  onAuth?: (token: string, user: any) => void;
-};
+import { api } from '@/lib/api'
+import { setToken, setUser, clearAuth, type AuthUser } from '@/lib/auth'
 
-export default function LoginScreen({ apiBase = "http://localhost:3001", onAuth }: Props) {
-  const [email, setEmail] = useState("");
-  const [pass, setPass] = useState("");
-  const [showPass, setShowPass] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+type LoginPayload = { token: string; user: AuthUser }
+type LoginResponse = { ok: true; data: LoginPayload } | { ok: false; error: string }
+
+export default function LoginScreen() {
+  const nav = useNavigate()
+  const loc = useLocation()
+
+  const nextPath = useMemo(() => {
+    const sp = new URLSearchParams(loc.search || '')
+    const next = sp.get('next') || '/'
+    if (!next.startsWith('/')) return '/'
+    return next
+  }, [loc.search])
+
+  const [email, setEmail] = useState('admin@taller.local')
+  const [pass, setPass] = useState('admin1234')
+  const [showPass, setShowPass] = useState(false)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   async function doLogin(e?: React.FormEvent) {
-    e?.preventDefault?.();
-    if (loading) return;
-    setError("");
-    setLoading(true);
-    try {
-      const base = String(apiBase || "").replace(/\/+$/, "");
-      const r = await fetch(`${base}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password: pass }),
-        mode: "cors",
-      });
-      let j: any = {};
-      try {
-        j = await r.json();
-      } catch {}
+    e?.preventDefault?.()
+    if (loading) return
 
-      if (!r.ok || !j?.ok || !j?.token) {
-        setError(j?.error || `Error HTTP ${r.status}`);
-      } else {
-        onAuth?.(j.token, j.user);
+    setError('')
+    setLoading(true)
+
+    try {
+      clearAuth()
+
+      const r = await api.post<LoginResponse>('/auth/login', {
+        email,
+        password: pass,
+      })
+
+      if (!r.ok) {
+        setError(r.error || 'No se pudo iniciar sesión.')
+        return
       }
+
+      // ✅ ApiResult: token y user vienen dentro de data
+      const token = (r.data as any)?.data?.token ?? (r.data as any)?.token
+      const user = (r.data as any)?.data?.user ?? (r.data as any)?.user
+
+      if (!token) {
+        setError('Respuesta inválida del servidor (sin token).')
+        return
+      }
+
+      setToken(String(token))
+      setUser((user as AuthUser) ?? null)
+
+      nav(nextPath || '/', { replace: true })
     } catch (err) {
-      setError("No se pudo conectar con el servidor (network/CORS).");
-      console.error("[login] fetch error", err);
+      console.error('[login] error', err)
+      setError('No se pudo conectar con el servidor (network/CORS).')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
@@ -70,7 +92,7 @@ export default function LoginScreen({ apiBase = "http://localhost:3001", onAuth 
             <span>Contraseña</span>
             <div className="password-box">
               <input
-                type={showPass ? "text" : "password"}
+                type={showPass ? 'text' : 'password'}
                 autoComplete="current-password"
                 value={pass}
                 onChange={(e) => setPass(e.currentTarget.value)}
@@ -83,9 +105,9 @@ export default function LoginScreen({ apiBase = "http://localhost:3001", onAuth 
                 className="toggle"
                 onClick={() => setShowPass((v) => !v)}
                 disabled={loading}
-                aria-label={showPass ? "Ocultar contraseña" : "Mostrar contraseña"}
+                aria-label={showPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
               >
-                {showPass ? "🙈" : "👁️"}
+                {showPass ? '🙈' : '👁️'}
               </button>
             </div>
           </label>
@@ -93,7 +115,7 @@ export default function LoginScreen({ apiBase = "http://localhost:3001", onAuth 
           {error && <div className="error">{error}</div>}
 
           <button className="btn-primary" type="submit" disabled={loading}>
-            {loading ? "Ingresando…" : "Ingresar"}
+            {loading ? 'Ingresando…' : 'Ingresar'}
           </button>
         </form>
 
@@ -103,10 +125,14 @@ export default function LoginScreen({ apiBase = "http://localhost:3001", onAuth 
             <p className="hint">
               Usuario inicial : <b>admin@taller.local</b>
               <br />
+              Password: <b>admin1234</b>
+            </p>
+            <p className="hint" style={{ marginTop: 8 }}>
+              API: <b>{String((import.meta as any).env?.VITE_API_BASE || 'http://localhost:3001')}</b>
             </p>
           </div>
         </details>
       </div>
     </div>
-  );
+  )
 }

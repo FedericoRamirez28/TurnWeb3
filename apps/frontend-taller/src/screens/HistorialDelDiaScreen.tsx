@@ -1,488 +1,281 @@
-// src/screens/ParteDiariaScreen.tsx
-import React, { useMemo, useState } from "react";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import { api } from "../lib/api";
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
-type YesNo = "si" | "no" | "na";
-type CombustibleLevel = "reserva" | "1/4" | "1/2" | "3/4" | "lleno";
+import { api } from '@/lib/api'
+import type { ApiResult } from '@/lib/types'
+import { useMovilId } from '@/screens/useMovilId'
 
-const YESNO = [
-  { v: "si", label: "Sí" },
-  { v: "no", label: "No" },
-  { v: "na", label: "N/A" },
-] as const;
+type HistRow = {
+  id?: string | number
+  movil_numero?: number | null
 
-const COMBUSTIBLE = [
-  { v: "reserva", label: "Reserva" },
-  { v: "1/4", label: "1/4" },
-  { v: "1/2", label: "1/2" },
-  { v: "3/4", label: "3/4" },
-  { v: "lleno", label: "Lleno" },
-] as const;
-
-function getQuery(k: string) {
-  const s1 = new URLSearchParams(location.search);
-  if (s1.has(k)) return s1.get(k);
-
-  if (location.hash?.includes("?")) {
-    const idx = location.hash.indexOf("?");
-    const s2 = new URLSearchParams(location.hash.slice(idx + 1));
-    if (s2.has(k)) return s2.get(k);
-  }
-  return null;
+  hora_entrada?: string | null
+  hora_salida?: string | null
+  salida_indefinida?: boolean | number | null
+  patente?: string | null
+  motivo?: string | null
+  prioridad?: 'baja' | 'alta' | 'urgente' | string | null
+  anotaciones?: string | null
 }
 
-/** ✅ Pills genérico: tipa value/onChange según options */
-function Pills<T extends string>({
-  name,
-  value,
-  onChange,
-  options,
-}: {
-  name: string;
-  value: T;
-  onChange: (v: T) => void;
-  options: readonly { v: T; label: string }[];
-}) {
-  return (
-    <div className="pills">
-      {options.map((o) => (
-        <label key={o.v} className={`pill ${value === o.v ? "on" : ""}`}>
-          <input
-            type="radio"
-            name={name}
-            value={o.v}
-            checked={value === o.v}
-            onChange={() => onChange(o.v)}
-          />
-          {o.label}
-        </label>
-      ))}
-    </div>
-  );
+const todayISO = () => {
+  const d = new Date()
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
 }
 
-function YesNoTable<T extends Record<string, YesNo>>({
-  title,
-  items,
-  values,
-  onChange,
-}: {
-  title: string;
-  items: { key: keyof T & string; label: string }[];
-  values: T;
-  onChange: (k: keyof T & string, v: YesNo) => void;
-}) {
-  return (
-    <section className="pd-card">
-      <h3>{title}</h3>
-      <div className="yn-table">
-        {items.map((it) => (
-          <div key={it.key} className="yn-row">
-            <span className="yn-label">{it.label}</span>
-            <div className="yn-opts">
-              {YESNO.map((o) => (
-                <label key={o.v} className={`opt ${values[it.key] === o.v ? "on" : ""}`}>
-                  <input
-                    type="radio"
-                    name={it.key}
-                    value={o.v}
-                    checked={values[it.key] === o.v}
-                    onChange={() => onChange(it.key, o.v)}
-                  />
-                  {o.label}
-                </label>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
+function safeLower(x: unknown) {
+  return String(x ?? '').toLowerCase()
 }
 
-export default function ParteDiariaScreen() {
-  const initialKey = useMemo(() => getQuery("key") || "", []);
-  const initialMovil = useMemo(() => getQuery("movil") || "", []);
+function asPrioridad(x: unknown) {
+  const v = String(x ?? 'baja').toLowerCase().trim()
+  if (v === 'urgente' || v === 'alta' || v === 'baja') return v
+  return 'baja'
+}
 
-  const [pdKey] = useState(initialKey);
-  const [saving, setSaving] = useState(false);
-  const [ok, setOk] = useState("");
+export default function HistorialDelDiaScreen() {
+  const nav = useNavigate()
+  const movilId = useMovilId() // puede ser null en /historial-dia (global)
 
-  const [movilId, setMovilId] = useState(initialMovil);
-  const [form, setForm] = useState({
-    patente: "",
-    chofer: "",
-    enfermero: "",
-    km_inicio: "",
-    km_fin: "",
-    hora_inicio: "",
-    hora_fin: "",
-    observaciones: "",
-  });
-  const onF = (k: keyof typeof form, v: string) => setForm((s) => ({ ...s, [k]: v }));
+  const [fecha, setFecha] = useState<string>(todayISO())
+  const [rows, setRows] = useState<HistRow[]>([])
+  const [loading, setLoading] = useState(false)
+  const [q, setQ] = useState('')
 
-  const [combustible, setCombustible] = useState<CombustibleLevel>("1/2");
-
-  const [docu, setDocu] = useState({
-    cedulaVerde: "na" as YesNo,
-    tarjetaSeguro: "na" as YesNo,
-    vtv: "na" as YesNo,
-    permisoManejo: "na" as YesNo,
-  });
-
-  const [pre, setPre] = useState({
-    combustibleOk: "na" as YesNo,
-    aceite: "na" as YesNo,
-    agua: "na" as YesNo,
-    liquidoRefrigerante: "na" as YesNo,
-    liquidoFrenos: "na" as YesNo,
-    cubiertas: "na" as YesNo,
-    limpieza: "na" as YesNo,
-  });
-
-  const [vehiculo, setVehiculo] = useState({
-    balizas: "na" as YesNo,
-    matafuego: "na" as YesNo,
-    llaveRueda: "na" as YesNo,
-    crique: "na" as YesNo,
-    radioEstereo: "na" as YesNo,
-    ruedaAuxilio: "na" as YesNo,
-  });
-
-  const [medico, setMedico] = useState({
-    botiquin: "na" as YesNo,
-    collares: "na" as YesNo,
-    canulasGuedel: "na" as YesNo,
-    ambu: "na" as YesNo,
-    tensiometro: "na" as YesNo,
-    glucometro: "na" as YesNo,
-    estetoscopio: "na" as YesNo,
-    vendasGasas: "na" as YesNo,
-    tablaEspinal: "na" as YesNo,
-    inmovilizadores: "na" as YesNo,
-    desfibrilador: "na" as YesNo,
-    oxigeno: "na" as YesNo,
-  });
-
-  const submit = async () => {
-    if (!movilId) return alert("Ingresá el Nº de móvil.");
-    if (!form.patente || !form.chofer || !form.km_inicio || !form.km_fin) {
-      return alert("Completá Patente, Chofer, Km iniciales y Km finales.");
-    }
-
-    setSaving(true);
-    setOk("");
+  const fetchRows = useCallback(async () => {
+    setLoading(true)
     try {
-      const payload = {
-        patente: form.patente,
-        chofer: form.chofer,
-        km_inicio: form.km_inicio,
-        km_fin: form.km_fin,
-        observaciones: form.observaciones,
-        fecha: new Date().toISOString().slice(0, 10),
-        pd_key: pdKey || undefined,
-        // Si después querés persistir todo el checklist, lo mandamos acá:
-        // combustible,
-        // docu, pre, vehiculo, medico,
-      };
-      await api.post(`/moviles/${encodeURIComponent(movilId)}/parte-diario`, payload);
-      setOk("✅ Parte diario enviado. ¡Gracias!");
-      setForm((s) => ({ ...s, km_inicio: "", km_fin: "", observaciones: "" }));
+      const fechaSafe = fecha || todayISO()
+
+      const j = await api.get<ApiResult<HistRow[]>>(
+        '/historial-dia',
+        movilId
+          ? { fecha: fechaSafe, movilId: String(movilId), movil_id: String(movilId) } // compat
+          : { fecha: fechaSafe }, // ✅ GLOBAL
+      )
+
+      const data =
+        (j as any)?.ok === true
+          ? ((j as any)?.data ?? [])
+          : Array.isArray(j)
+            ? j
+            : (j as any)?.data ?? []
+
+      setRows(Array.isArray(data) ? data : [])
     } catch (e) {
-      alert("Error guardando parte diario");
+      console.error('GET /historial-dia', e)
+      alert('No se pudo cargar el historial del día.')
     } finally {
-      setSaving(false);
+      setLoading(false)
     }
-  };
+  }, [fecha, movilId])
 
-  const descargarPDF = () => {
-    const doc = new jsPDF({ unit: "pt", format: "a4" });
-    const today = new Date().toLocaleDateString();
+  useEffect(() => {
+    fetchRows()
+  }, [fetchRows])
 
-    doc.setFontSize(16);
-    doc.text(`Parte diario de novedades del móvil #${movilId || "-"}`, 40, 40);
-    doc.setFontSize(10);
-    doc.text(`Fecha: ${today}`, 40, 58);
+  const filtered = useMemo(() => {
+    const s = safeLower(q)
+    if (!s) return rows
+    return rows.filter((r) => {
+      return (
+        safeLower(r.movil_numero).includes(s) ||
+        safeLower(r.patente).includes(s) ||
+        safeLower(r.prioridad).includes(s) ||
+        safeLower(r.anotaciones).includes(s) ||
+        safeLower(r.motivo).includes(s)
+      )
+    })
+  }, [rows, q])
 
-    autoTable(doc, {
-      startY: 78,
-      head: [["Campo", "Valor"]],
-      body: [
-        ["Patente", form.patente || "-"],
-        ["Chofer", form.chofer || "-"],
-        ["Enfermero/a", form.enfermero || "-"],
-        ["Km iniciales", form.km_inicio || "-"],
-        ["Km finales", form.km_fin || "-"],
-        ["Hora de comienzo", form.hora_inicio || "-"],
-        ["Hora de finalización", form.hora_fin || "-"],
-        ["Nivel de combustible", (combustible || "-").toUpperCase()],
-      ],
-      theme: "grid",
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [20, 20, 20] },
-    });
+  const sorted = useMemo(() => {
+    const copy = [...filtered]
+    copy.sort((a, b) => {
+      // si es global, ordenamos por movil primero y luego hora
+      const am = String(a.movil_numero ?? '')
+      const bm = String(b.movil_numero ?? '')
+      if (!movilId && am !== bm) return am.localeCompare(bm)
+      return String(a.hora_entrada || '').localeCompare(String(b.hora_entrada || ''))
+    })
+    return copy
+  }, [filtered, movilId])
 
-    autoTable(doc, {
-      startY: (doc as any).lastAutoTable.finalY + 12,
-      head: [["DOCUMENTACIÓN", "Sí/No/N/A"]],
-      body: [
-        ["Cédula verde", docu.cedulaVerde],
-        ["Tarjeta/Seguro", docu.tarjetaSeguro],
-        ["VTV vigente", docu.vtv],
-        ["Permiso de manejo", docu.permisoManejo],
-      ],
-      theme: "grid",
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [20, 20, 20] },
-    });
+  const prioridadPill = (p: HistRow['prioridad']) => {
+    const v = asPrioridad(p)
+    return <span className={`hd-pill hd-pill--${v}`}>{v}</span>
+  }
 
-    autoTable(doc, {
-      startY: (doc as any).lastAutoTable.finalY + 12,
-      head: [["PRE-CHEQUEO", "OK/NO/N/A"]],
-      body: [
-        ["Combustible OK", pre.combustibleOk],
-        ["Aceite", pre.aceite],
-        ["Agua", pre.agua],
-        ["Líquido refrigerante", pre.liquidoRefrigerante],
-        ["Líquido de frenos", pre.liquidoFrenos],
-        ["Cubiertas", pre.cubiertas],
-        ["Limpieza", pre.limpieza],
-      ],
-      theme: "grid",
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [20, 20, 20] },
-    });
+  const title = movilId ? `Historial del día — Móvil ${movilId}` : 'Historial del día — Todos los móviles'
 
-    autoTable(doc, {
-      startY: (doc as any).lastAutoTable.finalY + 12,
-      head: [["EQUIPAMIENTO DEL VEHÍCULO", "OK/NO/N/A"]],
-      body: [
-        ["Balizas", vehiculo.balizas],
-        ["Matafuego", vehiculo.matafuego],
-        ["Llave de rueda", vehiculo.llaveRueda],
-        ["Crique", vehiculo.crique],
-        ["Radio/Estéreo", vehiculo.radioEstereo],
-        ["Rueda de auxilio", vehiculo.ruedaAuxilio],
-      ],
-      theme: "grid",
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [20, 20, 20] },
-    });
+  const toPDF = () => {
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'pt' })
+    doc.setFontSize(14)
+    doc.text(`${title} — ${fecha || todayISO()}`, 40, 36)
+
+    const head = movilId
+      ? [['Hora entrada', 'Hora salida', 'Patente', 'Motivo', 'Prioridad', 'Observaciones']]
+      : [['Móvil', 'Hora entrada', 'Hora salida', 'Patente', 'Motivo', 'Prioridad', 'Observaciones']]
+
+    const body = sorted.map((r) => {
+      const base = [
+        r.hora_entrada || '-',
+        r.salida_indefinida ? 'Indefinido' : r.hora_salida || '-',
+        r.patente || '-',
+        r.motivo || '',
+        asPrioridad(r.prioridad).toUpperCase(),
+        r.anotaciones || '',
+      ]
+      return movilId ? base : [String(r.movil_numero ?? '-'), ...base]
+    })
 
     autoTable(doc, {
-      startY: (doc as any).lastAutoTable.finalY + 12,
-      head: [["EQUIPAMIENTO / MÉDICO", "OK/NO/N/A"]],
-      body: [
-        ["Botiquín", medico.botiquin],
-        ["Collares cervicales", medico.collares],
-        ["Cánulas Guedel", medico.canulasGuedel],
-        ["Ambú", medico.ambu],
-        ["Tensiómetro", medico.tensiometro],
-        ["Glucómetro", medico.glucometro],
-        ["Estetoscopio", medico.estetoscopio],
-        ["Vendas / Gasas", medico.vendasGasas],
-        ["Tabla espinal", medico.tablaEspinal],
-        ["Inmovilizadores", medico.inmovilizadores],
-        ["Desfibrilador", medico.desfibrilador],
-        ["Oxígeno", medico.oxigeno],
-      ],
-      theme: "grid",
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [20, 20, 20] },
-    });
+      head,
+      body,
+      startY: 56,
+      styles: { fontSize: 10, cellPadding: 6, overflow: 'linebreak' },
+      headStyles: { fillColor: [0, 143, 107] },
+      theme: 'striped',
+    })
 
-    autoTable(doc, {
-      startY: (doc as any).lastAutoTable.finalY + 12,
-      head: [["OBSERVACIONES"]],
-      body: [[form.observaciones || "-"]],
-      theme: "grid",
-      styles: { cellPadding: 6, minCellHeight: 40, fontSize: 9 },
-      headStyles: { fillColor: [20, 20, 20] },
-    });
+    const suf = movilId ? `movil-${movilId}` : 'global'
+    doc.save(`historial-dia_${suf}_${fecha || todayISO()}.pdf`)
+  }
 
-    doc.save(`parte-movil-${movilId || "X"}.pdf`);
-  };
+  const toExcel = async () => {
+    try {
+      const mod: any = await import('xlsx')
+      const XLSX = mod?.default ?? mod
+
+      const data = sorted.map((r) => ({
+        Fecha: fecha || todayISO(),
+        Movil: String(r.movil_numero ?? movilId ?? ''),
+        'Hora entrada': r.hora_entrada || '',
+        'Hora salida': r.salida_indefinida ? 'Indefinido' : r.hora_salida || '',
+        Patente: r.patente || '',
+        Motivo: r.motivo || '',
+        Prioridad: asPrioridad(r.prioridad).toUpperCase(),
+        Observaciones: r.anotaciones || '',
+      }))
+
+      const wb = XLSX.utils.book_new()
+      const ws = XLSX.utils.json_to_sheet(data)
+      XLSX.utils.book_append_sheet(wb, ws, 'Historial')
+
+      const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
+      const blob = new Blob([wbout], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      })
+
+      const a = document.createElement('a')
+      const href = URL.createObjectURL(blob)
+      a.href = href
+
+      const suf = movilId ? `movil-${movilId}` : 'global'
+      a.download = `historial-dia_${suf}_${fecha || todayISO()}.xlsx`
+
+      a.click()
+      setTimeout(() => URL.revokeObjectURL(href), 1500)
+    } catch (e) {
+      console.error('xlsx export', e)
+      alert('Para exportar a Excel instalá: npm i xlsx')
+    }
+  }
 
   return (
-    <div className="pd-wrap">
-      <header className="pd-header">
-        <h1>Parte diario de novedades del móvil</h1>
+    <div className="historial-dia">
+      <header className="hd-header">
+        <div className="hd-left">
+          <button className="btn btn--outline" onClick={() => nav(movilId ? `/movil/${movilId}` : `/`)} type="button">
+            Volver
+          </button>
+          <div className="hd-titlewrap">
+            <h1 className="hd-title">Historial del día</h1>
+            <div className="hd-subtitle">{movilId ? `Móvil ${movilId}` : 'Todos los móviles'}</div>
+          </div>
+        </div>
+
+        <div className="hd-right">
+          <label className="hd-field">
+            <span>Fecha</span>
+            <input
+              className="input hd-date"
+              type="date"
+              value={fecha}
+              onChange={(e) => setFecha(e.currentTarget.value)}
+            />
+          </label>
+
+          <input
+            className="input hd-search"
+            placeholder={movilId ? 'Buscar (patente, motivo, prioridad, observaciones)' : 'Buscar (móvil, patente, motivo, prioridad, observaciones)'}
+            value={q}
+            onChange={(e) => setQ(e.currentTarget.value)}
+          />
+
+          <div className="hd-actions">
+            <button className="btn btn--primary" onClick={fetchRows} disabled={loading} type="button">
+              ↻ Actualizar
+            </button>
+            <button className="btn btn--primary" onClick={toPDF} type="button">
+              ⬇️ PDF
+            </button>
+            <button className="btn btn--primary" onClick={toExcel} type="button">
+              ⬇️ Excel
+            </button>
+          </div>
+        </div>
       </header>
 
-      <main className="pd-main">
-        <section className="pd-card">
-          <h3>Datos del móvil</h3>
-          <div className="pd-grid">
-            <label>
-              Nº de móvil
-              <input
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={movilId}
-                onChange={(e) => setMovilId(e.currentTarget.value.replace(/\D/g, ""))}
-                placeholder="Ej: 3"
-              />
-            </label>
+      <div className="hd-tablewrap">
+        <table className="hd-table">
+          <thead>
+            <tr>
+              {!movilId && <th>Móvil</th>}
+              <th>Hora entrada</th>
+              <th>Hora salida</th>
+              <th>Patente</th>
+              <th>Motivo</th>
+              <th>Prioridad</th>
+              <th>Observaciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading && (
+              <tr>
+                <td colSpan={movilId ? 6 : 7} className="hd-muted">
+                  Cargando...
+                </td>
+              </tr>
+            )}
 
-            <label>
-              Patente
-              <input
-                value={form.patente}
-                onChange={(e) => onF("patente", e.currentTarget.value.toUpperCase())}
-                placeholder="ABC123 / AA123BB"
-              />
-            </label>
+            {!loading && sorted.length === 0 && (
+              <tr>
+                <td colSpan={movilId ? 6 : 7} className="hd-muted">
+                  Sin registros para esta fecha.
+                </td>
+              </tr>
+            )}
 
-            <label>
-              Chofer
-              <input
-                value={form.chofer}
-                onChange={(e) => onF("chofer", e.currentTarget.value)}
-                placeholder="Nombre y apellido"
-              />
-            </label>
-
-            <label>
-              Enfermero/a
-              <input
-                value={form.enfermero}
-                onChange={(e) => onF("enfermero", e.currentTarget.value)}
-                placeholder="Nombre y apellido"
-              />
-            </label>
-
-            <label>
-              Km iniciales
-              <input
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={form.km_inicio}
-                onChange={(e) => onF("km_inicio", e.currentTarget.value.replace(/\D/g, ""))}
-                placeholder="0"
-              />
-            </label>
-
-            <label>
-              Km finales
-              <input
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={form.km_fin}
-                onChange={(e) => onF("km_fin", e.currentTarget.value.replace(/\D/g, ""))}
-                placeholder="0"
-              />
-            </label>
-
-            <label>
-              Hora de comienzo
-              <input type="time" value={form.hora_inicio} onChange={(e) => onF("hora_inicio", e.currentTarget.value)} />
-            </label>
-
-            <label>
-              Hora de finalización
-              <input type="time" value={form.hora_fin} onChange={(e) => onF("hora_fin", e.currentTarget.value)} />
-            </label>
-          </div>
-
-          <div className="pd-block">
-            <div className="label_style-parte">
-              <label>Nivel de combustible</label>
-            </div>
-            <Pills<CombustibleLevel>
-              name="combustible"
-              value={combustible}
-              options={COMBUSTIBLE}
-              onChange={setCombustible}
-            />
-          </div>
-
-          <div className="pd-block">
-            <div className="label_style-parte">
-              <label>Observaciones</label>
-            </div>
-            <textarea
-              className="no-resize"
-              rows={5}
-              value={form.observaciones}
-              onChange={(e) => onF("observaciones", e.currentTarget.value)}
-              placeholder="Detalle cualquier novedad o problema del móvil…"
-            />
-          </div>
-        </section>
-
-        <YesNoTable
-          title="Documentación"
-          items={[
-            { key: "cedulaVerde", label: "Cédula verde" },
-            { key: "tarjetaSeguro", label: "Tarjeta de Seguro" },
-            { key: "vtv", label: "VTV vigente" },
-            { key: "permisoManejo", label: "Permiso de manejo" },
-          ]}
-          values={docu}
-          onChange={(k, v) => setDocu((s) => ({ ...s, [k]: v }))}
-        />
-
-        <YesNoTable
-          title="Pre-chequeo"
-          items={[
-            { key: "combustibleOk", label: "Combustible OK" },
-            { key: "aceite", label: "Aceite" },
-            { key: "agua", label: "Agua" },
-            { key: "liquidoRefrigerante", label: "Líquido refrigerante" },
-            { key: "liquidoFrenos", label: "Líquido de frenos" },
-            { key: "cubiertas", label: "Cubiertas" },
-            { key: "limpieza", label: "Limpieza" },
-          ]}
-          values={pre}
-          onChange={(k, v) => setPre((s) => ({ ...s, [k]: v }))}
-        />
-
-        <YesNoTable
-          title="Equipamiento del vehículo"
-          items={[
-            { key: "balizas", label: "Balizas" },
-            { key: "matafuego", label: "Matafuego" },
-            { key: "llaveRueda", label: "Llave de rueda" },
-            { key: "crique", label: "Crique" },
-            { key: "radioEstereo", label: "Radio / Estéreo" },
-            { key: "ruedaAuxilio", label: "Rueda de auxilio" },
-          ]}
-          values={vehiculo}
-          onChange={(k, v) => setVehiculo((s) => ({ ...s, [k]: v }))}
-        />
-
-        <YesNoTable
-          title="Equipamiento / Médico"
-          items={[
-            { key: "botiquin", label: "Botiquín" },
-            { key: "collares", label: "Collares cervicales" },
-            { key: "canulasGuedel", label: "Cánulas Guedel" },
-            { key: "ambu", label: "Ambú" },
-            { key: "tensiometro", label: "Tensiómetro" },
-            { key: "glucometro", label: "Glucómetro" },
-            { key: "estetoscopio", label: "Estetoscopio" },
-            { key: "vendasGasas", label: "Vendas / Gasas" },
-            { key: "tablaEspinal", label: "Tabla espinal" },
-            { key: "inmovilizadores", label: "Inmovilizadores" },
-            { key: "desfibrilador", label: "Desfibrilador" },
-            { key: "oxigeno", label: "Oxígeno" },
-          ]}
-          values={medico}
-          onChange={(k, v) => setMedico((s) => ({ ...s, [k]: v }))}
-        />
-
-        <section className="pd-actions">
-          <button className="btn save" onClick={submit} disabled={saving}>
-            {saving ? "Enviando…" : "Guardar parte"}
-          </button>
-          <button className="btn pdf" onClick={descargarPDF}>
-            Descargar PDF
-          </button>
-          {ok && <p className="pd-ok">{ok}</p>}
-        </section>
-      </main>
+            {!loading &&
+              sorted.map((r, idx) => (
+                <tr key={String(r.id ?? `${r.hora_entrada ?? 'row'}-${idx}`)}>
+                  {!movilId && <td className="hd-mono">{r.movil_numero ?? '-'}</td>}
+                  <td className="hd-mono">{r.hora_entrada || '-'}</td>
+                  <td className="hd-mono">{r.salida_indefinida ? 'Indefinido' : r.hora_salida || '-'}</td>
+                  <td className="hd-strong">{r.patente || '-'}</td>
+                  <td>{r.motivo || ''}</td>
+                  <td>{prioridadPill(r.prioridad)}</td>
+                  <td className="hd-anot">{r.anotaciones || ''}</td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
     </div>
-  );
+  )
 }

@@ -44,20 +44,29 @@
 }
 
 .pill-toggle {
-  appearance: none;
-  border: 1px solid var(--color-border, #cbd5e1);
-  background: var(--surface, #fff);
-  color: var(--ink, #0f172a);
-  padding: 8px 14px;
-  border-radius: var(--radius-md, 10px);
-  font-weight: 700;
+  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  color: var(--color-ink);
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast),
+    border-color var(--transition-fast);
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 18px rgba(15, 23, 42, 0.08);
+  }
 }
 
 .pill-toggle.active {
-  background: var(--brand, #2f6fed);
-  color: var(--brand-ink, #fff);
-  border-color: color-mix(in oklab, var(--brand, #2f6fed) 70%, #000 10%);
+ border-color: rgba(0, 143, 107, 0.35);
+  box-shadow: 0 10px 18px rgba(0, 143, 107, 0.12);
+  background: #fff;
 }
 
 .list {
@@ -188,6 +197,60 @@
 
 .meta-modelo {
   font-size: 15px;
+}
+/* ✅ Acciones en el hueco del medio de la card */
+.card-actions {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--surface, #fff) 85%, transparent);
+  border: 1px solid var(--color-border, #e5e7eb);
+  backdrop-filter: blur(4px);
+  box-shadow: var(--shadow-1, 0 2px 10px rgba(0, 0, 0, 0.10));
+}
+
+.card-url-btn,
+.card-open-btn {
+  appearance: none;
+  border: 1px solid var(--color-border, #e5e7eb);
+  background: #fff;
+  color: var(--ink, #0f172a);
+  border-radius: 999px;
+  padding: 8px 10px;
+  font-weight: 950;
+  font-size: 0.82rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 18px rgba(15, 23, 42, 0.10);
+  }
+}
+
+/* variante suave para el "Abrir" */
+.card-open-btn {
+  background: color-mix(in oklab, var(--brand, #2f6fed) 10%, #fff);
+  border-color: color-mix(in oklab, var(--brand, #2f6fed) 22%, var(--color-border, #e5e7eb));
+}
+
+/* Responsive: en pantallas chicas lo baja para no tapar la ambulancia */
+@media (max-width: 680px) {
+  .card-actions {
+    top: auto;
+    bottom: 12px;
+    left: 12px;
+    transform: none;
+  }
 }
 
 /* ✅ Sacamos los estilos del modal acá:

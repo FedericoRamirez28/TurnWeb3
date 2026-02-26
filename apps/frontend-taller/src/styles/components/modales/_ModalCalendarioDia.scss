@@ -1,0 +1,122 @@
+/* src/styles/components/modales/ModalCalendarioDia.scss */
+
+.ts-daymodal {
+  max-width: 760px;
+  width: min(760px, calc(100vw - 28px));
+}
+
+.ts-daymodal__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.ts-daymodal__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 950;
+  color: var(--color-ink);
+}
+
+.ts-daymodal__sub {
+  margin-top: 6px;
+  color: var(--color-ink-soft);
+  font-weight: 800;
+}
+
+.ts-daymodal__sub strong {
+  color: var(--color-ink);
+}
+
+.ts-daymodal__content {
+  margin-top: 14px;
+  display: grid;
+  gap: 14px;
+}
+
+.ts-daymodal__sectionTitle {
+  margin: 0 0 8px 0;
+  font-size: 0.95rem;
+  font-weight: 950;
+  color: var(--color-ink);
+}
+
+.ts-daymodal__empty {
+  color: var(--color-ink-soft);
+  font-weight: 800;
+}
+
+.ts-daymodal__list {
+  display: grid;
+  gap: 10px;
+  max-height: min(52vh, 520px);
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.ts-daymodal__card {
+  border: 1px solid var(--color-border);
+  background: #fff;
+  border-radius: var(--radius-lg);
+  padding: 12px;
+  box-shadow: var(--shadow-soft);
+}
+
+.ts-daymodal__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ts-daymodal__patente {
+  font-weight: 950;
+  color: var(--color-ink);
+}
+
+.ts-daymodal__prio {
+  font-weight: 900;
+  color: var(--color-ink-soft);
+}
+
+.ts-daymodal__motivo {
+  margin-top: 6px;
+  font-weight: 850;
+  color: var(--color-ink);
+}
+
+.ts-daymodal__note {
+  margin-top: 8px;
+  color: var(--color-ink);
+  opacity: 0.92;
+  white-space: pre-wrap;
+}
+
+.ts-daymodal__tasks {
+  margin-top: 10px;
+  display: grid;
+  gap: 4px;
+}
+
+.ts-daymodal__tasksTitle {
+  font-weight: 950;
+  margin-bottom: 4px;
+  color: var(--color-ink);
+}
+
+.ts-daymodal__task {
+  font-weight: 800;
+  color: var(--color-ink);
+}
+
+.ts-daymodal__task.is-done {
+  opacity: 0.7;
+}
+
+.ts-daymodal__footer {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
