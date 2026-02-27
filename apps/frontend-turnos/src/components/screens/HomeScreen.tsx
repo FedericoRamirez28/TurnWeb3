@@ -46,6 +46,7 @@ const PRESTADORES = [
   'TESLA',
   'TC HAEDO',
   'MEDIC',
+  'DRA UANE',
 ] as const
 
 const MEDIC_PROFESIONALES = ['Dr. Viano', 'Dra. Quevedo', 'Dra. Ramos'] as const

@@ -23,6 +23,7 @@ const PRESTADORES: PrestadorListItem[] = [
   { id: 'tesla', nombre: 'TESLA' },
   { id: 'tc-haedo', nombre: 'TC HAEDO' },
   { id: 'medic', nombre: 'MEDIC' },
+  { id: 'Dra Uane', nombre: 'DRA UANE' },
 ]
 
 function safeStr(v: unknown): string {
