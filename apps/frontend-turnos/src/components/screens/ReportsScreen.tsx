@@ -40,7 +40,9 @@ const PRESTADORES = [
   'TESLA',
   'TC HAEDO',
   'MEDIC',
-  'DRA UANE',
+  'DOCTORA UANE',
+  'DOCTOR DAVILA',
+  'DOCTOR AMAYA',
 ] as const;
 
 const normalizePlan = (planRaw?: string | null): PlanClave | 'OTROS' | null => {
