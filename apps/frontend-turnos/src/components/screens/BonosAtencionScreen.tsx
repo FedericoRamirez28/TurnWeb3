@@ -24,8 +24,8 @@ const PRESTADORES: PrestadorListItem[] = [
   { id: 'tc-haedo', nombre: 'TC HAEDO' },
   { id: 'medic', nombre: 'MEDIC' },
   { id: 'Dra Uane', nombre: 'DOCTORA UANE' },
-  { id: 'Dra Uane', nombre: 'DOCOR DAVILA TORRES' },
-  { id: 'Dra Uane', nombre: 'DOCTOR AMAYA' },
+  { id: 'Dr-Davila', nombre: 'DOCTOR DAVILA TORRES' },
+  { id: 'Dr-Amaya', nombre: 'DOCTOR AMAYA' },
 ]
 
 function safeStr(v: unknown): string {
