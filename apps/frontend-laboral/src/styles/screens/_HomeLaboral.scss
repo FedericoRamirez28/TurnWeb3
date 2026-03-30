@@ -7,7 +7,8 @@
   box-sizing: border-box;
 
   /* === Alturas fijas (desktop) === */
-  --home-card-companies-h: 240px;
+  /* ✅ Aumentamos la altura de la card de empresas (antes 240px) */
+  --home-card-companies-h: 490px; 
   --home-card-agenda-h: 420px;
 
   /* ✅ clave: la fila 1 del grid debe medir EXACTAMENTE lo mismo que (companies + agenda + gap) */
@@ -111,7 +112,8 @@
   .home-laboral {
     padding: var(--space);
 
-    --home-card-companies-h: 240px;
+    /* ✅ Aumentamos también en responsive (antes 240px) */
+    --home-card-companies-h: 320px; 
     --home-card-agenda-h: 380px;
 
     /* ✅ recalculamos la fila 1 para mobile */
@@ -137,7 +139,6 @@
 }
 
 /* ===== TurnosLaboralAgendaMini ===== */
-/* (lo dejo tal cual lo tenías) */
 
 .lab-agenda__head {
   display: flex;

@@ -16,8 +16,8 @@ type Draft = {
   puesto: string
   checks: Record<ExamKey, boolean>
 
-  clasificacion: ClasifKey
-  // ✅ ahora es texto libre (copiar/pegar desde Word)
+  // ✅ Ahora es un array para permitir múltiples o ninguna
+  clasificacion: ClasifKey[]
   observaciones: string
 
   adicionalesSelected: string[]
@@ -69,7 +69,7 @@ function blankDraft(): Draft {
     puesto: '',
     checks: { preocupacional: false, periodico: false, egreso: false },
 
-    clasificacion: 'C',
+    clasificacion: [], // ✅ Arranca vacío para que no haya ninguna marcada por defecto
     observaciones: '',
 
     adicionalesSelected: [],
@@ -82,21 +82,28 @@ function loadDraft(): Draft {
   try {
     const raw = localStorage.getItem(STORAGE_KEY_DRAFT)
     if (!raw) return fallback
-    const parsed = JSON.parse(raw) as Partial<Draft> & { observaciones?: unknown }
+    const parsed = JSON.parse(raw) as Partial<Draft> & { observaciones?: unknown; clasificacion?: unknown }
 
     const obsRaw = parsed.observaciones
+
+    // ✅ Migra la clasificación vieja (string) al formato nuevo (array)
+    let loadedClasificacion = fallback.clasificacion
+    if (Array.isArray(parsed.clasificacion)) {
+      loadedClasificacion = parsed.clasificacion as ClasifKey[]
+    } else if (typeof parsed.clasificacion === 'string') {
+      loadedClasificacion = [parsed.clasificacion as ClasifKey]
+    }
 
     return {
       ...fallback,
       ...parsed,
       checks: { ...fallback.checks, ...(parsed.checks || {}) },
-      // ✅ migra formato viejo string[] -> string (líneas)
       observaciones: Array.isArray(obsRaw)
         ? obsRaw.filter((x): x is string => typeof x === 'string').join('\n')
         : typeof obsRaw === 'string'
           ? obsRaw
           : fallback.observaciones,
-      clasificacion: (parsed.clasificacion as ClasifKey) || fallback.clasificacion,
+      clasificacion: loadedClasificacion,
       adicionalesSelected: Array.isArray(parsed.adicionalesSelected) ? parsed.adicionalesSelected : [],
     }
   } catch {
@@ -228,14 +235,10 @@ const ADICIONALES_LAB: string[] = [
 const ADICIONALES_ALL = [...ADICIONALES_CONCEPTO, ...ADICIONALES_LAB]
 
 // ===================== PDF: layout fijo para encastre =====================
-// A4 (mm). Vamos a usar SIEMPRE las mismas coordenadas
 const PDF = {
   margin: 16,
-  // Bloque planilla
   y0: 52,
-  // donde empiezan los 3 checks (tiene que ser idéntico en completo/planilla)
   checksY: 52 + 44, // 96
-  // El “cuadrado azul” (bloque intermedio) empieza acá
   clasifTop: 52 + 44 + 18, // 114
 }
 
@@ -251,7 +254,6 @@ function drawCheckbox(doc: jsPDF, x: number, y: number, label: string, checked: 
   doc.text(label, x + 9, y + 5)
 }
 
-// ✅ Header: SOLO fecha (quitamos “EXAMEN MEDICO” tachado)
 function drawHeader(doc: jsPDF, opts: { dateText: string }) {
   const pageW = doc.internal.pageSize.getWidth()
   const margin = PDF.margin
@@ -279,11 +281,6 @@ function drawFirmas(doc: jsPDF) {
   doc.text('FIRMA DEL MEDICO', pageW - margin - 40, signatureY + 7, { align: 'center' })
 }
 
-/**
- * Bloque "Clasificación / Observaciones"
- * - includePicker = true  => dibuja A/B/C/D/E + Observaciones + Leyenda
- * - includePicker = false => NO dibuja A/B/C/D/E; solo Observaciones + Leyenda
- */
 function drawClasificacionBlock(
   doc: jsPDF,
   draft: Draft,
@@ -301,7 +298,6 @@ function drawClasificacionBlock(
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(12)
     doc.setTextColor(15, 23, 42)
-    // si no hay picker, el título queda más fiel a lo que se muestra
     doc.text(opts.includePicker ? 'CLASIFICACION' : 'OBSERVACIONES', margin, yClasifTop)
   }
 
@@ -339,7 +335,9 @@ function drawClasificacionBlock(
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(11)
       doc.setTextColor(15, 23, 42)
-      const mark = draft.clasificacion === it.k ? 'X' : '-'
+      
+      // ✅ Revisamos si la key está dentro del array de clasificaciones seleccionadas
+      const mark = draft.clasificacion.includes(it.k) ? 'X' : '-'
       doc.text(`( ${mark} )`, x + boxW - 14, yBase + 7)
 
       x += boxW + (idx < 4 ? gap : 0)
@@ -347,11 +345,9 @@ function drawClasificacionBlock(
 
     obsTitleY = yBase + 34
   } else {
-    // sin picker, arrancamos observaciones más arriba
     obsTitleY = yBase + 6
   }
 
-  // Si ya pusimos título OBSERVACIONES arriba, evitamos repetir "Observaciones:" abajo
   const showObsLabel = opts.includePicker
 
   if (showObsLabel) {
@@ -367,10 +363,8 @@ function drawClasificacionBlock(
 
   const obsStartY = showObsLabel ? obsTitleY + 10 : obsTitleY + 6
 
-  // ✅ texto libre (respetamos saltos de línea, sin bullets automáticos)
   const obsText = (draft.observaciones || '').replace(/\r\n/g, '\n').trim()
 
-  // Importante: este bloque debe entrar ANTES de las firmas de la planilla
   const signatureY = pageH - 22
   const legendMaxBottom = signatureY - 10
   const maxObsBottom = legendMaxBottom - 28
@@ -387,7 +381,7 @@ function drawClasificacionBlock(
     const lines: string[] = []
     for (const ln of rawLines) {
       if (!ln.trim()) {
-        lines.push('') // línea en blanco
+        lines.push('')
         continue
       }
       const wrapped = doc.splitTextToSize(ln, maxW) as string[]
@@ -405,7 +399,7 @@ function drawClasificacionBlock(
       }
 
       if (!ln) {
-        oy += 4 // salto visual
+        oy += 4
         continue
       }
 
@@ -461,7 +455,6 @@ function buildPdfCompleto(draft: Draft, dateText: string) {
   drawCheckbox(doc, margin + 70, cy, 'Examen Periodico', draft.checks.periodico)
   drawCheckbox(doc, margin + 132, cy, 'Examen Egreso', draft.checks.egreso)
 
-  // ✅ En Periódico/Egreso NO hay selector A-E, pero sí Observaciones + Leyenda
   const includePicker = !(draft.checks.periodico || draft.checks.egreso)
   drawClasificacionBlock(doc, draft, PDF.clasifTop, { includeTitle: true, includePicker })
 
@@ -477,7 +470,6 @@ function buildPdfVista(view: ViewKey, draft: Draft, dateText: string) {
   const margin = PDF.margin
   const maxW = pageW - margin * 2
 
-  // ✅ En vista “clasificacion” NO dibujamos fecha/header (pedido)
   if (view !== 'clasificacion') drawHeader(doc, { dateText })
 
   if (view === 'planilla') {
@@ -565,7 +557,6 @@ function buildPdfVista(view: ViewKey, draft: Draft, dateText: string) {
     return doc
   }
 
-  // ✅ view === 'clasificacion'
   {
     const includePicker = !(draft.checks.periodico || draft.checks.egreso)
     drawClasificacionBlock(doc, draft, PDF.clasifTop, { includeTitle: true, includePicker })
@@ -603,7 +594,6 @@ export default function PreocupacionalScreen() {
   const today = useMemo(() => fmtDate(new Date()), [])
   const todayISO = useMemo(() => isoDay(new Date()), [])
 
-  // ✅ mostrar selector A-E solo si NO es Periódico/Egreso
   const showClasifPicker = useMemo(
     () => !(draft.checks.periodico || draft.checks.egreso),
     [draft.checks.periodico, draft.checks.egreso],
@@ -741,7 +731,7 @@ export default function PreocupacionalScreen() {
   function clearClasificacionSelection() {
     setDraft((p) => ({
       ...p,
-      clasificacion: 'C',
+      clasificacion: [], // ✅ Ahora se blanquea dejando el array vacío
       observaciones: '',
     }))
   }
@@ -750,7 +740,6 @@ export default function PreocupacionalScreen() {
     setDraft((p) => ({ ...p, adicionalesSelected: [] }))
   }
 
-  /** ✅ Limpia TODO (planilla + adicionales + clasificación) para evitar acumular paciente anterior */
   function clearAllSelection() {
     setDraft(blankDraft())
     setAdQ('')
@@ -989,7 +978,6 @@ export default function PreocupacionalScreen() {
             Adicionales
           </button>
 
-          {/* ✅ NO deshabilitamos el tab: solo se oculta el selector A-E si corresponde */}
           <button
             type="button"
             className={'preocupacional__tab' + (view === 'clasificacion' ? ' preocupacional__tab--active' : '')}
@@ -1120,19 +1108,31 @@ export default function PreocupacionalScreen() {
                 <h3 className="preocupacional__section-title">Clasificación</h3>
 
                 {showClasifPicker ? (
-                  <div className="clasif-grid" role="radiogroup" aria-label="Clasificación A a E">
+                  <div className="clasif-grid" role="group" aria-label="Clasificación A a E">
                     {(['A', 'B', 'C', 'D', 'E'] as ClasifKey[]).map((k) => {
                       const sub = k === 'D' ? 'CON LIMITACION' : k === 'E' ? 'NO APTO' : 'SIN INCAPACIDAD'
+                      // ✅ Comprobamos si la letra actual está incluida en el array de clasificación
+                      const isActive = draft.clasificacion.includes(k)
                       return (
                         <button
                           key={k}
                           type="button"
-                          className={'clasif-item' + (draft.clasificacion === k ? ' clasif-item--active' : '')}
-                          onClick={() => setDraft((p) => ({ ...p, clasificacion: k }))}
+                          className={'clasif-item' + (isActive ? ' clasif-item--active' : '')}
+                          onClick={() => {
+                            // ✅ Agregamos o sacamos del array según corresponda
+                            setDraft((p) => {
+                              const prev = p.clasificacion || []
+                              if (prev.includes(k)) {
+                                return { ...p, clasificacion: prev.filter((x) => x !== k) }
+                              } else {
+                                return { ...p, clasificacion: [...prev, k] }
+                              }
+                            })
+                          }}
                         >
                           <div className="clasif-item__top">
                             <span className="clasif-item__letter">{k}</span>
-                            <span className="clasif-item__mark">( {draft.clasificacion === k ? 'X' : '-'} )</span>
+                            <span className="clasif-item__mark">( {isActive ? 'X' : '-'} )</span>
                           </div>
                           <div className="clasif-item__sub">{sub}</div>
                         </button>
@@ -1162,7 +1162,6 @@ export default function PreocupacionalScreen() {
                   <h3 className="preocupacional__section-title">Observaciones</h3>
                 </div>
 
-                {/* ✅ Un solo textarea para copiar/pegar desde Word */}
                 <textarea
                   className="input preocupacional__obs-textarea"
                   value={draft.observaciones}
