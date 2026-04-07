@@ -1,28 +1,25 @@
 import {
-  IsString,
-  IsOptional,
-  IsNumber,
-  IsIn,
   IsBoolean,
+  IsIn,
+  IsNumber,
+  IsOptional,
+  IsString,
 } from 'class-validator';
 import * as turnosTypes from './turnos.types';
 
 export class CreateTurnoDto {
+  @IsOptional()
+  @IsString()
+  id?: string;
+
   @IsString()
   affiliateId: string;
 
   @IsString()
-  affiliateName: string;
-
-  @IsString()
-  @IsOptional()
-  affiliateDni?: string;
-
-  @IsString()
   date: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   controlDate?: string;
 
   @IsString()
@@ -31,12 +28,12 @@ export class CreateTurnoDto {
   @IsIn(['especialidad', 'laboratorio'])
   tipoAtencion: 'especialidad' | 'laboratorio';
 
-  @IsString()
   @IsOptional()
+  @IsString()
   especialidad?: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   laboratorio?: string;
 
   @IsString()
@@ -50,6 +47,14 @@ export class CreateTurnoDto {
 
   @IsString()
   profesional: string;
+
+  @IsIn(turnosTypes.APPOINTMENT_STATES)
+  estado: turnosTypes.AppointmentStatus;
+
+  @IsOptional()
+  @IsString()
+  motivo?: string;
+
   @IsOptional()
   @IsBoolean()
   mpPagado?: boolean;
@@ -74,20 +79,17 @@ export type AppointmentResponse = {
   affiliateName: string;
   affiliateDni?: string;
   date: string;
-  controlDate?: string;
+  controlDate?: string | null;
   time: string;
-
   tipoAtencion: 'especialidad' | 'laboratorio';
-  especialidad?: string;
-  laboratorio?: string;
-
+  especialidad?: string | null;
+  laboratorio?: string | null;
   plan: string;
   prestador: string;
   monto: number;
   profesional: string;
-
-  mpPagado?: boolean;
-  mpMonto?: number;
-  mpRef?: string;
+  mpPagado: boolean;
+  mpMonto: number;
+  mpRef?: string | null;
   estado: turnosTypes.AppointmentStatus;
 };

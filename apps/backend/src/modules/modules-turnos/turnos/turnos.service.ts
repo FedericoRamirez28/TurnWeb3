@@ -8,6 +8,7 @@ export interface TurnoDto {
   id: string;
   affiliateId: string;
   affiliateName: string;
+  affiliateDni?: string;
   date: string;
   controlDate?: string | null;
   time: string;
@@ -44,6 +45,8 @@ export interface CreateTurnoInput {
   mpRef?: string;
 }
 
+type TurnoWithAfiliado = Turno & { afiliado: Afiliado | null };
+
 @Injectable()
 export class TurnosService {
   constructor(private readonly prisma: PrismaService) {}
@@ -53,11 +56,25 @@ export class TurnosService {
     return date.toISOString().slice(0, 10);
   }
 
-  private mapTurnoToDto(turno: Turno & { afiliado: Afiliado }): TurnoDto {
+  private toMoneyInt(value: unknown): number {
+    if (typeof value === 'number') {
+      return Number.isFinite(value) ? Math.max(0, Math.round(value)) : 0;
+    }
+
+    if (typeof value === 'string') {
+      const parsed = Number(value.replace(',', '.'));
+      return Number.isFinite(parsed) ? Math.max(0, Math.round(parsed)) : 0;
+    }
+
+    return 0;
+  }
+
+  private mapTurnoToDto(turno: TurnoWithAfiliado): TurnoDto {
     return {
       id: turno.id,
       affiliateId: turno.afiliadoId,
-      affiliateName: turno.afiliado.nombreCompleto,
+      affiliateName: turno.afiliado?.nombreCompleto ?? '',
+      affiliateDni: turno.afiliado?.dni ?? undefined,
       date: this.toISODate(turno.fechaTomado) ?? '',
       controlDate: this.toISODate(turno.fechaReal),
       time: turno.hora,
@@ -66,24 +83,22 @@ export class TurnosService {
       laboratorio: turno.laboratorio,
       plan: turno.plan ?? '',
       prestador: turno.prestador,
-      monto: turno.monto,
+      monto: Number(turno.monto ?? 0),
       profesional: turno.profesional,
-      estado: turno.estado as TurnoEstado,
-
-      // ✅ MP
       mpPagado: Boolean(turno.mpPagado),
       mpMonto: Number(turno.mpMonto ?? 0),
       mpRef: turno.mpRef ?? null,
+      estado: turno.estado as TurnoEstado,
     };
   }
 
   async findAll(): Promise<TurnoDto[]> {
     const rows = await this.prisma.turno.findMany({
-      orderBy: { fechaTomado: 'asc' },
+      orderBy: [{ fechaTomado: 'asc' }, { hora: 'asc' }],
       include: { afiliado: true },
     });
 
-    return rows.map((t) => this.mapTurnoToDto(t));
+    return rows.map((row) => this.mapTurnoToDto(row));
   }
 
   async create(input: CreateTurnoInput): Promise<TurnoDto> {
@@ -91,14 +106,13 @@ export class TurnosService {
     const fechaReal = input.controlDate
       ? new Date(`${input.controlDate}T00:00:00`)
       : null;
-    const mpPagado = Boolean(input.mpPagado);
-    const mpMontoRaw = Number(input.mpMonto ?? 0);
-    const mpMonto = Number.isFinite(mpMontoRaw)
-      ? Math.max(0, Math.round(mpMontoRaw))
-      : 0;
 
-    // ✅ regla de negocio: si es MP, caja efectivo debe ser 0
-    const montoEfectivo = mpPagado ? 0 : Number(input.monto ?? 0) || 0;
+    const montoOriginal = this.toMoneyInt(input.monto);
+    const mpPagado = Boolean(input.mpPagado);
+    const mpMonto = mpPagado
+      ? this.toMoneyInt(input.mpMonto ?? montoOriginal)
+      : 0;
+    const montoEfectivo = mpPagado ? 0 : montoOriginal;
 
     const data = {
       afiliadoId: input.affiliateId,
@@ -106,28 +120,23 @@ export class TurnosService {
       fechaReal,
       hora: input.time,
       estado: input.estado,
-      observaciones: input.motivo ?? null,
+      observaciones: input.motivo?.trim() ? input.motivo.trim() : null,
       tipoAtencion: input.tipoAtencion,
       especialidad:
         input.tipoAtencion === 'especialidad'
-          ? (input.especialidad ?? null)
+          ? (input.especialidad?.trim() ? input.especialidad.trim() : null)
           : null,
       laboratorio:
         input.tipoAtencion === 'laboratorio'
-          ? (input.laboratorio ?? null)
+          ? (input.laboratorio?.trim() ? input.laboratorio.trim() : null)
           : null,
-      plan: input.plan || null,
-
-      // ✅ efectivo
+      plan: input.plan?.trim() ? input.plan.trim() : null,
       monto: montoEfectivo,
-
-      profesional: input.profesional,
-      prestador: input.prestador,
-
-      // ✅ MP
+      profesional: input.profesional?.trim() ? input.profesional.trim() : '',
+      prestador: input.prestador?.trim() ? input.prestador.trim() : '',
       mpPagado,
       mpMonto,
-      mpRef: input.mpRef?.trim() ? input.mpRef.trim() : null,
+      mpRef: mpPagado && input.mpRef?.trim() ? input.mpRef.trim() : null,
     } as const;
 
     const turno = input.id

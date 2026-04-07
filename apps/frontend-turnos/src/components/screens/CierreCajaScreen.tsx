@@ -1,15 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Appointment, Affiliate } from '@/components/screens/homeModels'
 import jsPDF from 'jspdf'
 import Swal from 'sweetalert2'
-import {
-  fetchCajaEstado,
-  cerrarCajaApi,
-  fetchCajaByDate,
-  type CajaEstadoDto,
-  type CierreCajaDto,
-  type CajaRow,
-} from '@/api/turnosApi'
+import { cerrarCajaApi, fetchCajaEstado, type CajaEstadoDto } from '@/api/turnosApi'
 import pdfIcon from '@/assets/icons/pdf.png'
 import medicLogo from '@/assets/logo-medic-hd.png'
 
@@ -35,7 +28,26 @@ type PdfColumn = {
   label: string
   width: number
   align?: PdfAlign
-  value: (row: CajaRow) => string
+  value: (row: CajaLocalRow) => string
+}
+
+type CajaLocalRow = {
+  fechaDisplay: string
+  numeroAfiliado: string
+  dni: string
+  nombre: string
+  prestador: string
+  practica: string
+  monto: number
+  mpPagado: boolean
+}
+
+type CajaDaySummary = {
+  fechaISO: string
+  rows: CajaLocalRow[]
+  efectivoTotal: number
+  mercadoPagoTotal: number
+  totalInformado: number
 }
 
 /* ======================= HELPERS ======================= */
@@ -52,7 +64,30 @@ const safeText = (v: unknown): string => {
   return s.length ? s : '—'
 }
 
-const todayISODate = () => new Date().toISOString().slice(0, 10)
+const getLocalISODate = () => {
+  const d = new Date()
+  const offset = d.getTimezoneOffset() * 60000
+  return new Date(d.getTime() - offset).toISOString().slice(0, 10)
+}
+
+const shiftISODate = (iso: string, days: number): string => {
+  const [y, m, d] = iso.split('-').map(Number)
+  const dt = new Date(y, (m || 1) - 1, d || 1)
+  dt.setDate(dt.getDate() + days)
+
+  const yy = dt.getFullYear()
+  const mm = String(dt.getMonth() + 1).padStart(2, '0')
+  const dd = String(dt.getDate()).padStart(2, '0')
+  return `${yy}-${mm}-${dd}`
+}
+
+const buildEmptySummary = (fechaISO: string): CajaDaySummary => ({
+  fechaISO,
+  rows: [],
+  efectivoTotal: 0,
+  mercadoPagoTotal: 0,
+  totalInformado: 0,
+})
 
 const swal = Swal.mixin({
   buttonsStyling: false,
@@ -66,16 +101,14 @@ const swal = Swal.mixin({
 })
 
 /* ======================= PDF BUILDER  ======================= */
-/* ======================= PDF BUILDER  ======================= */
 async function generateCajaPdf(
-  dateISO: string,
-  rows: CajaRow[],
-  mode: 'download' | 'preview' | 'tab'
+  summary: CajaDaySummary,
+  mode: 'download' | 'preview' | 'tab',
 ): Promise<string | null> {
-  if (!rows.length) return null
+  if (!summary.rows.length) return null
 
   const doc = new jsPDF({
-    orientation: 'portrait', // ✅ vertical
+    orientation: 'portrait',
     unit: 'pt',
     format: 'a4',
   })
@@ -87,7 +120,6 @@ async function generateCajaPdf(
   const marginTop = 24
   const bottomLimit = PAGE_H - 56
 
-  /* ---------- LOGO ---------- */
   let logoBottomY = marginTop
 
   try {
@@ -104,7 +136,6 @@ async function generateCajaPdf(
     logoBottomY = marginTop
   }
 
-  /* ---------- HEADER ---------- */
   const headerY = logoBottomY + 22
 
   doc.setFont('helvetica', 'bold')
@@ -116,38 +147,39 @@ async function generateCajaPdf(
   doc.setFontSize(11)
   doc.setTextColor(...TEXT_SOFT)
 
-  // ✅ fuerza zona horaria BA (así no depende del navegador/servidor)
   const generado = new Intl.DateTimeFormat('es-AR', {
     dateStyle: 'short',
     timeStyle: 'medium',
     timeZone: 'America/Argentina/Buenos_Aires',
   }).format(new Date())
 
-  doc.text(`Fecha: ${formatDateDisplay(dateISO)} · Generado: ${generado}`, PAGE_W / 2, headerY + 18, {
-    align: 'center',
-  })
+  doc.text(
+    `Fecha: ${formatDateDisplay(summary.fechaISO)} · Generado: ${generado}`,
+    PAGE_W / 2,
+    headerY + 18,
+    { align: 'center' },
+  )
 
   doc.setDrawColor(220)
   doc.setLineWidth(0.8)
   doc.line(marginX, headerY + 32, PAGE_W - marginX, headerY + 32)
 
-  /* ---------- TABLE ---------- */
   const tableStartY = headerY + 48
   const padX = 6
   const padY = 6
   const lineH = 12
 
-  // ✅ anchos base pensados para portrait (A4 vertical)
   const columns: PdfColumn[] = [
-    { label: 'Fecha', width: 62, value: (r) => safeText(r.fechaDisplay) },
-    { label: 'Nº Afiliado', width: 76, value: (r) => safeText(r.numeroAfiliado) },
-    { label: 'DNI / CUIT', width: 82, value: (r) => safeText(r.dni) },
-    { label: 'Apellido y nombre', width: 140, value: (r) => safeText(r.nombre) },
-    { label: 'Prestador', width: 110, value: (r) => safeText(r.prestador) },
-    { label: 'Esp. / Lab.', width: 150, value: (r) => safeText(r.practica) },
+    { label: 'Fecha', width: 58, value: (r) => safeText(r.fechaDisplay) },
+    { label: 'Nº Afiliado', width: 70, value: (r) => safeText(r.numeroAfiliado) },
+    { label: 'DNI / CUIT', width: 78, value: (r) => safeText(r.dni) },
+    { label: 'Apellido y nombre', width: 118, value: (r) => safeText(r.nombre) },
+    { label: 'Prestador', width: 84, value: (r) => safeText(r.prestador) },
+    { label: 'Esp. / Lab.', width: 126, value: (r) => safeText(r.practica) },
+    { label: 'Pago', width: 86, value: (r) => (r.mpPagado ? 'Mercado Pago' : 'Efectivo') },
     {
       label: 'Monto',
-      width: 76,
+      width: 62,
       align: 'right',
       value: (r) => `$ ${Number(r.monto || 0).toFixed(2)}`,
     },
@@ -156,9 +188,7 @@ async function generateCajaPdf(
   const rawW = columns.reduce((a, c) => a + c.width, 0)
   const maxW = PAGE_W - marginX * 2
   const scale = rawW > maxW ? maxW / rawW : 1
-
-  // ✅ en portrait el “min width 70” te puede romper el ajuste; bajamos el mínimo
-  const MIN_COL_W = 48
+  const MIN_COL_W = 44
 
   const cols = columns.map((c) => ({
     ...c,
@@ -174,7 +204,7 @@ async function generateCajaPdf(
     doc.rect(marginX, y, tableW, 26, 'F')
 
     doc.setFont('helvetica', 'bold')
-    doc.setFontSize(9.5)
+    doc.setFontSize(9.2)
     doc.setTextColor(255, 255, 255)
 
     let x = marginX
@@ -192,13 +222,9 @@ async function generateCajaPdf(
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(9)
 
-  let total = 0
-
-  for (const row of rows) {
-    total += Number(row.monto || 0)
-
+  for (const row of summary.rows) {
     const cellLines = cols.map(
-      (c) => doc.splitTextToSize(c.value(row), c.width - padX * 2) as string[]
+      (c) => doc.splitTextToSize(c.value(row), c.width - padX * 2) as string[],
     )
 
     const maxLines = Math.max(...cellLines.map((l) => l.length))
@@ -228,7 +254,6 @@ async function generateCajaPdf(
     y += rowH
   }
 
-  /* ---------- TOTAL ---------- */
   y += 14
   if (y > bottomLimit) {
     doc.addPage()
@@ -239,16 +264,25 @@ async function generateCajaPdf(
   doc.setLineWidth(1.4)
   doc.line(marginX, y, marginX + tableW, y)
 
-  y += 24
+  y += 20
   doc.setFont('helvetica', 'bold')
+  doc.setFontSize(11)
+  doc.setTextColor(...TEXT_SOFT)
+  doc.text(`Mercado Pago informado: $ ${summary.mercadoPagoTotal.toFixed(2)}`, marginX + tableW, y, {
+    align: 'right',
+  })
+
+  y += 20
   doc.setFontSize(14)
   doc.setTextColor(...MEDIC_GREEN)
-  doc.text(`TOTAL: $ ${total.toFixed(2)}`, marginX + tableW, y, { align: 'right' })
+  doc.text(`TOTAL EFECTIVO: $ ${summary.efectivoTotal.toFixed(2)}`, marginX + tableW, y, {
+    align: 'right',
+  })
 
   doc.setTextColor(...TEXT_DARK)
 
   if (mode === 'download') {
-    doc.save(`cierre-caja-${dateISO}.pdf`)
+    doc.save(`cierre-caja-${summary.fechaISO}.pdf`)
     return null
   }
 
@@ -257,9 +291,8 @@ async function generateCajaPdf(
   return url
 }
 
-
 /* ======================= COMPONENT ======================= */
-export const CierreCajaScreen: React.FC<Props> = () => {
+export const CierreCajaScreen: React.FC<Props> = ({ appointments, affiliates }) => {
   const [mode, setMode] = useState<ViewMode>('main')
   const [estado, setEstado] = useState<CajaEstadoDto | null>(null)
   const [historyQuery, setHistoryQuery] = useState('')
@@ -270,14 +303,79 @@ export const CierreCajaScreen: React.FC<Props> = () => {
 
   const [closing, setClosing] = useState(false)
 
-  const [manualDateISO, setManualDateISO] = useState<string>(todayISODate())
+  const todayISO = useMemo(() => getLocalISODate(), [])
+  const [manualDateISO, setManualDateISO] = useState<string>(todayISO)
+
+  const affiliateById = useMemo(
+    () => new Map(affiliates.map((affiliate) => [affiliate.id, affiliate] as const)),
+    [affiliates],
+  )
+
+  const cajaSummaryByDate = useMemo(() => {
+    const map = new Map<string, CajaDaySummary>()
+
+    appointments
+      .filter((appointment) => appointment.estado === 'recepcionado')
+      .forEach((appointment) => {
+        const fechaISO = String(appointment.date ?? '').slice(0, 10)
+        if (!fechaISO) return
+
+        const affiliate = affiliateById.get(appointment.affiliateId)
+        const practica =
+          appointment.tipoAtencion === 'laboratorio'
+            ? appointment.laboratorio ?? '—'
+            : appointment.especialidad ?? '—'
+
+        const montoBase = Number(appointment.monto ?? 0)
+        const montoMp =
+          appointment.mpPagado && typeof appointment.mpMonto === 'number' && appointment.mpMonto > 0
+            ? Number(appointment.mpMonto)
+            : montoBase
+
+        const montoRow = appointment.mpPagado ? montoMp : montoBase
+
+        const row: CajaLocalRow = {
+          fechaDisplay: formatDateDisplay(fechaISO),
+          numeroAfiliado: affiliate?.numeroAfiliado ?? '—',
+          dni: affiliate?.dni ?? appointment.affiliateDni ?? '—',
+          nombre: affiliate?.nombreCompleto ?? appointment.affiliateName ?? '—',
+          prestador: appointment.prestador ?? '—',
+          practica: practica || '—',
+          monto: montoRow,
+          mpPagado: Boolean(appointment.mpPagado),
+        }
+
+        const current = map.get(fechaISO) ?? buildEmptySummary(fechaISO)
+        current.rows.push(row)
+
+        if (row.mpPagado) {
+          current.mercadoPagoTotal += row.monto
+        } else {
+          current.efectivoTotal += row.monto
+        }
+
+        current.totalInformado += row.monto
+        map.set(fechaISO, current)
+      })
+
+    map.forEach((summary) => {
+      summary.rows.sort((a, b) => a.nombre.localeCompare(b.nombre))
+    })
+
+    return map
+  }, [affiliateById, appointments])
+
+  const getSummaryForDate = useCallback(
+    (fechaISO: string): CajaDaySummary => cajaSummaryByDate.get(fechaISO) ?? buildEmptySummary(fechaISO),
+    [cajaSummaryByDate],
+  )
 
   const loadEstado = async () => {
     try {
       setLoading(true)
       const data = await fetchCajaEstado()
       setEstado(data)
-      setManualDateISO(data.hoyFechaISO || todayISODate())
+      setManualDateISO(data.hoyFechaISO || todayISO)
     } catch (err) {
       console.error('Error cargando estado de caja', err)
     } finally {
@@ -291,48 +389,65 @@ export const CierreCajaScreen: React.FC<Props> = () => {
 
   const historyDates = useMemo(
     () => (estado?.historial ?? []).map((h) => h.fechaISO).sort((a, b) => b.localeCompare(a)),
-    [estado?.historial]
+    [estado?.historial],
   )
 
   const historyFiltered = useMemo(() => {
     if (!historyQuery) return historyDates
     return historyDates.filter(
-      (d) => d.includes(historyQuery) || formatDateDisplay(d).includes(historyQuery)
+      (dateISO) => dateISO.includes(historyQuery) || formatDateDisplay(dateISO).includes(historyQuery),
     )
   }, [historyDates, historyQuery])
 
-  const rowsHoy = useMemo(() => estado?.hoy?.rows ?? [], [estado?.hoy?.rows])
-  const totalHoy = useMemo(() => rowsHoy.reduce((acc, r) => acc + Number(r.monto || 0), 0), [rowsHoy])
+  const summaryHoy = useMemo(
+    () => getSummaryForDate(estado?.hoyFechaISO || todayISO),
+    [estado?.hoyFechaISO, getSummaryForDate, todayISO],
+  )
+  const rowsHoy = summaryHoy.rows
+  const totalHoy = summaryHoy.efectivoTotal
+  const totalHoyMp = summaryHoy.mercadoPagoTotal
 
-  const cajaAyer = estado?.ayer ?? null
+  const ayerISO = estado?.ayerFechaISO || shiftISODate(estado?.hoyFechaISO || todayISO, -1)
+  const cajaAyer = useMemo(() => getSummaryForDate(ayerISO), [ayerISO, getSummaryForDate])
 
   const isAlreadyClosed = (fechaISO: string): boolean =>
     (estado?.historial ?? []).some((h) => h.fechaISO === fechaISO)
 
-  const handleDownloadForDate = async (dateISO: string) => {
-    try {
-      const caja: CierreCajaDto = await fetchCajaByDate(dateISO)
-      void generateCajaPdf(dateISO, caja.rows, 'download')
-    } catch (err) {
-      console.error('Error descargando caja', err)
+  const handleDownloadForDate = async (fechaISO: string) => {
+    const summary = getSummaryForDate(fechaISO)
+    if (!summary.rows.length) {
+      await swal.fire({
+        title: 'Sin movimientos',
+        text: 'No hay movimientos recepcionados para esa fecha.',
+        icon: 'info',
+      })
+      return
     }
+
+    void generateCajaPdf(summary, 'download')
   }
 
-  const handlePreviewForDate = async (dateISO: string) => {
-    try {
-      const caja: CierreCajaDto = await fetchCajaByDate(dateISO)
-      const url = await generateCajaPdf(dateISO, caja.rows, 'preview')
-      if (url) {
-        setPreviewUrl(url)
-        setShowPreview(true)
-      }
-    } catch (err) {
-      console.error('Error previsualizando caja', err)
+  const handlePreviewForDate = async (fechaISO: string) => {
+    const summary = getSummaryForDate(fechaISO)
+    if (!summary.rows.length) {
+      await swal.fire({
+        title: 'Sin movimientos',
+        text: 'No hay movimientos recepcionados para esa fecha.',
+        icon: 'info',
+      })
+      return
+    }
+
+    const url = await generateCajaPdf(summary, 'preview')
+    if (url) {
+      setPreviewUrl(url)
+      setShowPreview(true)
     }
   }
 
   const handleManualClose = async (fechaISOToClose: string) => {
     if (!estado) return
+
     if (isAlreadyClosed(fechaISOToClose)) {
       await swal.fire({
         title: 'Caja ya cerrada',
@@ -342,21 +457,13 @@ export const CierreCajaScreen: React.FC<Props> = () => {
       return
     }
 
-    let cajaLive: CierreCajaDto | null = null
-    try {
-      cajaLive = await fetchCajaByDate(fechaISOToClose)
-    } catch {
-      cajaLive = null
-    }
+    const summary = getSummaryForDate(fechaISOToClose)
 
-    const rows = cajaLive?.rows ?? []
-    const total = rows.reduce((acc, r) => acc + Number(r.monto || 0), 0)
-
-    if (!rows.length) {
+    if (!summary.rows.length) {
       await swal.fire({
         title: 'Sin movimientos',
         html: `No hay turnos recepcionados para cerrar la caja del día <b>${formatDateDisplay(
-          fechaISOToClose
+          fechaISOToClose,
         )}</b>.`,
         icon: 'warning',
       })
@@ -368,8 +475,9 @@ export const CierreCajaScreen: React.FC<Props> = () => {
       html: `
         <div style="text-align:left">
           <p>¿Confirmás cerrar la caja del día <b>${formatDateDisplay(fechaISOToClose)}</b>?</p>
-          <p style="margin:8px 0 0"><b>Total:</b> $ ${total.toFixed(2)}</p>
-          <small>Se guardará en el historial y quedará persistida.</small>
+          <p style="margin:8px 0 0"><b>Total efectivo:</b> $ ${summary.efectivoTotal.toFixed(2)}</p>
+          <p style="margin:6px 0 0"><b>Mercado Pago informado:</b> $ ${summary.mercadoPagoTotal.toFixed(2)}</p>
+          <small>Los pagos Mercado Pago se guardan como referencia y no suman al total de efectivo.</small>
         </div>
       `,
       icon: 'warning',
@@ -383,40 +491,14 @@ export const CierreCajaScreen: React.FC<Props> = () => {
 
     try {
       setClosing(true)
-      const cierre = await cerrarCajaApi(fechaISOToClose)
 
-      const url = await generateCajaPdf(cierre.fechaISO, cierre.rows, 'preview')
+      await cerrarCajaApi(fechaISOToClose)
+
+      const url = await generateCajaPdf(summary, 'preview')
       if (url) {
         setPreviewUrl(url)
         setShowPreview(true)
       }
-
-      setEstado((prev) => {
-        if (!prev) return prev
-
-        const nextHistorial = [
-          { fechaISO: cierre.fechaISO, total: cierre.total },
-          ...(prev.historial ?? []).filter((h) => h.fechaISO !== cierre.fechaISO),
-        ].sort((a, b) => b.fechaISO.localeCompare(a.fechaISO))
-
-        const isClosingHoy = prev.hoy?.fechaISO === fechaISOToClose
-        const isClosingAyer = prev.ayer?.fechaISO === fechaISOToClose
-
-        return {
-          ...prev,
-          historial: nextHistorial,
-          ...(isClosingHoy
-            ? {
-                hoy: { ...prev.hoy, rows: [] },
-                ayer: { fechaISO: cierre.fechaISO, total: cierre.total, rows: cierre.rows },
-              }
-            : isClosingAyer
-              ? {
-                  ayer: { fechaISO: cierre.fechaISO, total: cierre.total, rows: cierre.rows },
-                }
-              : {}),
-        }
-      })
 
       await loadEstado()
 
@@ -439,7 +521,6 @@ export const CierreCajaScreen: React.FC<Props> = () => {
     }
   }
 
-  // ===== Vista historial =====
   if (mode === 'history') {
     return (
       <section className="cierre-caja-screen">
@@ -458,7 +539,7 @@ export const CierreCajaScreen: React.FC<Props> = () => {
               <button
                 type="button"
                 className="btn btn--outline btn--sm"
-                onClick={() => setShowPreview((v) => !v)}
+                onClick={() => setShowPreview((value) => !value)}
               >
                 {showPreview ? 'Ocultar previsualización' : 'Mostrar previsualización'}
               </button>
@@ -481,8 +562,11 @@ export const CierreCajaScreen: React.FC<Props> = () => {
             )}
 
             {historyFiltered.map((dateISO) => {
-              const resumen = estado?.historial?.find((h) => h.fechaISO === dateISO)
-              if (!resumen) return null
+              const resumenBackend = estado?.historial?.find((item) => item.fechaISO === dateISO)
+              const resumenLocal = getSummaryForDate(dateISO)
+              const totalEfectivo =
+                resumenLocal.rows.length > 0 ? resumenLocal.efectivoTotal : Number(resumenBackend?.total ?? 0)
+              const totalMp = resumenLocal.rows.length > 0 ? resumenLocal.mercadoPagoTotal : 0
 
               return (
                 <div
@@ -516,9 +600,11 @@ export const CierreCajaScreen: React.FC<Props> = () => {
                   </button>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                    <span className="cierre-caja-history__total">
-                      Total: $ {Number(resumen.total).toFixed(2)}
-                    </span>
+                    <span className="cierre-caja-history__total">Efectivo: $ {totalEfectivo.toFixed(2)}</span>
+
+                    {totalMp > 0 && (
+                      <span className="cierre-caja-history__mp">Mercado Pago: $ {totalMp.toFixed(2)}</span>
+                    )}
 
                     <button
                       type="button"
@@ -572,7 +658,6 @@ export const CierreCajaScreen: React.FC<Props> = () => {
     )
   }
 
-  // ===== Vista principal cierre de caja =====
   return (
     <section className="cierre-caja-screen">
       <div className="card cierre-caja">
@@ -588,8 +673,7 @@ export const CierreCajaScreen: React.FC<Props> = () => {
               className="btn btn--outline btn--sm"
               disabled={!estado || rowsHoy.length === 0}
               onClick={async () => {
-                if (!estado) return
-                const url = await generateCajaPdf(estado.hoy.fechaISO, rowsHoy, 'preview')
+                const url = await generateCajaPdf(summaryHoy, 'preview')
                 if (url) {
                   setPreviewUrl(url)
                   setShowPreview(true)
@@ -612,6 +696,11 @@ export const CierreCajaScreen: React.FC<Props> = () => {
             </button>
           </div>
         </header>
+
+        <p className="cierre-caja__note">
+          Los pagos marcados como Mercado Pago se muestran en el cierre como referencia, pero no suman al
+          total efectivo de caja.
+        </p>
 
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginTop: 10 }}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -648,6 +737,7 @@ export const CierreCajaScreen: React.FC<Props> = () => {
             <span>Apellido y nombre</span>
             <span>Prestador</span>
             <span>Especialidad / Laboratorio</span>
+            <span>Pago</span>
             <span className="cierre-caja__col-monto">Monto</span>
           </div>
 
@@ -658,27 +748,45 @@ export const CierreCajaScreen: React.FC<Props> = () => {
 
             {loading && <p className="cierre-caja__empty">Cargando cierre de caja…</p>}
 
-            {rowsHoy.map((r, idx) => (
+            {rowsHoy.map((row, idx) => (
               <div
-                key={`${estado?.hoy?.fechaISO ?? 'hoy'}-${r.numeroAfiliado}-${idx}`}
+                key={`${summaryHoy.fechaISO}-${row.numeroAfiliado}-${idx}`}
                 className="cierre-caja__row"
               >
-                <span>{r.fechaDisplay}</span>
-                <span>{r.numeroAfiliado || '—'}</span>
-                <span>{r.dni || '—'}</span>
-                <span>{r.nombre}</span>
-                <span>{r.prestador}</span>
-                <span>{r.practica}</span>
+                <span>{row.fechaDisplay}</span>
+                <span>{row.numeroAfiliado || '—'}</span>
+                <span>{row.dni || '—'}</span>
+                <span>{row.nombre}</span>
+                <span>{row.prestador}</span>
+                <span>{row.practica}</span>
+                <span>
+                  <span
+                    className={`cierre-caja__payment-tag ${
+                      row.mpPagado ? 'cierre-caja__payment-tag--digital' : 'cierre-caja__payment-tag--cash'
+                    }`}
+                  >
+                    {row.mpPagado ? 'Mercado Pago' : 'Efectivo'}
+                  </span>
+                </span>
                 <span className="cierre-caja__col-monto">
-                  {Number(r.monto) > 0 ? `$ ${Number(r.monto).toFixed(2)}` : '—'}
+                  {row.monto > 0 ? `$ ${row.monto.toFixed(2)}` : '—'}
                 </span>
               </div>
             ))}
           </div>
 
           <div className="cierre-caja__total-bar">
-            <span className="cierre-caja__total-label">Total</span>
-            <span className="cierre-caja__total-value">$ {totalHoy.toFixed(2)}</span>
+            <div className="cierre-caja__total-group">
+              <span className="cierre-caja__total-label">Mercado Pago</span>
+              <span className="cierre-caja__total-value cierre-caja__total-value--soft">
+                $ {totalHoyMp.toFixed(2)}
+              </span>
+            </div>
+
+            <div className="cierre-caja__total-group">
+              <span className="cierre-caja__total-label">Total efectivo</span>
+              <span className="cierre-caja__total-value">$ {totalHoy.toFixed(2)}</span>
+            </div>
           </div>
         </div>
 
@@ -715,12 +823,12 @@ export const CierreCajaScreen: React.FC<Props> = () => {
           <div className="cierre-caja__yesterday-info">
             <span className="cierre-caja__yesterday-label">Caja del día de ayer:</span>
 
-            {cajaAyer && cajaAyer.rows?.length ? (
+            {cajaAyer.rows.length > 0 ? (
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
                 <button
                   type="button"
                   className="cierre-caja__yesterday-btn"
-                  onClick={() => void generateCajaPdf(cajaAyer.fechaISO, cajaAyer.rows, 'download')}
+                  onClick={() => void generateCajaPdf(cajaAyer, 'download')}
                 >
                   <span className="cierre-caja__pdf-tag">
                     {pdfIcon ? <img src={pdfIcon} alt="PDF" className="cierre-caja__pdf-icon" /> : 'PDF'}
@@ -728,11 +836,21 @@ export const CierreCajaScreen: React.FC<Props> = () => {
                   <span className="cierre-caja__yesterday-date">{formatDateDisplay(cajaAyer.fechaISO)}</span>
                 </button>
 
+                <span className="cierre-caja__yesterday-total">
+                  Efectivo: $ {cajaAyer.efectivoTotal.toFixed(2)}
+                </span>
+
+                {cajaAyer.mercadoPagoTotal > 0 && (
+                  <span className="cierre-caja__yesterday-mp">
+                    Mercado Pago: $ {cajaAyer.mercadoPagoTotal.toFixed(2)}
+                  </span>
+                )}
+
                 <button
                   type="button"
                   className="btn btn--outline btn--sm"
                   onClick={async () => {
-                    const url = await generateCajaPdf(cajaAyer.fechaISO, cajaAyer.rows, 'preview')
+                    const url = await generateCajaPdf(cajaAyer, 'preview')
                     if (url) {
                       setPreviewUrl(url)
                       setShowPreview(true)

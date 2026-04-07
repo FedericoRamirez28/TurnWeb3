@@ -7828,5 +7828,335 @@
     "nombre": "PSIQUIATRÍA",
     "plan": "PARTICULAR",
     "valor": 39800
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ACIDO URICO",
+    "plan": "BASE",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ACIDO URICO",
+    "plan": "ESMERALDA",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ACIDO URICO",
+    "plan": "RUBI",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ACIDO URICO",
+    "plan": "DORADO",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ACIDO URICO",
+    "plan": "PARTICULAR",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CALCEMIA",
+    "plan": "BASE",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CALCEMIA",
+    "plan": "ESMERALDA",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CALCEMIA",
+    "plan": "RUBI",
+    "valor": 0
+  },
+  {
+   "tipo": "LABORATORIO",
+    "nombre": "CALCEMIA",
+    "plan": "DORADO",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CALCEMIA",
+    "plan": "PARTICULAR",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COLESTEROL TOTAL",
+    "plan": "BASE",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COLESTEROL TOTAL",
+    "plan": "ESMERALDA",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COLESTEROL TOTAL",
+    "plan": "RUBI",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COLESTEROL TOTAL",
+    "plan": "DORADO",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COLESTEROL TOTAL",
+    "plan": "PARTICULAR",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COLESTEROL HDL",
+    "plan": "BASE",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COLESTEROL HDL",
+    "plan": "ESMERALDA",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COLESTEROL HDL",
+    "plan": "RUBI",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COLESTEROL HDL",
+    "plan": "DORADO",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COLESTEROL HDL",
+    "plan": "PARTICULAR",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COLESTEROL LDL",
+    "plan": "BASE",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COLESTEROL LDL",
+    "plan": "ESMERALDA",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COLESTEROL LDL",
+    "plan": "RUBI",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COLESTEROL LDL",
+    "plan": "DORADO",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "COLESTEROL LDL",
+    "plan": "PARTICULAR",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CREATININA",
+    "plan": "BASE",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CREATININA",
+    "plan": "ESMERALDA",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CREATININA",
+    "plan": "RUBI",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "CREATININA",
+    "plan": "DORADO",
+    "valor": 0
+  },
+  {
+   "tipo": "LABORATORIO",
+    "nombre": "CREATININA",
+    "plan": "PARTICULAR",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATOGRAMA",
+    "plan": "BASE",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATOGRAMA",
+    "plan": "ESMERALDA",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATOGRAMA",
+    "plan": "RUBI",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATOGRAMA",
+    "plan": "DORADO",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "HEPATOGRAMA",
+    "plan": "PARTICULAR",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "UREMIA",
+    "plan": "BASE",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "UREMIA",
+    "plan": "ESMERALDA",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "UREMIA",
+    "plan": "RUBI",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "UREMIA",
+    "plan": "DORADO",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "UREMIA",
+    "plan": "PARTICULAR",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "URICEMIA",
+    "plan": "BASE",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "URICEMIA",
+    "plan": "ESMERALDA",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "URICEMIA",
+    "plan": "RUBI",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "URICEMIA",
+    "plan": "DORADO",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "URICEMIA",
+    "plan": "PARTICULAR",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ORINA COMPLETA",
+    "plan": "BASE",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ORINA COMPLETA",
+    "plan": "ESMERALDA",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ORINA COMPLETA",
+    "plan": "RUBI",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ORINA COMPLETA",
+    "plan": "DORADO",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ORINA COMPLETA",
+    "plan": "PARTICULAR",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ERITROSEDIMENTACIÓN",
+    "plan": "BASE",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ERITROSEDIMENTACIÓN",
+    "plan": "ESMERALDA",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ERITROSEDIMENTACIÓN",
+    "plan": "RUBI",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ERITROSEDIMENTACIÓN",
+    "plan": "DORADO",
+    "valor": 0
+  },
+  {
+    "tipo": "LABORATORIO",
+    "nombre": "ERITROSEDIMENTACIÓN",
+    "plan": "PARTICULAR",
+    "valor": 0
   }
 ]

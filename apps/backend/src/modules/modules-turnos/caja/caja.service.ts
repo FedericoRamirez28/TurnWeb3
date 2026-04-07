@@ -2,8 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { Prisma, Turno, Afiliado } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 
-/* ===================== DTOs ===================== */
-
 export interface CajaRowDto {
   fecha: string;
   numeroAfiliado: string;
@@ -11,13 +9,9 @@ export interface CajaRowDto {
   nombreCompleto: string;
   prestador: string;
   especialidadOLaboratorio: string;
-
-  // ✅ monto "efectivo" (lo que suma a caja)
   monto: number;
-
-  // ✅ NUEVO: Mercado Pago (NO suma al total)
-  mpPagado?: boolean;
-  mpMonto?: number;
+  mpPagado: boolean;
+  mpMonto: number;
   mpRef?: string | null;
 }
 
@@ -37,42 +31,40 @@ export interface CajaEstadoDto {
 
 type TurnoWithAfiliado = Turno & { afiliado: Afiliado | null };
 
-/* ===================== SAFE READ HELPERS (JSON) ===================== */
-
-function asRecord(v: unknown): Record<string, unknown> {
-  return v && typeof v === 'object' ? (v as Record<string, unknown>) : {};
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object'
+    ? (value as Record<string, unknown>)
+    : {};
 }
 
-function readBool(v: unknown, key: string, fallback = false): boolean {
-  const rec = asRecord(v);
-  const x = rec[key];
-  return typeof x === 'boolean' ? x : fallback;
+function readBool(value: unknown, key: string, fallback = false): boolean {
+  const record = asRecord(value);
+  const found = record[key];
+  return typeof found === 'boolean' ? found : fallback;
 }
 
-function readNumber(v: unknown, key: string, fallback = 0): number {
-  const rec = asRecord(v);
-  const x = rec[key];
-  if (typeof x === 'number' && Number.isFinite(x)) return x;
-  if (typeof x === 'string') {
-    const n = Number(x.replace(',', '.'));
-    return Number.isFinite(n) ? n : fallback;
+function readNumber(value: unknown, key: string, fallback = 0): number {
+  const record = asRecord(value);
+  const found = record[key];
+
+  if (typeof found === 'number' && Number.isFinite(found)) return found;
+  if (typeof found === 'string') {
+    const parsed = Number(found.replace(',', '.'));
+    return Number.isFinite(parsed) ? parsed : fallback;
   }
+
   return fallback;
 }
 
-function readString(v: unknown, key: string, fallback = ''): string {
-  const rec = asRecord(v);
-  const x = rec[key];
-  return typeof x === 'string' ? x : fallback;
+function readString(value: unknown, key: string, fallback = ''): string {
+  const record = asRecord(value);
+  const found = record[key];
+  return typeof found === 'string' ? found : fallback;
 }
-
-/* ===================== SERVICE ===================== */
 
 @Injectable()
 export class CajaService {
   constructor(private readonly prisma: PrismaService) {}
-
-  /* ===================== HELPERS ===================== */
 
   private getCajaDateForNow(now: Date = new Date()): string {
     const base = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -100,92 +92,62 @@ export class CajaService {
     return { start, end };
   }
 
-  /* ===================== CORE ===================== */
+  private mapTurnoToCajaRow(fechaISO: string, turno: TurnoWithAfiliado): CajaRowDto {
+    const mpPagado = Boolean(turno.mpPagado);
+    const mpMonto = Number(turno.mpMonto ?? 0);
+    const montoEfectivo = mpPagado ? 0 : Number(turno.monto ?? 0);
+
+    return {
+      fecha: this.isoToDisplay(fechaISO),
+      numeroAfiliado: turno.afiliado?.numeroAfiliado ?? '',
+      dni: turno.afiliado?.dni ?? '',
+      nombreCompleto: turno.afiliado?.nombreCompleto ?? '',
+      prestador: turno.prestador ?? '',
+      especialidadOLaboratorio:
+        turno.laboratorio ?? turno.especialidad ?? turno.tipoAtencion ?? '',
+      monto: montoEfectivo,
+      mpPagado,
+      mpMonto,
+      mpRef: turno.mpRef ?? null,
+    };
+  }
 
   private async buildCajaForDate(fechaISO: string): Promise<CierreCajaDto> {
     const { start, end } = this.buildIntervalForCajaDate(fechaISO);
 
-    const turnos = (await this.prisma.turno.findMany({
+    const turnos = await this.prisma.turno.findMany({
       where: {
         estado: 'recepcionado',
         updatedAt: { gte: start, lt: end },
       },
       include: { afiliado: true },
-      orderBy: { updatedAt: 'asc' },
-    })) as TurnoWithAfiliado[];
-
-    const rows: CajaRowDto[] = turnos.map((t) => {
-      // ✅ si en tu tabla Turno agregaste mpPagado/mpMonto/mpRef, Prisma te los expone acá.
-      // Si todavía NO están en el schema, comentá estas 3 líneas hasta migrar.
-      const mpPagado = Boolean(
-        (t as unknown as Record<string, unknown>).mpPagado,
-      );
-      const mpMonto = Number(
-        (t as unknown as Record<string, unknown>).mpMonto ?? 0,
-      );
-      const mpRef =
-        ((t as unknown as Record<string, unknown>).mpRef as
-          | string
-          | undefined) ?? null;
-
-      // ✅ Caja SOLO efectivo
-      const montoEfectivo = mpPagado ? 0 : Number(t.monto ?? 0);
-
-      return {
-        fecha: this.isoToDisplay(fechaISO),
-        numeroAfiliado: t.afiliado?.numeroAfiliado ?? '',
-        dni: t.afiliado?.dni ?? '',
-        nombreCompleto: t.afiliado?.nombreCompleto ?? '',
-        prestador: t.prestador ?? '',
-        especialidadOLaboratorio:
-          t.laboratorio ?? t.especialidad ?? t.tipoAtencion ?? '',
-        monto: montoEfectivo,
-        mpPagado,
-        mpMonto,
-        mpRef,
-      };
+      orderBy: [{ updatedAt: 'asc' }, { hora: 'asc' }],
     });
 
-    // ✅ total SOLO efectivo
-    const total = rows.reduce((acc, r) => acc + Number(r.monto ?? 0), 0);
+    const rows = turnos.map((turno) => this.mapTurnoToCajaRow(fechaISO, turno));
+    const total = rows.reduce((acc, row) => acc + Number(row.monto ?? 0), 0);
+
     return { fechaISO, total, rows };
   }
-
-  /* ===================== PERSIST / READ ===================== */
 
   private mapPersistedRows(rowsUnknown: unknown): CajaRowDto[] {
     if (!Array.isArray(rowsUnknown)) return [];
 
-    return rowsUnknown.map((r) => {
-      // ✅ lectura segura (SIN any)
-      const mpPagado = readBool(r, 'mpPagado', false);
-      const mpMonto = readNumber(r, 'mpMonto', 0);
-      const mpRef = readString(r, 'mpRef', '');
-
-      const monto = readNumber(r, 'monto', 0);
-
-      return {
-        fecha: readString(r, 'fecha', '—'),
-        numeroAfiliado: readString(r, 'numeroAfiliado', '—'),
-        dni: readString(r, 'dni', '—'),
-        nombreCompleto: readString(r, 'nombreCompleto', '—'),
-        prestador: readString(r, 'prestador', '—'),
-        especialidadOLaboratorio: readString(
-          r,
-          'especialidadOLaboratorio',
-          '—',
-        ),
-        monto,
-        mpPagado,
-        mpMonto,
-        mpRef: mpRef || null,
-      };
-    });
+    return rowsUnknown.map((row) => ({
+      fecha: readString(row, 'fecha', '—'),
+      numeroAfiliado: readString(row, 'numeroAfiliado', '—'),
+      dni: readString(row, 'dni', '—'),
+      nombreCompleto: readString(row, 'nombreCompleto', '—'),
+      prestador: readString(row, 'prestador', '—'),
+      especialidadOLaboratorio: readString(row, 'especialidadOLaboratorio', '—'),
+      monto: readNumber(row, 'monto', 0),
+      mpPagado: readBool(row, 'mpPagado', false),
+      mpMonto: readNumber(row, 'mpMonto', 0),
+      mpRef: readString(row, 'mpRef', '') || null,
+    }));
   }
 
-  private async getCajaPersistedOrLive(
-    fechaISO: string,
-  ): Promise<CierreCajaDto> {
+  private async getCajaPersistedOrLive(fechaISO: string): Promise<CierreCajaDto> {
     const saved = await this.prisma.cierreCaja.findUnique({
       where: { fechaISO },
     });
@@ -240,9 +202,9 @@ export class CajaService {
       take: 120,
     });
 
-    const historial = historialDb.map((h) => ({
-      fechaISO: h.fechaISO,
-      total: Number(h.total ?? 0),
+    const historial = historialDb.map((item) => ({
+      fechaISO: item.fechaISO,
+      total: Number(item.total ?? 0),
     }));
 
     return { hoyFechaISO, hoy, ayerFechaISO, ayer, historial };

@@ -208,6 +208,8 @@ export const HomeScreen: React.FC = () => {
     monto: number
     profesional: string
     estado: AppointmentStatus
+    mpPagado?: boolean
+    mpMonto?: number
   }) => {
     void saveTurno(payload)
       .then(() => refreshData())
@@ -663,6 +665,8 @@ interface TurnoModalProps {
     monto: number
     profesional: string
     estado: AppointmentStatus
+    mpPagado?: boolean
+    mpMonto?: number
   }) => Promise<void> | void
   isSlotTaken: (date: string, time: string) => boolean
 
@@ -709,10 +713,14 @@ const TurnoModal: React.FC<TurnoModalProps> = ({
   const [motivo, setMotivo] = useState('')
 
   const [montoInput, setMontoInput] = useState<string>(() => {
+    if (appointment?.mpPagado && typeof appointment?.mpMonto === 'number' && appointment.mpMonto > 0) {
+      return String(appointment.mpMonto)
+    }
     if (typeof appointment?.monto === 'number') return String(appointment.monto)
     return '0'
   })
   const [isMontoManual, setIsMontoManual] = useState(false)
+  const [mpPagado, setMpPagado] = useState(Boolean(appointment?.mpPagado))
 
   const isReadOnlyRecep = activeTab === 'recepcionar'
 
@@ -929,6 +937,8 @@ const [items, setItems] = useState<PracticaItem[]>(() => parseExistingToItems(ap
       monto: montoNumber,
       profesional,
       estado,
+      mpPagado,
+      mpMonto: mpPagado ? montoNumber : 0,
     })
 
     onClose()
@@ -1190,8 +1200,20 @@ const [items, setItems] = useState<PracticaItem[]>(() => parseExistingToItems(ap
               )}
             </label>
 
-            <label className="field">
-              <span className="field__label">Monto (coseguro)</span>
+            <div className="field turno-modal__monto-field">
+              <div className="turno-modal__monto-head">
+                <span className="field__label">Monto (coseguro)</span>
+
+                <label className="turno-modal__mp-check">
+                  <input
+                    type="checkbox"
+                    checked={mpPagado}
+                    onChange={(e) => setMpPagado(e.target.checked)}
+                  />
+                  <span>Mercado Pago</span>
+                </label>
+              </div>
+
               <input
                 className="input"
                 value={montoInput}
@@ -1199,10 +1221,15 @@ const [items, setItems] = useState<PracticaItem[]>(() => parseExistingToItems(ap
                 placeholder="Se calcula según plan y prácticas"
                 inputMode="decimal"
               />
+
+              {mpPagado && (
+                <span className="field__hint">Se informa en caja como pago digital y no suma al total efectivo.</span>
+              )}
+
               {isMontoManual && (
                 <span className="field__hint field__hint--error">Modificar el valor en caso de ser necesario.</span>
               )}
-            </label>
+            </div>
 
             {activeTab === 'recepcionar' && (
               <label className="field field--full">

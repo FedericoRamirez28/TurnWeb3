@@ -16,12 +16,10 @@ type ConsultorioTurno = {
   id: string
   empresaId: string
   empresaNombre: string
-
   dni: string
   nombre: string
   nacimientoISO: string
   diagnostico: string
-
   fechaTurnoISO: string
   createdAt: string
 }
@@ -35,12 +33,8 @@ type Draft = {
   fechaTurnoISO: string
 }
 
-const STORAGE_KEY_CONSULTORIOS_DRAFT = 'medic_laboral_consultorios_draft_v1'
-
-// ✅ Buenos Aires timezone
 const TZ_AR = 'America/Argentina/Buenos_Aires'
 
-// ✅ YYYY-MM-DD (en zona horaria Buenos Aires)
 function isoDayAR(d = new Date()): string {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: TZ_AR,
@@ -55,21 +49,29 @@ function isoDayAR(d = new Date()): string {
   return `${yyyy}-${mm}-${dd}`
 }
 
-// ✅ ISO -> DD/MM/YYYY (Argentina)
+function makeEmptyDraft(todayISO: string): Draft {
+  return {
+    empresaId: '',
+    dni: '',
+    nombre: '',
+    nacimientoISO: '',
+    diagnostico: '',
+    fechaTurnoISO: todayISO,
+  }
+}
+
 function fmtArgDate(isoYmd: string): string {
   const [y, m, d] = (isoYmd || '').split('-')
   if (!y || !m || !d) return isoYmd || '-'
   return `${d}/${m}/${y}`
 }
 
-// ✅ ISO -> DD-MM-YYYY (para nombre de archivo)
 function fmtArgDateFile(isoYmd: string): string {
   const [y, m, d] = (isoYmd || '').split('-')
   if (!y || !m || !d) return isoYmd || 'fecha'
   return `${d}-${m}-${y}`
 }
 
-// ✅ Mes/Año (ARG) -> MM-YYYY (para nombre de archivo)
 function fmtMonthYearFile(year: number, monthIndex0: number): string {
   const mm = String(monthIndex0 + 1).padStart(2, '0')
   return `${mm}-${year}`
@@ -79,7 +81,7 @@ function safeFilePart(s: string): string {
   return (s || '')
     .trim()
     .replaceAll(' ', '_')
-    .replace(/[\\/:*?"<>|]+/g, '-') // inválidos Windows
+    .replace(/[\\/:*?"<>|]+/g, '-')
     .replace(/_+/g, '_')
 }
 
@@ -95,43 +97,8 @@ function normalizeDni(s: string) {
   return (s || '').replace(/\D/g, '')
 }
 
-function safeLoadDraft(todayISO: string): Draft {
-  const fallback: Draft = {
-    empresaId: '',
-    dni: '',
-    nombre: '',
-    nacimientoISO: '',
-    diagnostico: '',
-    fechaTurnoISO: todayISO, // ✅ SIEMPRE HOY
-  }
-
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY_CONSULTORIOS_DRAFT)
-    if (!raw) return fallback
-    const parsed = JSON.parse(raw) as Partial<Draft>
-
-    // ✅ aunque venga guardado, FORZAMOS HOY
-    return {
-      ...fallback,
-      ...parsed,
-      fechaTurnoISO: todayISO,
-    }
-  } catch {
-    return fallback
-  }
-}
-
-function safeSaveDraft(d: Draft) {
-  try {
-    localStorage.setItem(STORAGE_KEY_CONSULTORIOS_DRAFT, JSON.stringify(d))
-  } catch {
-    // no-op
-  }
-}
-
 function fmtMonthTitle(year: number, monthIndex0: number) {
   const d = new Date(year, monthIndex0, 1)
-  // (esto es solo UI; el nombre del archivo lo hacemos con fmtMonthYearFile)
   return d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
 }
 
@@ -183,7 +150,6 @@ function buildPdfConsultorios(turnosList: ConsultorioTurno[]) {
     y = margin
   }
 
-  // ===== columnas (SIN SOLAPARSE) =====
   const gap = 2
   const colFechaW = 20
   const colDniW = 22
@@ -211,7 +177,6 @@ function buildPdfConsultorios(turnosList: ConsultorioTurno[]) {
       return (a.createdAt || '').localeCompare(b.createdAt || '')
     })
 
-    // ===== header empresa (wrap) =====
     ensureSpace(14)
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(11)
@@ -222,7 +187,6 @@ function buildPdfConsultorios(turnosList: ConsultorioTurno[]) {
 
     y += 2
 
-    // ===== header tabla =====
     ensureSpace(10)
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(9.2)
@@ -238,7 +202,6 @@ function buildPdfConsultorios(turnosList: ConsultorioTurno[]) {
     doc.line(margin, y, pageW - margin, y)
     y += 5
 
-    // ===== filas =====
     list.forEach((t) => {
       const nombreLines = doc.splitTextToSize(t.nombre || '-', cols.nombre.w)
       const diagLines = doc.splitTextToSize(t.diagnostico || '-', cols.diag.w)
@@ -252,8 +215,6 @@ function buildPdfConsultorios(turnosList: ConsultorioTurno[]) {
 
       doc.text(t.fechaTurnoISO ? fmtArgDate(t.fechaTurnoISO) : '-', cols.fecha.x, yRow)
       doc.text(t.dni || '-', cols.dni.x, yRow)
-
-      // ✅ acá ya NO se superponen porque diag.x está después de nombre.x + nombre.w
       doc.text(nombreLines, cols.nombre.x, yRow)
       doc.text(diagLines, cols.diag.x, yRow)
 
@@ -271,8 +232,6 @@ function buildPdfConsultorios(turnosList: ConsultorioTurno[]) {
   return doc
 }
 
-
-/** Busca un DNI en el padrón de empresas activas (con cache + concurrencia). */
 async function findPersonByDniAcrossCompanies(opts: {
   dni: string
   companies: Company[]
@@ -291,7 +250,6 @@ async function findPersonByDniAcrossCompanies(opts: {
   const actives = (opts.companies || []).filter((c) => c.isActive)
   if (actives.length === 0) return null
 
-  // ✅ primero: buscamos en cache
   for (const c of actives) {
     const cached = opts.padronCache.get(c.id)
     if (cached && cached.length) {
@@ -300,7 +258,6 @@ async function findPersonByDniAcrossCompanies(opts: {
     }
   }
 
-  // ✅ luego: fetch concurrente, cortando al primer match
   let found: { company: Company; person: CompanyPadronPerson } | null = null
   let idx = 0
   const limit = 4
@@ -310,14 +267,12 @@ async function findPersonByDniAcrossCompanies(opts: {
       const my = idx++
       const c = actives[my]
 
-      // si ya hay cache vacía, evitamos pegarle de nuevo
       if (opts.padronCache.has(c.id)) continue
 
       try {
         const r = await getCompanyPadron(c.id)
         const items = (r.items || []).slice()
 
-        // guardamos cache (aunque venga vacío)
         opts.padronCacheSet((prev) => {
           const next = new Map(prev)
           next.set(c.id, items)
@@ -329,7 +284,6 @@ async function findPersonByDniAcrossCompanies(opts: {
           if (hit) found = { company: c, person: hit }
         }
       } catch {
-        // cacheamos vacío para no insistir infinito
         opts.padronCacheSet((prev) => {
           const next = new Map(prev)
           next.set(c.id, [])
@@ -344,16 +298,14 @@ async function findPersonByDniAcrossCompanies(opts: {
 }
 
 export default function ConsultoriosScreen() {
-  // ✅ HOY calculado en zona horaria Buenos Aires (UTC-3)
   const todayISO = useMemo(() => isoDayAR(new Date()), [])
 
   const [companies, setCompanies] = useState<Company[]>([])
   const [companiesLoading, setCompaniesLoading] = useState(true)
 
   const [turnos, setTurnos] = useState<ConsultorioTurno[]>([])
-  const [draft, setDraft] = useState<Draft>(() => safeLoadDraft(todayISO))
+  const [draft, setDraft] = useState<Draft>(() => makeEmptyDraft(todayISO))
 
-  // ✅ cache de padrón por empresa (para autocompletar por DNI)
   const [padronCache, setPadronCache] = useState<Map<string, CompanyPadronPerson[]>>(() => new Map())
   const padronCacheRef = useRef<Map<string, CompanyPadronPerson[]>>(new Map())
   useEffect(() => {
@@ -369,14 +321,10 @@ export default function ConsultoriosScreen() {
 
   const monthTitle = useMemo(() => fmtMonthTitle(year, monthIndex0), [year, monthIndex0])
 
-  // ✅ siempre guardar draft, pero con fecha forzada a hoy (AR)
   useEffect(() => {
-    if (draft.fechaTurnoISO !== todayISO) {
-      setDraft((p) => ({ ...p, fechaTurnoISO: todayISO }))
-      return
-    }
-    safeSaveDraft(draft)
-  }, [draft, todayISO])
+    if (draft.fechaTurnoISO === todayISO) return
+    setDraft((prev) => ({ ...prev, fechaTurnoISO: todayISO }))
+  }, [draft.fechaTurnoISO, todayISO])
 
   const activeCompanies = useMemo(() => {
     const list = companies.slice()
@@ -390,8 +338,6 @@ export default function ConsultoriosScreen() {
 
   const monthResetKey = useMemo(() => `${year}-${monthIndex0}`, [year, monthIndex0])
   const [selectedDayISO, setSelectedDayISO] = useState<string>('')
-
-  // ✅ filtro de empresa para reportes/listado (independiente del formulario)
   const [reportCompanyId, setReportCompanyId] = useState<string>('')
 
   const reportCompany = useMemo(() => {
@@ -472,7 +418,6 @@ export default function ConsultoriosScreen() {
     return monthTurnos.filter((t) => t.fechaTurnoISO === selectedDayISO)
   }, [monthTurnos, selectedDayISO])
 
-  // ✅ aplica filtro de empresa al listado (mes o día)
   const baseForReport = useMemo(() => {
     return selectedDayISO ? dayTurnos : monthTurnos
   }, [selectedDayISO, dayTurnos, monthTurnos])
@@ -483,18 +428,13 @@ export default function ConsultoriosScreen() {
   }, [baseForReport, reportCompanyId])
 
   const setField = useCallback(<K extends keyof Draft>(key: K, value: Draft[K]) => {
-    setDraft((p) => ({ ...p, [key]: value }))
+    setDraft((prev) => ({ ...prev, [key]: value }))
   }, [])
 
   const clearForm = useCallback(() => {
-    setDraft((p) => ({
-      ...p,
-      empresaId: p.empresaId,
-      dni: '',
-      nombre: '',
-      nacimientoISO: '',
-      diagnostico: '',
-      fechaTurnoISO: isoDayAR(new Date()), // ✅ hoy AR
+    setDraft((prev) => ({
+      ...makeEmptyDraft(isoDayAR(new Date())),
+      empresaId: prev.empresaId,
     }))
     lastAutoDniRef.current = ''
   }, [])
@@ -509,7 +449,6 @@ export default function ConsultoriosScreen() {
     return null
   }, [draft])
 
-  // ✅ AUTOCOMPLETAR por DNI (empresa + nombre) buscando en padrón
   useEffect(() => {
     const dni = normalizeDni(draft.dni)
     if (dni.length < 7) return
@@ -532,10 +471,10 @@ export default function ConsultoriosScreen() {
 
         lastAutoDniRef.current = dni
 
-        setDraft((p) => ({
-          ...p,
+        setDraft((prev) => ({
+          ...prev,
           empresaId: hit.company.id,
-          nombre: (hit.person.nombre || '').trim() || p.nombre,
+          nombre: (hit.person.nombre || '').trim() || prev.nombre,
         }))
 
         Swal.fire({
@@ -552,10 +491,9 @@ export default function ConsultoriosScreen() {
   }, [draft.dni, activeCompanies])
 
   const takeTurno = useCallback(async () => {
-    // ✅ fecha HOY AR
     const fechaHoy = isoDayAR(new Date())
     if (draft.fechaTurnoISO !== fechaHoy) {
-      setDraft((p) => ({ ...p, fechaTurnoISO: fechaHoy }))
+      setDraft((prev) => ({ ...prev, fechaTurnoISO: fechaHoy }))
     }
 
     const err = validate()
@@ -573,7 +511,7 @@ export default function ConsultoriosScreen() {
         nombre: draft.nombre.trim(),
         nacimientoISO: draft.nacimientoISO,
         diagnostico: draft.diagnostico.trim(),
-        fechaTurnoISO: fechaHoy, // ✅ HOY SIEMPRE (AR)
+        fechaTurnoISO: fechaHoy,
       })
 
       Swal.fire({
@@ -616,9 +554,6 @@ export default function ConsultoriosScreen() {
     setMonthIndex0(d.getMonth())
   }, [])
 
-  // ✅ nombre archivo:
-  // - Día:  Empresa + DD-MM-YYYY
-  // - Mes:  Empresa + MM-YYYY
   const downloadPdf = useCallback(() => {
     const empresaLabel = reportCompany?.nombre?.trim() || 'Todas'
     const empresaPart = safeFilePart(empresaLabel)
@@ -626,10 +561,10 @@ export default function ConsultoriosScreen() {
     const doc = buildPdfConsultorios(reportTurnos)
 
     if (selectedDayISO) {
-      const dayArg = fmtArgDateFile(selectedDayISO) // DD-MM-YYYY
+      const dayArg = fmtArgDateFile(selectedDayISO)
       doc.save(`${empresaPart}_${dayArg}.pdf`)
     } else {
-      const my = fmtMonthYearFile(year, monthIndex0) // MM-YYYY
+      const my = fmtMonthYearFile(year, monthIndex0)
       doc.save(`${empresaPart}_${my}.pdf`)
     }
   }, [selectedDayISO, reportTurnos, monthIndex0, year, reportCompany])
@@ -647,7 +582,6 @@ export default function ConsultoriosScreen() {
   }, [year, monthIndex0])
 
   const hasCompanies = !companiesLoading && activeCompanies.length > 0
-
   const pdfButtonLabel = selectedDayISO ? 'PDF Día' : 'PDF Mes'
   const pdfButtonDisabled = reportTurnos.length === 0
 
@@ -717,7 +651,7 @@ export default function ConsultoriosScreen() {
                   disabled
                   title="Demanda espontánea: los turnos son siempre para hoy"
                   onChange={() => {
-                    // noop (lock)
+                    // noop
                   }}
                 />
               </label>

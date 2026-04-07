@@ -522,7 +522,10 @@ export const TodaySummary: React.FC<TodaySummaryProps> = ({
                   a.tipoAtencion === 'laboratorio' ? a.laboratorio : a.especialidad;
 
                 const prestadorDisplay = a.prestador;
-                const montoDisplay = a.monto > 0 ? `$ ${a.monto.toFixed(2)}` : 'Sin costo';
+                const montoBase = a.mpPagado
+                  ? (typeof a.mpMonto === 'number' && a.mpMonto > 0 ? a.mpMonto : a.monto)
+                  : a.monto;
+                const montoDisplay = montoBase > 0 ? `$ ${montoBase.toFixed(2)}` : 'Sin costo';
 
                 const isCancelado = a.estado === 'cancelado';
 
@@ -548,7 +551,12 @@ export const TodaySummary: React.FC<TodaySummaryProps> = ({
                     <td>{a.profesional}</td>
                     <td>{prestadorDisplay}</td>
                     <td>{practica ?? ''}</td>
-                    <td>{montoDisplay}</td>
+                    <td>
+                      <div>{montoDisplay}</div>
+                      {a.mpPagado && (
+                        <div className="summary-table__sub">Mercado Pago · no suma a caja efectivo</div>
+                      )}
+                    </td>
                     <td>
                       <span className={getEstadoClass(a.estado)}>
                         {getEstadoLabel(a.estado)}

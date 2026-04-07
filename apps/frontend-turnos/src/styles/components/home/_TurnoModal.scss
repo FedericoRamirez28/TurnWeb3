@@ -280,3 +280,36 @@
 .calendar__day--empty {
   visibility: hidden;
 }
+
+.turno-modal__monto-field {
+  gap: 6px;
+}
+
+.turno-modal__monto-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.turno-modal__mp-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: var(--color-ink-soft);
+  user-select: none;
+  cursor: pointer;
+
+  input {
+    width: 15px;
+    height: 15px;
+    accent-color: var(--color-primary, #0f766e);
+    cursor: pointer;
+  }
+
+  span {
+    line-height: 1;
+  }
+}

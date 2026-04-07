@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
-import type { CreateTurnoInput, TurnoDto, TurnoEstado } from './turnos.service';
+import { CreateTurnoDto, UpdateEstadoDto } from './turnos.dto';
+import type { TurnoDto } from './turnos.service';
 import { TurnosService } from './turnos.service';
 
 @Controller('turnos')
@@ -12,14 +13,14 @@ export class TurnosController {
   }
 
   @Post()
-  create(@Body() body: CreateTurnoInput): Promise<TurnoDto> {
+  create(@Body() body: CreateTurnoDto): Promise<TurnoDto> {
     return this.turnosService.create(body);
   }
 
   @Patch(':id/estado')
   updateEstado(
     @Param('id') id: string,
-    @Body() body: { estado: TurnoEstado },
+    @Body() body: UpdateEstadoDto,
   ): Promise<TurnoDto> {
     return this.turnosService.updateEstado(id, body.estado);
   }

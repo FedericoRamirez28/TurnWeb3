@@ -1,4 +1,3 @@
-// apps/backend/src/modules/laboral/consultorios/consultorios.controller.ts
 import {
   Body,
   Controller,
@@ -10,58 +9,60 @@ import {
   Req,
   UnauthorizedException,
   UseGuards,
-} from '@nestjs/common';
-import type { Request } from 'express';
+} from '@nestjs/common'
+import type { Request } from 'express'
 
-import { ConsultoriosService } from './consultorios.service';
+import { ConsultoriosService } from './consultorios.service'
 import {
   CreateConsultorioTurnoDto,
   ListConsultoriosQueryDto,
   ConsultorioTurnoResponse,
-} from './consultorio.dto';
+} from './consultorio.dto'
 
 import {
   JwtCookieAuthGuard,
   type JwtPayload,
-} from '../../auth/jwt-cookie.guard';
+} from '../../auth/jwt-cookie.guard'
+import { OptionalJwtCookieAuthGuard } from '../../auth/optional-jwt-cookie.guard'
 
-type RequestWithUser = Request & { user?: JwtPayload };
+type RequestWithUser = Request & { user?: JwtPayload }
 
 function getHeaderString(req: Request, key: string): string | undefined {
-  const v = req.headers[key.toLowerCase()];
-  if (Array.isArray(v)) return v[0];
-  return typeof v === 'string' ? v : undefined;
+  const v = req.headers[key.toLowerCase()]
+  if (Array.isArray(v)) return v[0]
+  return typeof v === 'string' ? v : undefined
 }
 
 function resolveUserId(req: RequestWithUser): string {
-  // Si el Guard se ejecutó correctamente, req.user ya tiene los datos
-  if (req.user?.sub) return req.user.sub;
+  if (req.user?.sub) return req.user.sub
 
-  const isProd = process.env.NODE_ENV === 'production';
-  if (isProd) throw new UnauthorizedException('No autenticado');
+  const isProd = process.env.NODE_ENV === 'production'
+  if (isProd) {
+    throw new UnauthorizedException('No autenticado')
+  }
 
-  // Fallback para desarrollo (si el guard falló o no se usó cookie en postman/curl)
-  const devHeader = getHeaderString(req, 'x-user-id');
+  const devHeader = getHeaderString(req, 'x-user-id')
   if (!devHeader) {
     throw new UnauthorizedException(
       'Falta autenticación (cookie) o x-user-id (solo dev)',
-    );
+    )
   }
-  return devHeader;
+
+  return devHeader
 }
 
 @Controller('laboral/consultorios')
-@UseGuards(JwtCookieAuthGuard)
 export class ConsultoriosController {
   constructor(private readonly service: ConsultoriosService) {}
 
+  @UseGuards(OptionalJwtCookieAuthGuard)
   @Get()
   async list(
     @Req() req: RequestWithUser,
     @Query() q: ListConsultoriosQueryDto,
   ): Promise<ConsultorioTurnoResponse[]> {
-    const userId = resolveUserId(req);
-    const takeNum = q.take ? Number(q.take) : undefined;
+    const userId = resolveUserId(req)
+    const takeNum = q.take ? Number(q.take) : undefined
 
     return this.service.list(userId, {
       from: q.from,
@@ -69,33 +70,36 @@ export class ConsultoriosController {
       q: q.q,
       companyId: q.companyId,
       take: Number.isFinite(takeNum) ? takeNum : undefined,
-    });
+    })
   }
 
+  @UseGuards(OptionalJwtCookieAuthGuard)
   @Get(':id')
   async getOne(
     @Req() req: RequestWithUser,
     @Param('id') id: string,
   ): Promise<ConsultorioTurnoResponse> {
-    const userId = resolveUserId(req);
-    return this.service.getById(userId, id);
+    const userId = resolveUserId(req)
+    return this.service.getById(userId, id)
   }
 
+  @UseGuards(JwtCookieAuthGuard)
   @Post()
   async create(
     @Req() req: RequestWithUser,
     @Body() dto: CreateConsultorioTurnoDto,
   ): Promise<ConsultorioTurnoResponse> {
-    const userId = resolveUserId(req);
-    return this.service.create(userId, dto);
+    const userId = resolveUserId(req)
+    return this.service.create(userId, dto)
   }
 
+  @UseGuards(JwtCookieAuthGuard)
   @Delete(':id')
   async remove(
     @Req() req: RequestWithUser,
     @Param('id') id: string,
   ): Promise<{ ok: true }> {
-    const userId = resolveUserId(req);
-    return this.service.delete(userId, id);
+    const userId = resolveUserId(req)
+    return this.service.delete(userId, id)
   }
 }
