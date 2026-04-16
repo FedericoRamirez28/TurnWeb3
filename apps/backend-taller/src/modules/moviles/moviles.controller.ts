@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common'
+import { Controller, Get, Param, Put, Query, Body } from '@nestjs/common'
 import { MovilesService } from './moviles.service'
 
 type ApiResult<T> = { ok: true; data: T } | { ok: false; error: string }
@@ -32,35 +32,6 @@ export class MovilesController {
   async info(@Param('id') id: string): Promise<ApiResult<{ patente_fija: string | null }>> {
     try {
       const data = await this.svc.getInfo(id)
-      return { ok: true, data }
-    } catch (e: any) {
-      return { ok: false, error: e?.message || 'Error' }
-    }
-  }
-
-  @Get(':id/parte-diario/ultimo')
-  async ultimoParte(@Param('id') id: string): Promise<ApiResult<any>> {
-    try {
-      const data = await this.svc.getUltimoParte(id)
-      return { ok: true, data }
-    } catch (e: any) {
-      return { ok: false, error: e?.message || 'Error' }
-    }
-  }
-
-  @Post(':id/parte-diario')
-  async crearParte(
-    @Param('id') id: string,
-    @Body()
-    body: {
-      fechaISO?: string | null
-      chofer?: string | null
-      km_inicio?: number | string | null
-      km_fin?: number | string | null
-    },
-  ): Promise<ApiResult<any>> {
-    try {
-      const data = await this.svc.createParteDiario(id, body || {})
       return { ok: true, data }
     } catch (e: any) {
       return { ok: false, error: e?.message || 'Error' }

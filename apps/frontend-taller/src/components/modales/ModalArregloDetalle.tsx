@@ -16,8 +16,45 @@ function hhmmNow(): string {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
+function pickText(...values: unknown[]): string {
+  for (const value of values) {
+    const s = String(value ?? '').trim()
+    if (s) return s
+  }
+  return ''
+}
+
+function extractTime(value: unknown): string {
+  const s = String(value ?? '').trim()
+  if (!s) return ''
+  const match = s.match(/(\d{2}:\d{2})/)
+  return match ? match[1] : ''
+}
+
+function buildStorageDateTime(fecha: string, hhmm: string): string | null {
+  const date = String(fecha ?? '').trim()
+  const time = extractTime(hhmm)
+  if (!date || !time) return null
+  return `${date} ${time}`
+}
+
+function displayTime(value: unknown): string {
+  return extractTime(value) || '—'
+}
+
+function toBool(value: unknown): boolean {
+  if (typeof value === 'boolean') return value
+  if (typeof value === 'number') return value === 1
+  const s = String(value ?? '').trim().toLowerCase()
+  return s === '1' || s === 'true' || s === 'si' || s === 'sí'
+}
+
 export default function ModalArregloDetalle({ arreglo, onCancel, onSave }: Props) {
   const [modoEdicion, setModoEdicion] = useState(false)
+
+  const storedEntrada = pickText((arreglo as any).hora_entrada, (arreglo as any).horaEntrada)
+  const storedSalida = pickText((arreglo as any).hora_salida, (arreglo as any).horaSalida, arreglo.hora_salida)
+  const storedSalidaIndefinida = toBool((arreglo as any).salida_indefinida ?? (arreglo as any).salidaIndefinida)
 
   const initial = useMemo(
     () => ({
@@ -27,33 +64,42 @@ export default function ModalArregloDetalle({ arreglo, onCancel, onSave }: Props
       anotaciones: arreglo.anotaciones ?? '',
       tareas: Array.isArray(arreglo.tareas) ? arreglo.tareas : [],
       prioridad: (String(arreglo.prioridad || 'baja').toLowerCase() as Priority) || 'baja',
-      hora_entrada: (arreglo as any).hora_entrada || '',
-      hora_salida: arreglo.hora_salida || '',
-      salida_indefinida: !!(arreglo as any).salida_indefinida,
+      hora_entrada: extractTime(storedEntrada),
+      hora_salida: extractTime(storedSalida),
+      salida_indefinida: storedSalidaIndefinida,
     }),
-    [arreglo],
+    [arreglo, storedEntrada, storedSalida, storedSalidaIndefinida],
   )
 
   const [form, setForm] = useState(initial)
 
   const persistir = async (actualizado: Arreglo, moverADone: boolean) => {
+    const fechaBase = String(actualizado.fecha || form.fecha || arreglo.fecha || '').trim()
+    const entradaTime = extractTime((actualizado as any).hora_entrada ?? form.hora_entrada ?? storedEntrada)
+    const salidaTime = extractTime((actualizado as any).hora_salida ?? form.hora_salida ?? storedSalida)
+    const salidaIndefinida = toBool((actualizado as any).salida_indefinida)
+
+    const horaEntradaStorage = buildStorageDateTime(fechaBase, entradaTime)
+    const horaSalidaStorage = salidaIndefinida ? null : buildStorageDateTime(fechaBase, salidaTime)
+
     await api.put(`/arreglos/${encodeURIComponent(actualizado.id)}`, {
       ...actualizado,
-      // compat: si tu backend usa movil_id
       movil_id: (actualizado as any).movil_id ?? (arreglo as any).movil_id ?? null,
-      // compat: si tu backend usa hora_entrada
-      hora_entrada: (actualizado as any).hora_entrada ?? (form as any).hora_entrada ?? null,
-      salida_indefinida: !!(actualizado as any).salida_indefinida,
+      hora_entrada: horaEntradaStorage,
+      horaEntrada: horaEntradaStorage,
+      hora_salida: horaSalidaStorage,
+      horaSalida: horaSalidaStorage,
+      salida_indefinida: salidaIndefinida,
+      salidaIndefinida: salidaIndefinida,
     })
 
-    // upsert historial día (si lo estás usando)
     await api.post('/historial-dia', {
-      fecha: actualizado.fecha || form.fecha || null,
+      fecha: fechaBase || null,
       movil_id: (actualizado as any).movil_id ?? (arreglo as any).movil_id ?? null,
       patente: (actualizado.patente || form.patente || '').toUpperCase(),
-      hora_entrada: (actualizado as any).hora_entrada ?? (form as any).hora_entrada ?? null,
-      hora_salida: (actualizado as any).salida_indefinida ? null : (actualizado.hora_salida ?? null),
-      salida_indefinida: !!(actualizado as any).salida_indefinida,
+      hora_entrada: entradaTime || null,
+      hora_salida: salidaIndefinida ? null : salidaTime || null,
+      salida_indefinida: salidaIndefinida,
       anotaciones: actualizado.anotaciones ?? '',
       prioridad: String(actualizado.prioridad || 'baja').toLowerCase(),
       arreglo_id: actualizado.id,
@@ -63,29 +109,54 @@ export default function ModalArregloDetalle({ arreglo, onCancel, onSave }: Props
     window.dispatchEvent(new Event('ts:historial-dia:refetch'))
     window.dispatchEvent(new CustomEvent('ts:calendar:refresh'))
 
-    onSave(actualizado, actualizado.tareas || [], moverADone)
+    const actualizadoLocal = {
+      ...actualizado,
+      ...(horaEntradaStorage ? { hora_entrada: horaEntradaStorage } : {}),
+      hora_salida: horaSalidaStorage,
+      salida_indefinida: salidaIndefinida,
+      salidaIndefinida: salidaIndefinida,
+      horaSalida: horaSalidaStorage,
+    } as Arreglo
+
+    onSave(actualizadoLocal, actualizado.tareas || [], moverADone)
   }
 
   const toggleTarea = async (index: number) => {
     const nuevasTareas = (form.tareas || []).map((t, i) => (i === index ? { ...t, completa: !t.completa } : t))
     const completo = nuevasTareas.length > 0 ? nuevasTareas.every((t) => t.completa) : false
 
-    let horaSalida = form.hora_salida
-    if (completo && !form.salida_indefinida && !horaSalida) horaSalida = hhmmNow()
+    const horaEntrada = extractTime(form.hora_entrada || storedEntrada)
+    let horaSalida = extractTime(form.hora_salida || storedSalida)
+    let salidaIndefinida = !!form.salida_indefinida
+
+    if (completo) {
+      if (salidaIndefinida || !horaSalida) {
+        horaSalida = hhmmNow()
+        salidaIndefinida = false
+      }
+    }
 
     const actualizado: Arreglo = {
       ...arreglo,
-      ...form,
       patente: (form.patente || arreglo.patente || '').toUpperCase(),
       fecha: form.fecha || arreglo.fecha,
-      hora_salida: horaSalida || null,
+      motivo: form.motivo,
+      anotaciones: form.anotaciones,
+      prioridad: form.prioridad,
       tareas: nuevasTareas,
-      ...(form.salida_indefinida ? { salida_indefinida: true } : { salida_indefinida: false }),
-      // compat hora_entrada
-      ...(form.hora_entrada ? { hora_entrada: form.hora_entrada } : {}),
+      ...(horaEntrada ? { hora_entrada: buildStorageDateTime(form.fecha || arreglo.fecha || '', horaEntrada) } : {}),
+      hora_salida: salidaIndefinida ? null : buildStorageDateTime(form.fecha || arreglo.fecha || '', horaSalida),
+      salida_indefinida: salidaIndefinida,
+      salidaIndefinida: salidaIndefinida,
     } as any
 
-    setForm((f) => ({ ...f, tareas: nuevasTareas, hora_salida: horaSalida }))
+    setForm((f) => ({
+      ...f,
+      tareas: nuevasTareas,
+      hora_salida: horaSalida,
+      hora_entrada: horaEntrada || f.hora_entrada,
+      salida_indefinida: salidaIndefinida,
+    }))
     await persistir(actualizado, completo)
   }
 
@@ -96,19 +167,36 @@ export default function ModalArregloDetalle({ arreglo, onCancel, onSave }: Props
   const handleGuardar = async () => {
     const moverADone = (form.tareas || []).length > 0 ? (form.tareas || []).every((t) => t.completa) : false
 
-    let horaSalida = form.hora_salida
-    if (moverADone && !form.salida_indefinida && !horaSalida) horaSalida = hhmmNow()
+    const horaEntrada = extractTime(form.hora_entrada || storedEntrada)
+    let horaSalida = extractTime(form.hora_salida || storedSalida)
+    let salidaIndefinida = !!form.salida_indefinida
+
+    if (moverADone) {
+      if (salidaIndefinida || !horaSalida) {
+        horaSalida = hhmmNow()
+        salidaIndefinida = false
+      }
+    }
 
     const actualizado: Arreglo = {
       ...arreglo,
-      ...form,
       patente: (form.patente || arreglo.patente || '').toUpperCase(),
       fecha: form.fecha || arreglo.fecha,
-      hora_salida: form.salida_indefinida ? null : (horaSalida || null),
+      motivo: form.motivo,
+      anotaciones: form.anotaciones,
+      prioridad: form.prioridad,
       tareas: form.tareas || [],
-      ...(form.salida_indefinida ? { salida_indefinida: true } : { salida_indefinida: false }),
-      ...(form.hora_entrada ? { hora_entrada: form.hora_entrada } : {}),
+      ...(horaEntrada ? { hora_entrada: buildStorageDateTime(form.fecha || arreglo.fecha || '', horaEntrada) } : {}),
+      hora_salida: salidaIndefinida ? null : buildStorageDateTime(form.fecha || arreglo.fecha || '', horaSalida),
+      salida_indefinida: salidaIndefinida,
+      salidaIndefinida: salidaIndefinida,
     } as any
+
+    setForm((f) => ({
+      ...f,
+      hora_salida: horaSalida,
+      salida_indefinida: salidaIndefinida,
+    }))
 
     await persistir(actualizado, moverADone)
     setModoEdicion(false)
@@ -252,11 +340,13 @@ export default function ModalArregloDetalle({ arreglo, onCancel, onSave }: Props
               <strong>Fecha:</strong> {arreglo.fecha || '—'}
             </p>
             <p>
-              <strong>Hora entrada:</strong> {(arreglo as any).hora_entrada || '—'}
+              <strong>Hora entrada:</strong> {displayTime((arreglo as any).hora_entrada ?? (arreglo as any).horaEntrada)}
             </p>
             <p>
               <strong>Hora salida:</strong>{' '}
-              {(arreglo as any).salida_indefinida ? 'Indefinido' : arreglo.hora_salida || '—'}
+              {toBool((arreglo as any).salida_indefinida ?? (arreglo as any).salidaIndefinida)
+                ? 'Indefinido'
+                : displayTime((arreglo as any).hora_salida ?? (arreglo as any).horaSalida ?? arreglo.hora_salida)}
             </p>
             <p>
               <strong>Motivo:</strong> {arreglo.motivo || '—'}

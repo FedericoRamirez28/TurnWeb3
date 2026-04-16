@@ -27,6 +27,7 @@ const PRESTADORES: PrestadorListItem[] = [
   { id: 'Dr-Davila', nombre: 'DOCTOR DAVILA TORRES' },
   { id: 'Dr-Amaya', nombre: 'DOCTOR AMAYA' },
   { id: 'barlocco', nombre: 'BARLOCCO' },
+  { id: 'entre-rios', nombre: 'CONSULTORIOS ENTRE RIOS' },
 ]
 
 function safeStr(v: unknown): string {

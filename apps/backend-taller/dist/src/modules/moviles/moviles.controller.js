@@ -46,24 +46,6 @@ let MovilesController = class MovilesController {
             return { ok: false, error: e?.message || 'Error' };
         }
     }
-    async ultimoParte(id) {
-        try {
-            const data = await this.svc.getUltimoParte(id);
-            return { ok: true, data };
-        }
-        catch (e) {
-            return { ok: false, error: e?.message || 'Error' };
-        }
-    }
-    async crearParte(id, body) {
-        try {
-            const data = await this.svc.createParteDiario(id, body || {});
-            return { ok: true, data };
-        }
-        catch (e) {
-            return { ok: false, error: e?.message || 'Error' };
-        }
-    }
     async kmAcum(id) {
         try {
             const data = await this.svc.getKmAcumulado(id);
@@ -135,21 +117,6 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], MovilesController.prototype, "info", null);
-__decorate([
-    (0, common_1.Get)(':id/parte-diario/ultimo'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], MovilesController.prototype, "ultimoParte", null);
-__decorate([
-    (0, common_1.Post)(':id/parte-diario'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", Promise)
-], MovilesController.prototype, "crearParte", null);
 __decorate([
     (0, common_1.Get)(':id/km-acumulado'),
     __param(0, (0, common_1.Param)('id')),

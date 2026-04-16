@@ -28,6 +28,15 @@ type Props = {
 function fromInputDT(v: string) {
   return v ? v.replace('T', ' ').slice(0, 16) : null
 }
+
+function todayLocalISO() {
+  const d = new Date()
+  const yyyy = d.getFullYear()
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}
+
 function nowLocalDT() {
   const d = new Date()
   const yyyy = d.getFullYear()
@@ -42,7 +51,7 @@ export default function ModalFormularioArreglo({ movilId, defaultPatente = '', o
   const movilStr = useMemo(() => (movilId == null ? '' : String(movilId)), [movilId])
 
   const [patente, setPatente] = useState('')
-  const [fecha, setFecha] = useState(() => new Date().toISOString().slice(0, 10))
+  const [fecha, setFecha] = useState(() => todayLocalISO())
   const [anotaciones, setAnotaciones] = useState('')
   const [motivo, setMotivo] = useState('')
   const [prioridad, setPrioridad] = useState<Priority>('baja')
@@ -72,6 +81,9 @@ export default function ModalFormularioArreglo({ movilId, defaultPatente = '', o
 
     setCargando(true)
     try {
+      const horaEntrada = fromInputDT(entradaDT)
+      const horaSalida = salidaIndefinida ? null : fromInputDT(salidaDT)
+
       const dto: NuevoArregloDto = {
         movil_id: movilStr ? movilStr : null,
         patente: patente.toUpperCase().trim(),
@@ -80,8 +92,8 @@ export default function ModalFormularioArreglo({ movilId, defaultPatente = '', o
         motivo,
         prioridad: String(prioridad || 'baja').toLowerCase() as Priority,
         tareas: tareas.map((t) => ({ texto: t, completa: false })),
-        hora_entrada: fromInputDT(entradaDT),
-        hora_salida: salidaIndefinida ? null : fromInputDT(salidaDT),
+        hora_entrada: horaEntrada,
+        hora_salida: horaSalida,
         salida_indefinida: !!salidaIndefinida,
       }
 
@@ -149,7 +161,11 @@ export default function ModalFormularioArreglo({ movilId, defaultPatente = '', o
                 onChange={(e) => setSalidaDT(e.currentTarget.value)}
               />
               <label className="inline-toggle">
-                <input type="checkbox" checked={salidaIndefinida} onChange={(e) => setSalidaIndefinida(e.currentTarget.checked)} />
+                <input
+                  type="checkbox"
+                  checked={salidaIndefinida}
+                  onChange={(e) => setSalidaIndefinida(e.currentTarget.checked)}
+                />
                 <span>Indefinida</span>
               </label>
             </div>
@@ -176,10 +192,10 @@ export default function ModalFormularioArreglo({ movilId, defaultPatente = '', o
         </ul>
 
         <div className="acciones">
-          <button onClick={handleSubmit} disabled={cargando} className="primary">
+          <button onClick={handleSubmit} disabled={cargando} className="primary" type="button">
             {cargando ? 'Guardando…' : 'Agregar'}
           </button>
-          <button onClick={onClose} className="ghost">
+          <button onClick={onClose} className="ghost" type="button">
             Cancelar
           </button>
         </div>

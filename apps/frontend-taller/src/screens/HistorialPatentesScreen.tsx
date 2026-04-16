@@ -1,4 +1,3 @@
-// src/screens/HistorialPatentesScreen.tsx
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import jsPDF from 'jspdf'
@@ -19,6 +18,78 @@ type ResumenItem = {
   pr_urgente?: number
 }
 
+const BA_TIME_ZONE = 'America/Argentina/Buenos_Aires'
+const DATE_ONLY_RE = /^\d{4}-\d{2}-\d{2}$/
+const DATE_TIME_NO_TZ_RE = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(?::\d{2})?$/
+
+function parseDateForSort(value: unknown) {
+  const raw = String(value ?? '').trim()
+  if (!raw) return Number.NEGATIVE_INFINITY
+
+  if (DATE_ONLY_RE.test(raw)) {
+    return Date.parse(`${raw}T00:00:00-03:00`)
+  }
+
+  if (DATE_TIME_NO_TZ_RE.test(raw)) {
+    const normalized = raw.replace(' ', 'T')
+    const withSeconds = normalized.length === 16 ? `${normalized}:00` : normalized
+    return Date.parse(`${withSeconds}-03:00`)
+  }
+
+  const parsed = Date.parse(raw)
+  return Number.isNaN(parsed) ? Number.NEGATIVE_INFINITY : parsed
+}
+
+function formatBuenosAires(value: unknown) {
+  const raw = String(value ?? '').trim()
+  if (!raw) return '-'
+
+  if (DATE_ONLY_RE.test(raw)) {
+    const [y, m, d] = raw.split('-')
+    return `${d}/${m}/${y}`
+  }
+
+  if (DATE_TIME_NO_TZ_RE.test(raw)) {
+    const normalized = raw.replace(' ', 'T')
+    const withSeconds = normalized.length === 16 ? `${normalized}:00` : normalized
+    const parsed = new Date(`${withSeconds}-03:00`)
+
+    if (Number.isNaN(parsed.getTime())) return raw
+
+    return new Intl.DateTimeFormat('es-AR', {
+      timeZone: BA_TIME_ZONE,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    })
+      .format(parsed)
+      .replace(',', '')
+  }
+
+  const parsed = new Date(raw)
+  if (Number.isNaN(parsed.getTime())) return raw
+
+  const hasTime = /T\d{2}:\d{2}|\s\d{2}:\d{2}/.test(raw)
+  return new Intl.DateTimeFormat('es-AR', {
+    timeZone: BA_TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    ...(hasTime
+      ? {
+          hour: '2-digit' as const,
+          minute: '2-digit' as const,
+          hour12: false,
+        }
+      : {}),
+  })
+    .format(parsed)
+    .replace(',', '')
+}
+
 export default function HistorialPatentesScreen() {
   const nav = useNavigate()
   const { movilId: movilIdParam } = useParams<Params>()
@@ -37,7 +108,7 @@ export default function HistorialPatentesScreen() {
     ;(async () => {
       try {
         const url = movilId ? `/historial?movilId=${encodeURIComponent(movilId)}` : `/historial`
-        const r = await api.get<ResumenItem[]>(url) // ApiResult<T>
+        const r = await api.get<ApiResult<ResumenItem[]>>(url)
 
         if (abort) return
 
@@ -64,21 +135,38 @@ export default function HistorialPatentesScreen() {
   const filtrados = useMemo(() => {
     const term = q.trim().toLowerCase()
     if (!term) return items
+
     return items.filter((it) =>
-      `${it.patente} ${it.movil_id ?? ''} ${it.ultima_fecha ?? ''}`.toLowerCase().includes(term),
+      `${it.patente} ${it.movil_id ?? ''} ${it.ultima_fecha ?? ''} ${formatBuenosAires(it.ultima_fecha)}`
+        .toLowerCase()
+        .includes(term),
     )
   }, [items, q])
+
+  const ordenados = useMemo(() => {
+    const copy = [...filtrados]
+    copy.sort((a, b) => {
+      const diff = parseDateForSort(b.ultima_fecha) - parseDateForSort(a.ultima_fecha)
+      if (diff !== 0) return diff
+
+      const vecesDiff = Number(b.veces ?? 0) - Number(a.veces ?? 0)
+      if (vecesDiff !== 0) return vecesDiff
+
+      return String(a.patente ?? '').localeCompare(String(b.patente ?? ''))
+    })
+    return copy
+  }, [filtrados])
 
   const exportarPDF = () => {
     const doc = new jsPDF()
     doc.setFontSize(16)
     doc.text(`Historial por patente ${movilId ? `(Móvil #${movilId})` : ''}`, 14, 16)
 
-    const body = filtrados.map((x) => [
+    const body = ordenados.map((x) => [
       x.patente,
       x.movil_id ?? '',
       x.veces ?? 0,
-      x.ultima_fecha || '-',
+      formatBuenosAires(x.ultima_fecha),
       x.pr_baja || 0,
       x.pr_alta || 0,
       x.pr_urgente || 0,
@@ -95,7 +183,6 @@ export default function HistorialPatentesScreen() {
 
   return (
     <div className="historial-patentes">
-      {/* HEADER estilo HistorialDelDia */}
       <header className="hp-header">
         <div className="hp-left">
           <button className="btn btn--outline" onClick={() => nav(movilId ? `/movil/${movilId}` : `/`)} type="button">
@@ -124,14 +211,13 @@ export default function HistorialPatentesScreen() {
         </div>
       </header>
 
-      {/* BODY */}
       {cargando ? (
         <div className="hp-card hp-muted">Cargando…</div>
-      ) : filtrados.length === 0 ? (
+      ) : ordenados.length === 0 ? (
         <div className="hp-card hp-muted">No hay resultados.</div>
       ) : (
         <div className="hp-grid">
-          {filtrados.map((it) => (
+          {ordenados.map((it) => (
             <article className="hp-card" key={`${it.patente}-${it.movil_id ?? 'global'}`}>
               <header className="hp-card__head">
                 <div className="hp-patente">{it.patente}</div>
@@ -146,7 +232,7 @@ export default function HistorialPatentesScreen() {
 
                 <div>
                   <dt>Último ingreso</dt>
-                  <dd>{it.ultima_fecha || '-'}</dd>
+                  <dd>{formatBuenosAires(it.ultima_fecha)}</dd>
                 </div>
 
                 <div className="full">

@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Body, Query } from '@nestjs/common'
+import { Body, Controller, Get, Post, Put, Query } from '@nestjs/common'
 import { HistorialDiaService } from './historial-dia.service'
 
 type ApiResult<T> = { ok: true; data: T } | { ok: false; error: string }
@@ -24,9 +24,29 @@ export class HistorialDiaController {
 
       if (!f) return { ok: true, data: [] }
 
-      const data = movilRaw
-        ? await this.svc.listByMovil(movilRaw, f)
-        : await this.svc.listAll(f)
+      const data = movilRaw ? await this.svc.listByMovil(movilRaw, f) : await this.svc.listAll(f)
+      return { ok: true, data }
+    } catch (e: any) {
+      return { ok: false, error: e?.message || 'Error' }
+    }
+  }
+
+  @Post()
+  async upsertFromPayload(@Body() body: Record<string, unknown>): Promise<ApiResult<{ ok: true }>> {
+    try {
+      const data = await this.svc.upsertFromPayload({
+        fechaISO: String(body?.fechaISO ?? body?.fecha ?? '').trim() || null,
+        movilId: String(body?.movil_id ?? body?.movilId ?? '').trim() || null,
+        arregloId: String(body?.arreglo_id ?? body?.arregloId ?? '').trim() || null,
+        horaEntrada: (body?.hora_entrada ?? body?.horaEntrada ?? null) as string | null,
+        horaSalida: (body?.hora_salida ?? body?.horaSalida ?? null) as string | null,
+        salidaIndefinida: !!(body?.salida_indefinida ?? body?.salidaIndefinida),
+        patente: String(body?.patente ?? '').trim() || null,
+        motivo: String(body?.motivo ?? '').trim() || null,
+        prioridad: String(body?.prioridad ?? '').trim() || null,
+        anotaciones: String(body?.anotaciones ?? '').trim() || null,
+        payload: body?.payload,
+      })
 
       return { ok: true, data }
     } catch (e: any) {

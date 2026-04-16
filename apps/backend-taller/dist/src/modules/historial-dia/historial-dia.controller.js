@@ -30,9 +30,28 @@ let HistorialDiaController = class HistorialDiaController {
             const movilRaw = String(movilIdA || movilIdB || '').trim();
             if (!f)
                 return { ok: true, data: [] };
-            const data = movilRaw
-                ? await this.svc.listByMovil(movilRaw, f)
-                : await this.svc.listAll(f);
+            const data = movilRaw ? await this.svc.listByMovil(movilRaw, f) : await this.svc.listAll(f);
+            return { ok: true, data };
+        }
+        catch (e) {
+            return { ok: false, error: e?.message || 'Error' };
+        }
+    }
+    async upsertFromPayload(body) {
+        try {
+            const data = await this.svc.upsertFromPayload({
+                fechaISO: String(body?.fechaISO ?? body?.fecha ?? '').trim() || null,
+                movilId: String(body?.movil_id ?? body?.movilId ?? '').trim() || null,
+                arregloId: String(body?.arreglo_id ?? body?.arregloId ?? '').trim() || null,
+                horaEntrada: (body?.hora_entrada ?? body?.horaEntrada ?? null),
+                horaSalida: (body?.hora_salida ?? body?.horaSalida ?? null),
+                salidaIndefinida: !!(body?.salida_indefinida ?? body?.salidaIndefinida),
+                patente: String(body?.patente ?? '').trim() || null,
+                motivo: String(body?.motivo ?? '').trim() || null,
+                prioridad: String(body?.prioridad ?? '').trim() || null,
+                anotaciones: String(body?.anotaciones ?? '').trim() || null,
+                payload: body?.payload,
+            });
             return { ok: true, data };
         }
         catch (e) {
@@ -68,6 +87,13 @@ __decorate([
     __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", Promise)
 ], HistorialDiaController.prototype, "list", null);
+__decorate([
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], HistorialDiaController.prototype, "upsertFromPayload", null);
 __decorate([
     (0, common_1.Put)('update-by-arreglo-id'),
     __param(0, (0, common_1.Body)()),

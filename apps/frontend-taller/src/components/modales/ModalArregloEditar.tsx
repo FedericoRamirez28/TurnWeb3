@@ -22,8 +22,19 @@ type Props = {
   onSave: (dto: ArregloEditDto) => Promise<void> | void
 }
 
+function extractTime(value: unknown): string {
+  const s = String(value ?? '').trim()
+  if (!s) return ''
+  const match = s.match(/(\d{2}:\d{2})/)
+  return match ? match[1] : ''
+}
+
 export default function ModalArregloEditar({ initial, onClose, onSave }: Props) {
-  const [form, setForm] = useState<ArregloEditDto>(initial)
+  const [form, setForm] = useState<ArregloEditDto>({
+    ...initial,
+    hora_entrada: extractTime(initial.hora_entrada),
+    hora_salida: extractTime(initial.hora_salida),
+  })
   const [saving, setSaving] = useState(false)
 
   const canSave = useMemo(() => !!form.patente.trim() && !!form.fecha, [form.patente, form.fecha])
@@ -36,6 +47,8 @@ export default function ModalArregloEditar({ initial, onClose, onSave }: Props) 
         ...form,
         patente: form.patente.toUpperCase().trim(),
         prioridad: String(form.prioridad || 'baja').toLowerCase() as Priority,
+        hora_entrada: extractTime(form.hora_entrada),
+        hora_salida: form.salida_indefinida ? '' : extractTime(form.hora_salida),
       })
       onClose()
     } finally {
@@ -116,10 +129,10 @@ export default function ModalArregloEditar({ initial, onClose, onSave }: Props) 
         </label>
 
         <div className="acciones">
-          <button onClick={handleSave} disabled={!canSave || saving} className="primary">
+          <button onClick={handleSave} disabled={!canSave || saving} className="primary" type="button">
             {saving ? 'Guardando…' : 'Guardar'}
           </button>
-          <button onClick={onClose} className="ghost">
+          <button onClick={onClose} className="ghost" type="button">
             Cancelar
           </button>
         </div>

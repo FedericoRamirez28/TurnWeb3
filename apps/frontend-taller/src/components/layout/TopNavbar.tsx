@@ -1,8 +1,6 @@
-// src/components/ui/TopNavbar.tsx
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { NavLink, matchPath, useLocation } from 'react-router-dom'
-
-
+import { NavLink, matchPath, useLocation, useNavigate } from 'react-router-dom'
+import { clearAuth } from '@/lib/auth'
 
 function fire(name: string) {
   window.dispatchEvent(new Event(name))
@@ -10,14 +8,13 @@ function fire(name: string) {
 
 export default function TopNavbar() {
   const { pathname } = useLocation()
+  const navigate = useNavigate()
   const wrapRef = useRef<HTMLDivElement | null>(null)
   const [open, setOpen] = useState(false)
 
-  // Contexto móvil (para links /movil/:id/*)
   const movilCtx = matchPath({ path: '/movil/:movilId/*', end: false }, pathname)
   const movilId = movilCtx?.params?.movilId ? String(movilCtx.params.movilId) : ''
 
-  // ✅ SOLO en ArreglosScreen (/movil/:id) mostramos el toggle y el dropdown
   const isArreglosPorMovil = !!matchPath({ path: '/movil/:movilId', end: true }, pathname)
 
   const links = useMemo(() => {
@@ -30,12 +27,10 @@ export default function TopNavbar() {
     }
   }, [movilId])
 
-  // Cerrar el drop al navegar de ruta
   useEffect(() => {
     setOpen(false)
   }, [pathname])
 
-  // Click afuera + Escape
   useEffect(() => {
     if (!open) return
 
@@ -56,10 +51,26 @@ export default function TopNavbar() {
     }
   }, [open])
 
-  // Si no estás en /movil/:id, no tiene sentido dejar abierto
   useEffect(() => {
     if (!isArreglosPorMovil) setOpen(false)
   }, [isArreglosPorMovil])
+
+  const handleLogout = () => {
+    try {
+      clearAuth()
+    } catch {
+      try {
+        localStorage.removeItem('token')
+        localStorage.removeItem('auth_token')
+        localStorage.removeItem('ts_logged')
+      } catch {
+        // noop
+      }
+    }
+
+    setOpen(false)
+    navigate('/login', { replace: true })
+  }
 
   return (
     <div className="topnavWrap" ref={wrapRef}>
@@ -73,36 +84,28 @@ export default function TopNavbar() {
           <nav className="topnav__nav" aria-label="Navegación">
             <NavLink
               to={links.home}
-              className={({ isActive }) =>
-                `topnav__nav-item ${isActive ? 'topnav__nav-item--active' : ''}`
-              }
+              className={({ isActive }) => `topnav__nav-item ${isActive ? 'topnav__nav-item--active' : ''}`}
             >
               Home
             </NavLink>
 
             <NavLink
               to={links.finalizados}
-              className={({ isActive }) =>
-                `topnav__nav-item ${isActive ? 'topnav__nav-item--active' : ''}`
-              }
+              className={({ isActive }) => `topnav__nav-item ${isActive ? 'topnav__nav-item--active' : ''}`}
             >
               Ver arreglos finalizados
             </NavLink>
 
             <NavLink
               to={links.historialPatente}
-              className={({ isActive }) =>
-                `topnav__nav-item ${isActive ? 'topnav__nav-item--active' : ''}`
-              }
+              className={({ isActive }) => `topnav__nav-item ${isActive ? 'topnav__nav-item--active' : ''}`}
             >
               Historial por patente
             </NavLink>
 
             <NavLink
               to={links.historialDia}
-              className={({ isActive }) =>
-                `topnav__nav-item ${isActive ? 'topnav__nav-item--active' : ''}`
-              }
+              className={({ isActive }) => `topnav__nav-item ${isActive ? 'topnav__nav-item--active' : ''}`}
             >
               Historial del día
             </NavLink>
@@ -125,10 +128,18 @@ export default function TopNavbar() {
           )}
 
           {movilId ? <div className="topnav__badge">Móvil {movilId}</div> : null}
+
+          <button
+            type="button"
+            className="topnav__logout"
+            onClick={handleLogout}
+            title="Cerrar sesión"
+          >
+            Cerrar sesión
+          </button>
         </div>
       </header>
 
-      {/* ✅ Dropdown debajo del navbar (solo en /movil/:id) */}
       {isArreglosPorMovil && open && (
         <div className="topnavDrop" id="topnavDrop">
           <div className="topnavDrop__inner">

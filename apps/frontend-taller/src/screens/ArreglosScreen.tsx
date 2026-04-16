@@ -66,6 +66,87 @@ function resetSeen(movilId: string | number, barKey: string) {
   setSeen(movilId, barKey, defaultSeen)
 }
 
+
+type AnyRecord = Record<string, unknown>
+
+function asRecord(value: unknown): AnyRecord {
+  return value && typeof value === 'object' ? (value as AnyRecord) : {}
+}
+
+function firstNonEmpty(...values: unknown[]): string {
+  for (const value of values) {
+    const s = String(value ?? '').trim()
+    if (s) return s
+  }
+  return ''
+}
+
+function readStringOrNumber(value: unknown): string | number | null {
+  if (typeof value === 'string' || typeof value === 'number') return value
+  return null
+}
+
+function normalizeMovilInfo(raw: unknown): MovilInfo {
+  const obj = asRecord(raw)
+  const nested = obj.data
+  const src = nested && typeof nested === 'object' ? asRecord(nested) : obj
+
+  return {
+    patente_fija:
+      firstNonEmpty(src.patente_fija, src.patenteFija, src.patente, src.patente_snap) || null,
+  }
+}
+
+function normalizePartePayload(raw: unknown): ParteDiario | null {
+  const obj = asRecord(raw)
+  const nested = obj.data
+  const src = nested && typeof nested === 'object' ? asRecord(nested) : obj
+
+  const patente = firstNonEmpty(src.patente, src.patente_fija, src.patenteFija)
+  const chofer = firstNonEmpty(src.chofer)
+  const observaciones = firstNonEmpty(src.observaciones, src.anotaciones)
+  const fechaISO = firstNonEmpty(src.fechaISO, src.fecha_iso, src.fecha)
+  const createdAt = firstNonEmpty(src.createdAt)
+
+  const km_inicio: ParteDiario['km_inicio'] = readStringOrNumber(src.km_inicio ?? src.kmInicio)
+  const km_fin: ParteDiario['km_fin'] = readStringOrNumber(src.km_fin ?? src.kmFin)
+
+  const hasSomething = Boolean(
+    patente || chofer || observaciones || fechaISO || createdAt || km_inicio != null || km_fin != null,
+  )
+  if (!hasSomething) return null
+
+  return {
+    id: firstNonEmpty(src.id) || null,
+    chofer: chofer || null,
+    km_inicio,
+    km_fin,
+    kmInicio: readStringOrNumber(src.kmInicio),
+    kmFin: readStringOrNumber(src.kmFin),
+    patente: patente || null,
+    observaciones: observaciones || null,
+    createdAt: createdAt || null,
+    fecha: firstNonEmpty(src.fecha) || null,
+    fechaISO: fechaISO || null,
+  }
+}
+
+
+function extractHourValue(raw: unknown): string | null {
+  const s = String(raw ?? '').trim()
+  if (!s) return null
+
+  const match = s.match(/(\d{2}:\d{2})/)
+  return match ? match[1] : null
+}
+
+function normalizeBool(raw: unknown): boolean {
+  if (typeof raw === 'boolean') return raw
+  if (typeof raw === 'number') return raw === 1
+  const s = String(raw ?? '').trim().toLowerCase()
+  return s === '1' || s === 'true' || s === 'si' || s === 'sí'
+}
+
 type Props = {
   filtroExterno?: string
   sidebarAbierto?: boolean
@@ -218,8 +299,13 @@ export default function ArreglosScreen({
   async function cargarInfoMovil() {
     if (!movilIdParam) return
     const j = await api.get<MovilInfo>(`/moviles/${encodeURIComponent(String(movilIdParam))}/info`)
-    if (j.ok) setPatenteFija(j.data?.patente_fija ?? '')
-    else console.warn('infoMovil:', j.error)
+    if (!j.ok) {
+      console.warn('infoMovil:', j.error)
+      return
+    }
+
+    const info = normalizeMovilInfo(j.data)
+    setPatenteFija(String(info.patente_fija || '').trim().toUpperCase())
   }
 
   async function cargarParteDiario() {
@@ -238,30 +324,24 @@ export default function ArreglosScreen({
       return
     }
 
-    setParte(j.data ?? null)
+    const p = normalizePartePayload(j.data)
+    setParte(p)
 
-    const p = j.data
+    setChofer(String(p?.chofer || '').trim())
 
-    // ✅ Chofer
-    setChofer(p?.chofer ?? '')
-
-    // ✅ Km (compat snake/camel)
     const kIni = n(p?.km_inicio ?? p?.kmInicio)
     const kFin = n(p?.km_fin ?? p?.kmFin)
     setKmInicio(kIni)
     setKmFin(kFin)
 
-    // ✅ Patente: prioridad parte -> patente fija
     const pat = String(p?.patente || '').trim()
     if (pat) setPatente(pat.toUpperCase())
-    else if (patenteFija) setPatente((patenteFija || '').toUpperCase())
+    else if (patenteFija) setPatente(String(patenteFija || '').trim().toUpperCase())
 
-    // ✅ Observaciones
     const obs = String(p?.observaciones || '').trim()
     setObsUltimo(obs)
     setObsUltimoAt(String(p?.createdAt || p?.fechaISO || p?.fecha || '').trim())
 
-    // acumulado persistente
     const lastSig = lastSigKey ? n(localStorage.getItem(lastSigKey)) : 0
     const delta = Math.max(0, kFin - kIni)
     const sig = kFin
@@ -469,11 +549,22 @@ export default function ArreglosScreen({
   const handleNuevoArreglo = async (dto: NuevoArregloDto) => {
     if (!movilIdParam) return
 
+    const horaEntrada = (dto as any).hora_entrada ?? (dto as any).horaEntrada ?? null
+    const horaSalida = (dto as any).hora_salida ?? (dto as any).horaSalida ?? null
+    const salidaIndefinida = normalizeBool((dto as any).salida_indefinida ?? (dto as any).salidaIndefinida)
+
     const payload: any = {
       ...dto,
       movilId: String(movilIdParam),
+      movil_id: String(movilIdParam),
       patente: dto.patente ?? patente ?? patenteFija ?? null,
       fechaISO: (dto as any).fechaISO ?? (dto as any).fecha ?? null,
+      hora_entrada: horaEntrada,
+      horaEntrada,
+      hora_salida: horaSalida,
+      horaSalida,
+      salida_indefinida: salidaIndefinida,
+      salidaIndefinida,
     }
 
     const r = await api.post<Arreglo>('/arreglos', payload)
@@ -487,7 +578,34 @@ export default function ArreglosScreen({
       return
     }
 
-    const creado = r.data
+    const creado: any = {
+      ...(r.data as any),
+      hora_entrada: (r.data as any)?.hora_entrada ?? (r.data as any)?.horaEntrada ?? horaEntrada ?? null,
+      hora_salida: (r.data as any)?.hora_salida ?? (r.data as any)?.horaSalida ?? horaSalida ?? null,
+      salida_indefinida:
+        (r.data as any)?.salida_indefinida ?? (r.data as any)?.salidaIndefinida ?? salidaIndefinida ?? false,
+    }
+
+    try {
+      await api.post('/historial-dia', {
+        fecha: payload.fechaISO ?? payload.fecha ?? null,
+        movil_id: String(movilIdParam),
+        movilId: String(movilIdParam),
+        patente: String(creado.patente ?? payload.patente ?? '').toUpperCase(),
+        hora_entrada: extractHourValue(creado.hora_entrada ?? horaEntrada),
+        hora_salida:
+          normalizeBool(creado.salida_indefinida)
+            ? null
+            : extractHourValue(creado.hora_salida ?? horaSalida),
+        salida_indefinida: normalizeBool(creado.salida_indefinida),
+        anotaciones: String(creado.anotaciones ?? payload.anotaciones ?? ''),
+        prioridad: String(creado.prioridad ?? payload.prioridad ?? 'baja').toLowerCase(),
+        arreglo_id: creado.id,
+        motivo: creado.motivo ?? payload.motivo ?? null,
+      })
+    } catch (e) {
+      console.warn('historial-dia create:', e)
+    }
 
     setTablero((prev) => {
       const tareas = Array.isArray((creado as any).tareas) ? (creado as any).tareas : []
@@ -495,7 +613,7 @@ export default function ArreglosScreen({
       const alguna = tareas.some((t: { completa?: boolean }) => !!t?.completa)
 
       const col = (todas ? 'Done' : alguna ? 'In progress' : 'Inbox') as keyof Tablero
-      return { ...prev, [col]: [creado, ...(prev[col] || [])] }
+      return { ...prev, [col]: [creado as Arreglo, ...(prev[col] || [])] }
     })
 
     setNuevoOpen(false)

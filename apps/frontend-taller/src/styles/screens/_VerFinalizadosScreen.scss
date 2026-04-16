@@ -10,7 +10,6 @@
     var(--color-bg);
 }
 
-/* ===== Header (IGUAL a HistorialDelDia) ===== */
 .hd-header {
   max-width: 1560px;
   margin: 0 auto var(--space);
@@ -19,7 +18,6 @@
   justify-content: space-between;
   gap: var(--space);
   flex-wrap: wrap;
-
   background: color-mix(in oklab, var(--color-surface) 92%, #ffffff 8%);
   border: 1px solid color-mix(in oklab, var(--color-border) 82%, #ffffff 18%);
   border-radius: var(--radius-lg);
@@ -93,10 +91,6 @@
   flex-wrap: wrap;
 }
 
-/* ===============================
-   Cards (lo tuyo)
-   =============================== */
-
 .vf-card {
   background: color-mix(in oklab, var(--color-surface) 92%, #ffffff 8%);
   border: 1px solid color-mix(in oklab, var(--color-border) 82%, #ffffff 18%);
@@ -164,7 +158,6 @@
   color: var(--color-ink-soft);
 }
 
-/* ===== Prioridad ===== */
 .vf-prio {
   font-size: 0.78rem;
   font-weight: 950;
@@ -193,13 +186,36 @@
   }
 }
 
-/* ===== Body ===== */
 .vf-label {
   font-size: 0.82rem;
   font-weight: 950;
   color: var(--color-ink-soft);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.vf-extra-grid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.vf-info-box {
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in oklab, var(--color-border) 82%, #ffffff 18%);
+  background: #fff;
+}
+
+.vf-info-value {
+  margin-top: 6px;
+  font-weight: 900;
+  color: var(--color-ink);
 }
 
 .vf-anot {
@@ -230,7 +246,6 @@
   display: flex;
   align-items: center;
   gap: 10px;
-
   padding: 10px 12px;
   border-radius: var(--radius-md);
   border: 1px solid color-mix(in oklab, var(--color-border) 82%, #ffffff 18%);

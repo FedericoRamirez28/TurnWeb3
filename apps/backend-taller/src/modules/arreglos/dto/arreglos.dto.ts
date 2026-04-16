@@ -1,5 +1,5 @@
-import { IsArray, IsIn, IsOptional, IsString, ValidateNested } from 'class-validator'
 import { Type } from 'class-transformer'
+import { IsArray, IsBoolean, IsIn, IsOptional, IsString, ValidateNested } from 'class-validator'
 
 const PRIORIDADES = ['baja', 'alta', 'urgente'] as const
 export type PrioridadDto = (typeof PRIORIDADES)[number]
@@ -23,7 +23,6 @@ export class CreateArregloDto {
   @IsString()
   patente?: string | null
 
-  // ✅ el frontend a veces usa "fecha", a veces "fechaISO"
   @IsOptional()
   @IsString()
   fechaISO?: string | null
@@ -43,6 +42,30 @@ export class CreateArregloDto {
   @IsOptional()
   @IsIn(PRIORIDADES as any)
   prioridad?: PrioridadDto
+
+  @IsOptional()
+  @IsString()
+  hora_entrada?: string | null
+
+  @IsOptional()
+  @IsString()
+  horaEntrada?: string | null
+
+  @IsOptional()
+  @IsString()
+  hora_salida?: string | null
+
+  @IsOptional()
+  @IsString()
+  horaSalida?: string | null
+
+  @IsOptional()
+  @IsBoolean()
+  salida_indefinida?: boolean
+
+  @IsOptional()
+  @IsBoolean()
+  salidaIndefinida?: boolean
 
   @IsOptional()
   @IsArray()
@@ -75,6 +98,30 @@ export class UpdateArregloDto {
   @IsOptional()
   @IsIn(PRIORIDADES as any)
   prioridad?: PrioridadDto
+
+  @IsOptional()
+  @IsString()
+  hora_entrada?: string | null
+
+  @IsOptional()
+  @IsString()
+  horaEntrada?: string | null
+
+  @IsOptional()
+  @IsString()
+  hora_salida?: string | null
+
+  @IsOptional()
+  @IsString()
+  horaSalida?: string | null
+
+  @IsOptional()
+  @IsBoolean()
+  salida_indefinida?: boolean
+
+  @IsOptional()
+  @IsBoolean()
+  salidaIndefinida?: boolean
 
   @IsOptional()
   @IsArray()

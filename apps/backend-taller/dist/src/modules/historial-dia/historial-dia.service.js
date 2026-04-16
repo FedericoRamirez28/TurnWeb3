@@ -33,6 +33,37 @@ function normStr(v) {
     const s = String(v ?? '').trim();
     return s.length ? s : null;
 }
+function pickString(obj, ...keys) {
+    for (const key of keys) {
+        if (!(key in obj))
+            continue;
+        return normStr(obj[key]);
+    }
+    return undefined;
+}
+function pickBool(obj, ...keys) {
+    for (const key of keys) {
+        if (!(key in obj))
+            continue;
+        const raw = obj[key];
+        if (typeof raw === 'boolean')
+            return raw;
+        if (typeof raw === 'number')
+            return raw === 1;
+        const txt = String(raw ?? '').trim().toLowerCase();
+        return txt === '1' || txt === 'true' || txt === 'si' || txt === 'sí';
+    }
+    return undefined;
+}
+function toHHMM(v) {
+    if (v == null)
+        return null;
+    const s = String(v).trim();
+    if (!s)
+        return null;
+    const match = s.match(/(\d{2}:\d{2})/);
+    return match ? match[1] : null;
+}
 let HistorialDiaService = class HistorialDiaService {
     constructor(prisma, moviles) {
         this.prisma = prisma;
@@ -42,7 +73,7 @@ let HistorialDiaService = class HistorialDiaService {
     async listAll(fechaISO) {
         const rows = await this.prisma.historialDiaRow.findMany({
             where: { fechaISO },
-            orderBy: [{ horaEntrada: 'asc' }, { createdAt: 'asc' }],
+            orderBy: [{ horaEntrada: 'desc' }, { createdAt: 'desc' }],
             include: { movil: { select: { numero: true } } },
         });
         return rows.map((r) => ({
@@ -62,7 +93,7 @@ let HistorialDiaService = class HistorialDiaService {
         const m = await this.moviles.ensureMovil(movilIdRaw);
         const rows = await this.prisma.historialDiaRow.findMany({
             where: { movilId: m.id, fechaISO },
-            orderBy: [{ horaEntrada: 'asc' }, { createdAt: 'asc' }],
+            orderBy: [{ horaEntrada: 'desc' }, { createdAt: 'desc' }],
         });
         return rows.map((r) => ({
             id: r.id,
@@ -76,6 +107,46 @@ let HistorialDiaService = class HistorialDiaService {
             anotaciones: r.anotaciones,
         }));
     }
+    async upsertFromPayload(input) {
+        const movilRaw = String(input.movilId || '').trim();
+        if (!movilRaw)
+            throw new common_1.NotFoundException('Móvil inválido');
+        const movil = await this.moviles.ensureMovil(movilRaw);
+        const arregloId = normStr(input.arregloId);
+        const fechaISO = isISODateDay(String(input.fechaISO || '')) ? String(input.fechaISO) : todayISO();
+        const existing = arregloId
+            ? await this.prisma.historialDiaRow.findUnique({
+                where: { arregloId },
+                select: { id: true, horaEntrada: true, horaSalida: true, salidaIndefinida: true },
+            })
+            : null;
+        const horaEntrada = toHHMM(input.horaEntrada) ?? existing?.horaEntrada ?? null;
+        const salidaIndefinida = !!input.salidaIndefinida;
+        const horaSalida = salidaIndefinida ? null : (toHHMM(input.horaSalida) ?? existing?.horaSalida ?? null);
+        const data = {
+            movilId: movil.id,
+            arregloId,
+            fechaISO,
+            horaEntrada,
+            horaSalida,
+            salidaIndefinida,
+            patente: normStr(input.patente),
+            motivo: normStr(input.motivo),
+            prioridad: (normStr(input.prioridad) || 'baja'),
+            anotaciones: normStr(input.anotaciones),
+            payload: input.payload == null ? undefined : input.payload,
+        };
+        if (arregloId) {
+            await this.prisma.historialDiaRow.upsert({
+                where: { arregloId },
+                create: data,
+                update: data,
+            });
+            return { ok: true };
+        }
+        await this.prisma.historialDiaRow.create({ data });
+        return { ok: true };
+    }
     // ✅ lo que usa KanbanBoard cuando pasa a Done (o vuelve de Done)
     async updateByArregloId(arregloId, patch) {
         const arreglo = await this.prisma.arreglo.findUnique({
@@ -85,14 +156,18 @@ let HistorialDiaService = class HistorialDiaService {
         if (!arreglo)
             throw new common_1.NotFoundException('Arreglo no encontrado');
         const movilId = arreglo.movilId;
-        const fechaISO = isISODateDay(String(arreglo.fechaISO || '')) ? arreglo.fechaISO : todayISO();
+        const fechaISO = isISODateDay(String(arreglo.fechaISO || '')) ? String(arreglo.fechaISO) : todayISO();
+        const existing = await this.prisma.historialDiaRow.findUnique({
+            where: { arregloId },
+            select: { horaEntrada: true },
+        });
         await this.prisma.historialDiaRow.upsert({
             where: { arregloId },
             create: {
                 movilId,
                 arregloId,
                 fechaISO,
-                horaEntrada: nowHHMM(),
+                horaEntrada: existing?.horaEntrada ?? nowHHMM(),
                 horaSalida: patch.salidaIndefinida ? null : patch.horaSalida,
                 salidaIndefinida: patch.salidaIndefinida,
                 patente: normStr(arreglo.patenteSnap),

@@ -1,4 +1,3 @@
-// src/screens/VerFinalizadosScreen.tsx
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import jsPDF from 'jspdf'
@@ -10,17 +9,26 @@ import { useMovilId } from '@/screens/useMovilId'
 
 type Tarea = { texto: string; completa?: boolean }
 
+type ParteResumen = {
+  chofer: string
+  observaciones: string
+}
+
 type FinalizadoUI = {
   id: string
   movilNumero?: number | null
+  movilLookupId?: string | null
   patente: string
   fecha: string
   anotaciones: string
+  observacionesChofer: string
+  chofer: string
   prioridad?: 'baja' | 'alta' | 'urgente' | string | null
   tareas: Tarea[]
+  horaInicio: string | null
+  horaFinalizado: string | null
 }
 
-/** Soporta varios shapes posibles del backend */
 type FinalizadoApiItem =
   | {
       id: string
@@ -31,6 +39,10 @@ type FinalizadoApiItem =
       createdAt?: string
     }
   | any
+
+const BA_TIME_ZONE = 'America/Argentina/Buenos_Aires'
+const DATE_ONLY_RE = /^\d{4}-\d{2}-\d{2}$/
+const DATE_TIME_NO_TZ_RE = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(?::\d{2})?$/
 
 const todayISO = () => {
   const d = new Date()
@@ -57,17 +69,103 @@ function normText(x: unknown) {
   return stripAccents(String(x ?? '')).toLowerCase().trim()
 }
 
+function pickText(...values: unknown[]): string {
+  for (const value of values) {
+    const s = String(value ?? '').trim()
+    if (s) return s
+  }
+  return ''
+}
+
+function parseDateForSort(value: unknown) {
+  const raw = String(value ?? '').trim()
+  if (!raw) return Number.NEGATIVE_INFINITY
+
+  if (DATE_ONLY_RE.test(raw)) return Date.parse(`${raw}T00:00:00-03:00`)
+
+  if (DATE_TIME_NO_TZ_RE.test(raw)) {
+    const normalized = raw.replace(' ', 'T')
+    const withSeconds = normalized.length === 16 ? `${normalized}:00` : normalized
+    return Date.parse(`${withSeconds}-03:00`)
+  }
+
+  const parsed = Date.parse(raw)
+  return Number.isNaN(parsed) ? Number.NEGATIVE_INFINITY : parsed
+}
+
+function formatBuenosAires(value: unknown) {
+  const raw = String(value ?? '').trim()
+  if (!raw) return '-'
+
+  if (DATE_ONLY_RE.test(raw)) {
+    const [y, m, d] = raw.split('-')
+    return `${d}/${m}/${y}`
+  }
+
+  if (DATE_TIME_NO_TZ_RE.test(raw)) {
+    const normalized = raw.replace(' ', 'T')
+    const withSeconds = normalized.length === 16 ? `${normalized}:00` : normalized
+    const parsed = new Date(`${withSeconds}-03:00`)
+    if (Number.isNaN(parsed.getTime())) return raw
+
+    return new Intl.DateTimeFormat('es-AR', {
+      timeZone: BA_TIME_ZONE,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    })
+      .format(parsed)
+      .replace(',', '')
+  }
+
+  const parsed = new Date(raw)
+  if (Number.isNaN(parsed.getTime())) return raw
+
+  const hasTime = /T\d{2}:\d{2}|\s\d{2}:\d{2}/.test(raw)
+  return new Intl.DateTimeFormat('es-AR', {
+    timeZone: BA_TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    ...(hasTime
+      ? {
+          hour: '2-digit' as const,
+          minute: '2-digit' as const,
+          hour12: false,
+        }
+      : {}),
+  })
+    .format(parsed)
+    .replace(',', '')
+}
+
+function formatHourOnly(value: unknown) {
+  const raw = String(value ?? '').trim()
+  if (!raw) return '-'
+
+  const hhmm = raw.match(/(\d{2}:\d{2})/)
+  if (hhmm) return hhmm[1]
+
+  const parsed = new Date(raw)
+  if (Number.isNaN(parsed.getTime())) return raw
+
+  return new Intl.DateTimeFormat('es-AR', {
+    timeZone: BA_TIME_ZONE,
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(parsed)
+}
+
 function normalizeFinalizado(raw: FinalizadoApiItem, fallbackMovilId?: string | number | null): FinalizadoUI | null {
   const payload = raw?.payload ?? raw
 
-  const patente =
-    String(payload?.patente ?? payload?.patenteSnap ?? payload?.patente_fija ?? payload?.patenteFija ?? '').trim()
-
-  const fecha =
-    String(payload?.fecha ?? payload?.fechaISO ?? payload?.fecha_iso ?? payload?.createdAt ?? raw?.createdAt ?? '').trim()
-
-  const anotaciones = String(payload?.anotaciones ?? payload?.nota ?? '').trim()
-
+  const patente = pickText(payload?.patente, payload?.patenteSnap, payload?.patente_fija, payload?.patenteFija)
+  const fecha = pickText(payload?.fecha, payload?.fechaISO, payload?.fecha_iso, payload?.archivedAt, payload?.finalizedAt, payload?.createdAt, raw?.createdAt)
+  const anotaciones = pickText(payload?.anotaciones, payload?.nota)
   const prioridad = payload?.prioridad ?? payload?.priority ?? null
 
   const tareasRaw = payload?.tareas ?? payload?.tasks ?? []
@@ -88,30 +186,42 @@ function normalizeFinalizado(raw: FinalizadoApiItem, fallbackMovilId?: string | 
     asNum(payload?.movilId) ??
     asNum(fallbackMovilId)
 
+  const movilLookupId = pickText(raw?.movilId, payload?.movilId, payload?.movil_id, movilNumero, fallbackMovilId) || null
+  const horaInicio = pickText(payload?.hora_entrada, payload?.horaEntrada) || null
+  const horaFinalizado =
+    pickText(payload?.hora_salida, payload?.horaSalida, payload?.archivedAt, payload?.finalizedAt, raw?.createdAt) || null
+  const observacionesChofer = pickText(payload?.observacionesChofer, payload?.parteDiarioObservaciones, payload?.obsChofer)
+  const chofer = pickText(payload?.choferParte, payload?.chofer)
+
   if (!patente && !fecha && !anotaciones && tareas.length === 0) return null
 
   return {
     id: String(raw?.id ?? payload?.id ?? crypto.randomUUID()),
     movilNumero,
+    movilLookupId,
     patente: patente || '—',
     fecha: fecha || '—',
     anotaciones: anotaciones || '—',
+    observacionesChofer: observacionesChofer || '',
+    chofer: chofer || '',
     prioridad,
     tareas,
+    horaInicio,
+    horaFinalizado,
   }
 }
 
 function fechaFileISO() {
-  // Nombre de archivo simple con fecha actual
   return todayISO()
 }
 
 export default function VerFinalizadosScreen() {
   const nav = useNavigate()
-  const movilId = useMovilId() // puede ser null si estás en vista global
+  const movilId = useMovilId()
   const [finalizados, setFinalizados] = useState<FinalizadoUI[]>([])
   const [cargando, setCargando] = useState(true)
   const [q, setQ] = useState('')
+  const [parteMap, setParteMap] = useState<Record<string, ParteResumen>>({})
 
   useEffect(() => {
     let abort = false
@@ -119,31 +229,25 @@ export default function VerFinalizadosScreen() {
 
     ;(async () => {
       try {
-        // ✅ tu wrapper soporta query como 2do parámetro
         const j = await api.get<FinalizadoApiItem[]>('/finalizados', movilId ? { movilId } : undefined)
         if (abort) return
 
-        if ((j as any)?.ok === true) {
-          const list = Array.isArray((j as any).data) ? (j as any).data : []
-          const normalized = list
-            .map((it: any) => normalizeFinalizado(it, movilId ?? null))
-            .filter(Boolean) as FinalizadoUI[]
-          setFinalizados(normalized)
-        } else if (Array.isArray(j as any)) {
-          // por si tu wrapper devuelve array directo
-          const list = Array.isArray(j) ? (j as any) : []
-          const normalized = list
-            .map((it: any) => normalizeFinalizado(it, movilId ?? null))
-            .filter(Boolean) as FinalizadoUI[]
-          setFinalizados(normalized)
-        } else {
-          // fallback
-          const list = Array.isArray((j as any)?.data) ? (j as any).data : []
-          const normalized = list
-            .map((it: any) => normalizeFinalizado(it, movilId ?? null))
-            .filter(Boolean) as FinalizadoUI[]
-          setFinalizados(normalized)
-        }
+        const list =
+          (j as any)?.ok === true
+            ? Array.isArray((j as any).data)
+              ? (j as any).data
+              : []
+            : Array.isArray(j as any)
+              ? (j as any)
+              : Array.isArray((j as any)?.data)
+                ? (j as any).data
+                : []
+
+        const normalized = list
+          .map((it: any) => normalizeFinalizado(it, movilId ?? null))
+          .filter(Boolean) as FinalizadoUI[]
+
+        setFinalizados(normalized)
       } catch (e) {
         if (!abort) {
           console.error('Error cargando finalizados:', e)
@@ -159,38 +263,102 @@ export default function VerFinalizadosScreen() {
     }
   }, [movilId])
 
+  useEffect(() => {
+    const uniqueIds = Array.from(
+      new Set(
+        finalizados
+          .map((item) => String(item.movilLookupId ?? '').trim())
+          .filter(Boolean),
+      ),
+    )
+
+    if (!uniqueIds.length) {
+      setParteMap({})
+      return
+    }
+
+    let abort = false
+
+    ;(async () => {
+      const entries = await Promise.all(
+        uniqueIds.map(async (id) => {
+          try {
+            const r = await api.get<any>(`/moviles/${encodeURIComponent(id)}/parte-diario/ultimo`)
+            if (!r.ok) return [id, { chofer: '', observaciones: '' }] as const
+
+            const data = (r as any)?.data ?? r
+            return [
+              id,
+              {
+                chofer: pickText(data?.chofer),
+                observaciones: pickText(data?.observaciones),
+              },
+            ] as const
+          } catch {
+            return [id, { chofer: '', observaciones: '' }] as const
+          }
+        }),
+      )
+
+      if (!abort) setParteMap(Object.fromEntries(entries))
+    })()
+
+    return () => {
+      abort = true
+    }
+  }, [finalizados])
+
+  const merged = useMemo(() => {
+    return finalizados.map((item) => {
+      const key = String(item.movilLookupId ?? '').trim()
+      const parte = key ? parteMap[key] : undefined
+
+      return {
+        ...item,
+        chofer: item.chofer || parte?.chofer || '',
+        observacionesChofer: item.observacionesChofer || parte?.observaciones || '',
+      }
+    })
+  }, [finalizados, parteMap])
+
   const filtered = useMemo(() => {
     const s = normText(q)
-    if (!s) return finalizados
+    if (!s) return merged
 
-    return finalizados.filter((a) => {
+    return merged.filter((a) => {
       const txt = normText(
-        `${a.movilNumero ?? ''} ${a.patente} ${a.fecha} ${a.prioridad ?? ''} ${a.anotaciones} ${(a.tareas || [])
+        `${a.movilNumero ?? ''} ${a.patente} ${a.fecha} ${formatBuenosAires(a.fecha)} ${a.prioridad ?? ''} ${a.anotaciones} ${a.observacionesChofer} ${a.chofer} ${formatHourOnly(a.horaInicio)} ${formatHourOnly(a.horaFinalizado)} ${(a.tareas || [])
           .map((t) => t.texto)
           .join(' ')}`,
       )
       return txt.includes(s)
     })
-  }, [finalizados, q])
+  }, [merged, q])
 
   const sorted = useMemo(() => {
     const copy = [...filtered]
     copy.sort((a, b) => {
-      // global: orden por móvil primero, luego fecha
-      const am = String(a.movilNumero ?? '')
-      const bm = String(b.movilNumero ?? '')
-      if (!movilId && am !== bm) return am.localeCompare(bm)
-      return String(a.fecha ?? '').localeCompare(String(b.fecha ?? ''))
+      const diff = parseDateForSort(b.horaFinalizado || b.fecha) - parseDateForSort(a.horaFinalizado || a.fecha)
+      if (diff !== 0) return diff
+
+      const bm = Number(b.movilNumero ?? -1)
+      const am = Number(a.movilNumero ?? -1)
+      if (bm !== am) return bm - am
+
+      return String(a.patente ?? '').localeCompare(String(b.patente ?? ''))
     })
     return copy
-  }, [filtered, movilId])
+  }, [filtered])
 
   const exportarExcel = () => {
     const datos = sorted.map((a) => ({
       Movil: a.movilNumero ?? '',
       Patente: a.patente,
-      Fecha: a.fecha,
+      Fecha: formatBuenosAires(a.fecha),
+      'Hora inicio': formatHourOnly(a.horaInicio),
+      'Hora finalizado': formatHourOnly(a.horaFinalizado),
       Prioridad: a.prioridad ?? '',
+      'Obs. chofer': a.observacionesChofer || '',
       Anotaciones: a.anotaciones,
       Tareas: (a.tareas || []).map((t) => t.texto).join(', '),
     }))
@@ -209,14 +377,17 @@ export default function VerFinalizadosScreen() {
     doc.text(`${title} — ${fechaFileISO()}`, 40, 36)
 
     const head = movilId
-      ? [['Patente', 'Fecha', 'Prioridad', 'Anotaciones', 'Tareas']]
-      : [['Móvil', 'Patente', 'Fecha', 'Prioridad', 'Anotaciones', 'Tareas']]
+      ? [['Patente', 'Fecha', 'Hora inicio', 'Hora finalizado', 'Prioridad', 'Obs. chofer', 'Anotaciones', 'Tareas']]
+      : [['Móvil', 'Patente', 'Fecha', 'Hora inicio', 'Hora finalizado', 'Prioridad', 'Obs. chofer', 'Anotaciones', 'Tareas']]
 
     const body = sorted.map((a) => {
       const base = [
         a.patente || '-',
-        a.fecha || '-',
+        formatBuenosAires(a.fecha),
+        formatHourOnly(a.horaInicio),
+        formatHourOnly(a.horaFinalizado),
         String(a.prioridad ?? '').toUpperCase(),
+        a.observacionesChofer || '',
         a.anotaciones || '',
         (a.tareas || []).map((t) => t.texto).join(', '),
       ]
@@ -235,8 +406,6 @@ export default function VerFinalizadosScreen() {
     const suf = movilId ? `movil-${movilId}` : 'global'
     doc.save(`arreglos-finalizados_${suf}_${fechaFileISO()}.pdf`)
   }
-
-  const title = movilId ? `Arreglos finalizados — Móvil ${movilId}` : 'Arreglos finalizados — Todos los móviles'
 
   return (
     <div className="ver-finalizados">
@@ -292,15 +461,29 @@ export default function VerFinalizadosScreen() {
                   <div className="vf-patente">{a.patente}</div>
                   <div className="vf-meta">
                     {a.movilNumero != null && <span className="vf-chip">Móvil {a.movilNumero}</span>}
-                    <span className="vf-date">Fecha: {a.fecha}</span>
+                    <span className="vf-date">Fecha: {formatBuenosAires(a.fecha)}</span>
                     {String(a.prioridad ?? '').toLowerCase() === 'baja' && <span className="vf-prio vf-prio--baja">baja</span>}
                     {String(a.prioridad ?? '').toLowerCase() === 'alta' && <span className="vf-prio vf-prio--alta">alta</span>}
-                    {String(a.prioridad ?? '').toLowerCase() === 'urgente' && (
-                      <span className="vf-prio vf-prio--urgente">urgente</span>
-                    )}
+                    {String(a.prioridad ?? '').toLowerCase() === 'urgente' && <span className="vf-prio vf-prio--urgente">urgente</span>}
                   </div>
                 </div>
               </header>
+
+              <div className="vf-extra-grid">
+                <div className="vf-info-box">
+                  <span className="vf-label">Hora inicio</span>
+                  <div className="vf-info-value">{formatHourOnly(a.horaInicio)}</div>
+                </div>
+                <div className="vf-info-box">
+                  <span className="vf-label">Hora finalizado</span>
+                  <div className="vf-info-value">{formatHourOnly(a.horaFinalizado)}</div>
+                </div>
+              </div>
+
+              <div className="vf-anot">
+                <span className="vf-label">Obs. chofer</span>
+                <div className="vf-anot__text">{a.observacionesChofer || 'Sin observaciones del chofer.'}</div>
+              </div>
 
               <div className="vf-anot">
                 <span className="vf-label">Anotaciones</span>

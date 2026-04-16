@@ -1,15 +1,11 @@
 /* src/styles/components/ui/TopNavbar.scss */
 
-
-
-
 .topnavWrap {
   position: sticky;
   top: 0;
   z-index: 20;
 }
 
-/* ===== NAVBAR ===== */
 .topnav {
   position: sticky;
   top: 0;
@@ -29,9 +25,9 @@
     align-items: center;
     gap: 24px;
     min-width: 0;
+    flex: 1 1 auto;
   }
 
-  /* Marca */
   &__logo {
     display: flex;
     align-items: center;
@@ -59,7 +55,6 @@
     }
   }
 
-  /* Links */
   &__nav {
     display: flex;
     align-items: center;
@@ -92,22 +87,21 @@
     }
   }
 
-  /* Derecha */
   &__right {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: 12px;
     font-size: 0.9rem;
     white-space: nowrap;
     min-width: 0;
+    flex: 0 0 auto;
   }
 
-  /* Botón “Filtros y acciones” */
   &__smart {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-
     border-radius: 999px;
     border: 1px solid var(--color-border);
     background: #fff;
@@ -139,7 +133,6 @@
     transform: translateY(-0.5px);
   }
 
-  /* Badge móvil */
   &__badge {
     border-radius: 999px;
     border: 1px solid var(--color-border);
@@ -148,16 +141,31 @@
     font-size: 0.85rem;
     color: var(--color-ink);
   }
+
+  &__logout {
+    border: 1px solid rgba(205, 56, 69, 0.18);
+    background: #fff;
+    color: #9f1d2a;
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 0.9rem;
+    font-weight: 800;
+    line-height: 1;
+    cursor: pointer;
+    transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+
+    &:hover {
+      background: rgba(205, 56, 69, 0.08);
+      border-color: rgba(205, 56, 69, 0.28);
+    }
+  }
 }
 
-/* ===== Panel desplegable ===== */
 .topnavDrop {
   width: 100%;
   background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--color-border);
-
-  /* mini “slide” prolijo */
   transform-origin: top;
   animation: topnavDropIn 140ms ease-out;
 }
@@ -203,7 +211,6 @@
   opacity: 0.6;
 }
 
-/* ===== Botones dentro del drop ===== */
 .actions {
   display: flex;
   gap: 10px;
@@ -219,7 +226,6 @@
   font-weight: 800;
   color: var(--color-ink);
   transition: background var(--transition-fast), border-color var(--transition-fast);
-
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -236,46 +242,55 @@
 }
 
 .pill span {
-  color: #23822C;
+  color: #23822c;
 }
 
-.pill--primary {
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
-  border-color: rgba(0, 0, 0, 0.06);
-  font-weight: 900;
-}
-
-/* ===== Responsive ===== */
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
   .topnav {
-    flex-wrap: wrap;
     align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .topnav__left,
+  .topnav__right {
+    width: 100%;
+  }
+
+  .topnav__right {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 720px) {
+  .topnav {
+    padding: 10px 12px;
   }
 
   .topnav__left {
-    flex-wrap: wrap;
-    row-gap: 6px;
+    gap: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .topnav__nav {
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 2px;
+  }
+
+  .topnav__right {
+    gap: 8px;
+  }
+
+  .topnav__smart,
+  .topnav__logout,
+  .topnav__badge {
+    width: 100%;
+    justify-content: center;
   }
 
   .topnavDrop__divider {
     display: none;
-  }
-
-  .topnavDrop__inner {
-    padding-inline: var(--space);
-  }
-}
-
-@media (max-width: 640px) {
-  .topnav {
-    padding-inline: var(--space);
-  }
-
-  .topnav__right {
-    width: 100%;
-    justify-content: flex-start;
-    font-size: 0.85rem;
-    flex-wrap: wrap;
   }
 }

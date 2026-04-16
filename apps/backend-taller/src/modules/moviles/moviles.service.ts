@@ -121,7 +121,11 @@ export class MovilesService {
     })
 
     return row
-      ? { chofer: row.chofer ?? null, km_inicio: row.kmInicio ?? null, km_fin: row.kmFin ?? null }
+      ? {
+          chofer: row.chofer ?? null,
+          km_inicio: row.kmInicio ?? null,
+          km_fin: row.kmFin ?? null,
+        }
       : null
   }
 
@@ -206,9 +210,10 @@ export class MovilesService {
     return map
   }
 
-  // map (numero) -> prioridad máxima mirando Arreglo (activos)
+  // map (numero) -> prioridad máxima mirando SOLO arreglos activos
   async getPrioridadesMap(): Promise<Record<string, Prioridad>> {
     const rows = await this.prisma.arreglo.findMany({
+      where: { archived: false },
       select: {
         prioridad: true,
         movil: { select: { numero: true, id: true } },
@@ -283,7 +288,7 @@ export class MovilesService {
         anotaciones: true,
         prioridad: true,
         createdAt: true,
-        payload: true, // ✅ requiere payload Json? en schema
+        payload: true,
       },
       orderBy: { createdAt: 'asc' },
     })

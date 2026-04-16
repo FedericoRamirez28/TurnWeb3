@@ -22,6 +22,17 @@ const COMBUSTIBLE = [
   { v: 'lleno', label: 'Lleno' },
 ] as const
 
+
+const PARTE_CACHE_KEY = (movilId: string | number) => `ts_parte_diario_cache_${String(movilId)}`
+
+function writeParteCache(movilId: string | number, parte: Record<string, unknown>) {
+  try {
+    localStorage.setItem(PARTE_CACHE_KEY(movilId), JSON.stringify(parte))
+  } catch {
+    // noop
+  }
+}
+
 /** ✅ Pills genérico */
 function Pills<T extends string>({
   name,
@@ -196,6 +207,7 @@ export default function ParteDiariaScreen() {
     setSaving(true)
     setOk('')
     try {
+      const fechaHoy = new Date().toISOString().slice(0, 10)
       const payload: any = {
         // ✅ mandamos todo lo necesario
         chofer: form.chofer.trim(),
@@ -209,8 +221,8 @@ export default function ParteDiariaScreen() {
         km_fin: kmFin,
 
         // ✅ COMPAT: fecha como string día (si tu backend la parsea)
-        fecha: new Date().toISOString().slice(0, 10),
-        fechaISO: new Date().toISOString().slice(0, 10),
+        fecha: fechaHoy,
+        fechaISO: fechaHoy,
 
         pd_key: pdKey || undefined,
 
@@ -221,6 +233,21 @@ export default function ParteDiariaScreen() {
       const r = await api.post(`/moviles/${encodeURIComponent(m)}/parte-diario`, payload)
       if (!r.ok) throw new Error(r.error || 'Error')
 
+      const parteCache = {
+        chofer: form.chofer.trim(),
+        patente: form.patente.trim().toUpperCase(),
+        observaciones: (form.observaciones || '').trim(),
+        km_inicio: kmIni,
+        km_fin: kmFin,
+        kmInicio: kmIni,
+        kmFin: kmFin,
+        fecha: fechaHoy,
+        fechaISO: fechaHoy,
+        createdAt: new Date().toISOString(),
+      }
+
+      writeParteCache(m, parteCache)
+
       setOk('✅ Parte diario enviado. ¡Gracias!')
       setForm((s) => ({ ...s, km_inicio: '', km_fin: '', observaciones: '' }))
 
@@ -229,7 +256,7 @@ export default function ParteDiariaScreen() {
       window.dispatchEvent(new Event('ts:historial-dia:refetch'))
 
       // ✅ CLAVE: avisa a ArreglosScreen para que recargue patente + observaciones
-      window.dispatchEvent(new Event('ts:parte-diario:updated'))
+      window.dispatchEvent(new CustomEvent('ts:parte-diario:updated', { detail: parteCache }))
     } catch (e) {
       alert('Error guardando parte diario')
     } finally {

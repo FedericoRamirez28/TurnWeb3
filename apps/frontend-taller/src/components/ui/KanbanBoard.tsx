@@ -21,6 +21,20 @@ function nowLocal(): string {
   return `${yyyy}-${mm}-${dd} ${hh}:${mi}`
 }
 
+function extractTime(value: unknown): string {
+  const s = String(value ?? '').trim()
+  if (!s) return ''
+  const match = s.match(/(\d{2}:\d{2})/)
+  return match ? match[1] : ''
+}
+
+function toBool(value: unknown): boolean {
+  if (typeof value === 'boolean') return value
+  if (typeof value === 'number') return value === 1
+  const s = String(value ?? '').trim().toLowerCase()
+  return s === '1' || s === 'true' || s === 'si' || s === 'sí'
+}
+
 type Props = {
   movilId?: string | number | null
   tablero: Tablero
@@ -31,13 +45,31 @@ type Props = {
 }
 
 function toUpdateDto(a: Arreglo) {
+  const horaEntrada =
+    (a as any).hora_entrada ??
+    (a as any).horaEntrada ??
+    null
+
+  const horaSalida =
+    (a as any).hora_salida ??
+    (a as any).horaSalida ??
+    (a as any).hora_salida ??
+    null
+
+  const salidaIndefinida = toBool((a as any).salida_indefinida ?? (a as any).salidaIndefinida)
+
   return {
     patente: (a as any).patente ?? null,
-    // ✅ tu backend acepta fecha o fechaISO
     fecha: (a as any).fecha ?? (a as any).fechaISO ?? null,
     motivo: (a as any).motivo ?? null,
     anotaciones: (a as any).anotaciones ?? null,
     prioridad: (a as any).prioridad ?? 'baja',
+    hora_entrada: horaEntrada,
+    horaEntrada: horaEntrada,
+    hora_salida: horaSalida,
+    horaSalida: horaSalida,
+    salida_indefinida: salidaIndefinida,
+    salidaIndefinida: salidaIndefinida,
     tareas: Array.isArray((a as any).tareas)
       ? (a as any).tareas.map((t: any, i: number) => ({
           texto: String(t?.texto ?? '').trim(),
@@ -69,7 +101,6 @@ export default function KanbanBoard({
     Done: doneRef,
   }
 
-  // ======== Filtro ========
   const filtroNorm = String(filtro || '').toLowerCase()
   const filtrado = useMemo<Tablero>(() => {
     if (!filtroNorm) return tablero
@@ -92,7 +123,6 @@ export default function KanbanBoard({
     return out
   }, [tablero, filtroNorm])
 
-  // ======== REST (usa api.ts con token) ========
   async function putArreglo(a: Arreglo) {
     const dto = toUpdateDto(a)
     const r = await api.put<any>(`/arreglos/${encodeURIComponent(String((a as any).id))}`, dto)
@@ -118,8 +148,6 @@ export default function KanbanBoard({
     arregloId: string,
     { hora_salida = null, salida_indefinida = 0 }: { hora_salida?: string | null; salida_indefinida?: number },
   ) {
-    // Este endpoint lo conectamos cuando armemos historial-dia del backend.
-    // Lo dejamos “best effort” para no cortar flujo.
     const r = await api.put<any>(`/historial-dia/update-by-arreglo-id`, {
       arreglo_id: arregloId,
       hora_salida,
@@ -153,12 +181,17 @@ export default function KanbanBoard({
   }, [tablero.Inbox.length, tablero['In progress'].length, tablero.Done.length])
 
   async function persistMove(a: Arreglo, from: ColKey, to: ColKey) {
-    const payload: any = { ...(a as any), tareas: Array.isArray((a as any).tareas) ? (a as any).tareas.map((t: any) => ({ ...t })) : [] }
+    const payload: any = {
+      ...(a as any),
+      tareas: Array.isArray((a as any).tareas) ? (a as any).tareas.map((t: any) => ({ ...t })) : [],
+    }
 
     if (to === 'Inbox') {
       payload.tareas = (payload.tareas || []).map((t: any) => ({ ...t, completa: false }))
       payload.hora_salida = null
-      payload.salida_indefinida = 0
+      payload.horaSalida = null
+      payload.salida_indefinida = false
+      payload.salidaIndefinida = false
     } else if (to === 'In progress') {
       const tareas = payload.tareas || []
       if (!tareas.some((t: any) => t.completa)) {
@@ -169,8 +202,21 @@ export default function KanbanBoard({
       payload.tareas = tareas
     } else if (to === 'Done') {
       payload.tareas = (payload.tareas || []).map((t: any) => ({ ...t, completa: true }))
-      const indef = !!payload.salida_indefinida
-      if (!indef && !payload.hora_salida) payload.hora_salida = nowLocal()
+
+      const manualSalida = extractTime(payload.hora_salida ?? payload.horaSalida)
+      if (toBool(payload.salida_indefinida ?? payload.salidaIndefinida)) {
+        const salidaReal = nowLocal()
+        payload.hora_salida = salidaReal
+        payload.horaSalida = salidaReal
+        payload.salida_indefinida = false
+        payload.salidaIndefinida = false
+      } else if (!manualSalida) {
+        const salidaReal = nowLocal()
+        payload.hora_salida = salidaReal
+        payload.horaSalida = salidaReal
+        payload.salida_indefinida = false
+        payload.salidaIndefinida = false
+      }
     }
 
     const ok = await putArreglo(payload)
@@ -182,8 +228,8 @@ export default function KanbanBoard({
 
     if (to === 'Done') {
       await updateHistorialSalida(payload.id, {
-        salida_indefinida: payload.salida_indefinida ? 1 : 0,
-        hora_salida: payload.salida_indefinida ? null : payload.hora_salida || null,
+        salida_indefinida: 0,
+        hora_salida: extractTime(payload.hora_salida ?? payload.horaSalida) || null,
       })
     } else if (from === 'Done') {
       await updateHistorialSalida(payload.id, { salida_indefinida: 0, hora_salida: null })
@@ -204,7 +250,17 @@ export default function KanbanBoard({
 
   async function handleSaveDesdeModal(actualizado: Arreglo, nuevasTareas: Tarea[], moverADone: boolean) {
     const payload: any = { ...(actualizado as any), tareas: nuevasTareas }
-    if (moverADone && !payload.salida_indefinida && !payload.hora_salida) payload.hora_salida = nowLocal()
+
+    if (moverADone) {
+      const manualSalida = extractTime(payload.hora_salida ?? payload.horaSalida)
+      if (toBool(payload.salida_indefinida ?? payload.salidaIndefinida) || !manualSalida) {
+        const salidaReal = nowLocal()
+        payload.hora_salida = salidaReal
+        payload.horaSalida = salidaReal
+        payload.salida_indefinida = false
+        payload.salidaIndefinida = false
+      }
+    }
 
     const ok = await putArreglo(payload)
     if (!ok) return
@@ -219,8 +275,12 @@ export default function KanbanBoard({
     setColState({ [from]: nextFrom, [to]: nextTo } as Partial<Tablero>)
 
     await updateHistorialSalida(payload.id, {
-      salida_indefinida: payload.salida_indefinida ? 1 : 0,
-      hora_salida: payload.salida_indefinida ? null : payload.hora_salida || (moverADone ? nowLocal() : null),
+      salida_indefinida: moverADone ? 0 : toBool(payload.salida_indefinida ?? payload.salidaIndefinida) ? 1 : 0,
+      hora_salida: moverADone
+        ? extractTime(payload.hora_salida ?? payload.horaSalida) || null
+        : toBool(payload.salida_indefinida ?? payload.salidaIndefinida)
+          ? null
+          : extractTime(payload.hora_salida ?? payload.horaSalida) || null,
     })
 
     window.dispatchEvent(new CustomEvent('ts:calendar:refresh'))
@@ -228,7 +288,6 @@ export default function KanbanBoard({
     ;(window as any).__ts_last_arreglo = payload
   }
 
-  // ======== Drag (SortableJS) ========
   useEffect(() => {
     let sortables: any[] = []
 
