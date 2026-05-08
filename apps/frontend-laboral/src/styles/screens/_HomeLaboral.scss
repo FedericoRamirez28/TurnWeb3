@@ -1,0 +1,295 @@
+/* src/styles/screens/_homeLaboral.scss */
+
+.home-laboral {
+  min-height: calc(100vh - 130px);
+  width: 100%;
+  padding: var(--space-lg);
+  box-sizing: border-box;
+
+  /* Layout tipo landing: la página scrollea, las cards no tienen scroll interno. */
+  --home-page-max-w: none;
+}
+
+/* ===== GRID PRINCIPAL ===== */
+.home-laboral__grid {
+  width: 100%;
+  max-width: var(--home-page-max-w);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "turnos"
+    "empresas"
+    "agenda"
+    "notas";
+  gap: var(--space-lg);
+  align-items: start;
+}
+
+/* ===== AREAS ===== */
+.home-laboral__turnos,
+.home-laboral__empresas,
+.home-laboral__agenda,
+.home-laboral__notes {
+  min-width: 0;
+  width: 100%;
+  scroll-margin-top: 78px;
+}
+
+.home-laboral__turnos {
+  grid-area: turnos;
+}
+
+.home-laboral__empresas {
+  grid-area: empresas;
+}
+
+.home-laboral__agenda {
+  grid-area: agenda;
+}
+
+.home-laboral__notes {
+  grid-area: notas;
+}
+
+/* ===== CARDS tipo landing: sin scroll interno ===== */
+.home-laboral__card {
+  width: 100%;
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+}
+
+.home-laboral__cardBody {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: visible;
+  padding-right: 0;
+}
+
+.home-laboral__card--companies,
+.home-laboral__card--agenda,
+.home-laboral__card--notes {
+  height: auto;
+}
+
+/* ===== Turnos arriba, usando todo el ancho disponible ===== */
+.home-laboral__turnosWrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.home-laboral__turnosWrap > .card {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.home-laboral__turnos .card--stretch {
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+}
+
+.home-laboral__turnos .card--stretch > * {
+  min-height: 0;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 980px) {
+  .home-laboral {
+    padding: var(--space);
+  }
+
+  .home-laboral__card {
+    padding: var(--space-lg);
+  }
+}
+
+/* ===== TurnosLaboralAgendaMini ===== */
+
+.lab-agenda__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space);
+}
+
+.lab-agenda__title {
+  margin: 0;
+  font-size: 1.02rem;
+}
+
+.lab-agenda__sub {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: var(--color-ink-soft);
+}
+
+.lab-agenda__actions {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.lab-agenda__cal {
+  margin-top: var(--space);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.65);
+  overflow: hidden;
+}
+
+.lab-agenda__dow {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  border-bottom: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.lab-agenda__dowCell {
+  padding: 8px 10px;
+  font-size: 0.82rem;
+  color: var(--color-ink-soft);
+  text-align: center;
+}
+
+.lab-agenda__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.lab-agenda__day {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 10px;
+  min-height: 58px;
+  position: relative;
+
+  border-right: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.lab-agenda__day:nth-child(7n) {
+  border-right: 0;
+}
+
+.lab-agenda__day:hover {
+  background: rgba(255, 255, 255, 0.85);
+  transform: translateY(-1px);
+}
+
+.lab-agenda__day:disabled {
+  cursor: default;
+  opacity: 0.45;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.lab-agenda__day--sel {
+  background: rgba(0, 143, 107, 0.08) !important;
+}
+
+.lab-agenda__num {
+  font-weight: 800;
+  color: var(--color-ink);
+  font-size: 0.9rem;
+}
+
+.lab-agenda__badge {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+
+  color: rgba(0, 143, 107, 0.95);
+  background: rgba(0, 143, 107, 0.12);
+  border: 1px solid rgba(0, 143, 107, 0.22);
+}
+
+.lab-agenda__list {
+  margin-top: var(--space);
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space);
+}
+
+.lab-agenda__listHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space);
+}
+
+.lab-agenda__listTitle {
+  font-weight: 650;
+  color: var(--color-ink);
+}
+
+.lab-agenda__listMeta {
+  color: var(--color-ink-soft);
+  font-size: 0.9rem;
+}
+
+.lab-agenda__tableWrap {
+  margin-top: var(--space);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  overflow-y: visible;
+  background: rgba(255, 255, 255, 0.7);
+  max-height: none;
+}
+
+.lab-agenda__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+  min-width: 760px;
+}
+
+.lab-agenda__table th,
+.lab-agenda__table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.lab-agenda__table thead th {
+  position: sticky;
+  top: 0;
+  background: rgba(255, 255, 255, 0.92);
+  z-index: 1;
+  font-size: 0.82rem;
+  color: var(--color-ink-soft);
+}
+
+.lab-agenda__muted {
+  color: var(--color-ink-soft);
+}
+
+.lab-agenda__hint {
+  margin-top: 10px;
+  color: var(--color-ink-soft);
+  font-size: 0.88rem;
+}
+
+@media (max-width: 900px) {
+  .lab-agenda__actions {
+    justify-content: flex-start;
+  }
+}

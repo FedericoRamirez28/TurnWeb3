@@ -1,0 +1,444 @@
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+
+import ModalArregloDetalle from '../modales/ModalArregloDetalle'
+import type { ColKey, Tarea, Arreglo, Tablero } from '@/lib/tallerTypes'
+import { api } from '@/lib/api'
+
+const COLS: ColKey[] = ['Inbox', 'In progress', 'Done']
+const COL_LABEL: Record<ColKey, string> = {
+  Inbox: 'En espera',
+  'In progress': 'En progreso',
+  Done: 'Finalizado',
+}
+
+function nowLocal(): string {
+  const d = new Date()
+  const yyyy = d.getFullYear()
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  const hh = String(d.getHours()).padStart(2, '0')
+  const mi = String(d.getMinutes()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd} ${hh}:${mi}`
+}
+
+function extractTime(value: unknown): string {
+  const s = String(value ?? '').trim()
+  if (!s) return ''
+  const match = s.match(/(\d{2}:\d{2})/)
+  return match ? match[1] : ''
+}
+
+function toBool(value: unknown): boolean {
+  if (typeof value === 'boolean') return value
+  if (typeof value === 'number') return value === 1
+  const s = String(value ?? '').trim().toLowerCase()
+  return s === '1' || s === 'true' || s === 'si' || s === 'sí'
+}
+
+type Props = {
+  movilId?: string | number | null
+  tablero: Tablero
+  setTablero: React.Dispatch<React.SetStateAction<Tablero>>
+  filtro?: string
+  modoEliminar?: boolean
+  salirModoEliminar?: () => void
+}
+
+function toUpdateDto(a: Arreglo) {
+  const horaEntrada =
+    (a as any).hora_entrada ??
+    (a as any).horaEntrada ??
+    null
+
+  const horaSalida =
+    (a as any).hora_salida ??
+    (a as any).horaSalida ??
+    (a as any).hora_salida ??
+    null
+
+  const salidaIndefinida = toBool((a as any).salida_indefinida ?? (a as any).salidaIndefinida)
+
+  return {
+    patente: (a as any).patente ?? null,
+    fecha: (a as any).fecha ?? (a as any).fechaISO ?? null,
+    motivo: (a as any).motivo ?? null,
+    anotaciones: (a as any).anotaciones ?? null,
+    prioridad: (a as any).prioridad ?? 'baja',
+    hora_entrada: horaEntrada,
+    horaEntrada: horaEntrada,
+    hora_salida: horaSalida,
+    horaSalida: horaSalida,
+    salida_indefinida: salidaIndefinida,
+    salidaIndefinida: salidaIndefinida,
+    tareas: Array.isArray((a as any).tareas)
+      ? (a as any).tareas.map((t: any, i: number) => ({
+          texto: String(t?.texto ?? '').trim(),
+          completa: !!t?.completa,
+          orden: Number.isFinite(Number(t?.orden)) ? Number(t.orden) : i,
+        }))
+      : [],
+  }
+}
+
+export default function KanbanBoard({
+  movilId,
+  tablero,
+  setTablero,
+  filtro = '',
+  modoEliminar = false,
+  salirModoEliminar = () => {},
+}: Props) {
+  const [detalleOpen, setDetalleOpen] = useState(false)
+  const [detalleItem, setDetalleItem] = useState<Arreglo | null>(null)
+
+  const inboxRef = useRef<HTMLDivElement>(null)
+  const inProgRef = useRef<HTMLDivElement>(null)
+  const doneRef = useRef<HTMLDivElement>(null)
+
+  const colRefs: Record<ColKey, React.RefObject<HTMLDivElement>> = {
+    Inbox: inboxRef,
+    'In progress': inProgRef,
+    Done: doneRef,
+  }
+
+  const filtroNorm = String(filtro || '').toLowerCase()
+  const filtrado = useMemo<Tablero>(() => {
+    if (!filtroNorm) return tablero
+    const out: Tablero = { Inbox: [], 'In progress': [], Done: [] }
+
+    for (const col of COLS) {
+      out[col] = (tablero[col] || []).filter((a) => {
+        const txt = [
+          (a as any)?.patente,
+          (a as any)?.motivo,
+          (a as any)?.anotaciones,
+          ...(Array.isArray((a as any)?.tareas) ? (a as any).tareas.map((t: any) => t?.texto) : []),
+          (a as any)?.prioridad,
+        ]
+          .join(' ')
+          .toLowerCase()
+        return txt.includes(filtroNorm)
+      })
+    }
+    return out
+  }, [tablero, filtroNorm])
+
+  async function putArreglo(a: Arreglo) {
+    const dto = toUpdateDto(a)
+    const r = await api.put<any>(`/arreglos/${encodeURIComponent(String((a as any).id))}`, dto)
+    if (!r.ok) {
+      console.error('PUT /arreglos/:id', r.error)
+      alert('No se pudo actualizar el arreglo')
+      return false
+    }
+    return true
+  }
+
+  async function deleteArreglo(id: string) {
+    const r = await api.del<any>(`/arreglos/${encodeURIComponent(String(id))}`)
+    if (!r.ok) {
+      console.error('DELETE /arreglos/:id', r.error)
+      alert('No se pudo eliminar el arreglo')
+      return false
+    }
+    return true
+  }
+
+  async function updateHistorialSalida(
+    arregloId: string,
+    { hora_salida = null, salida_indefinida = 0 }: { hora_salida?: string | null; salida_indefinida?: number },
+  ) {
+    const r = await api.put<any>(`/historial-dia/update-by-arreglo-id`, {
+      arreglo_id: arregloId,
+      hora_salida,
+      salida_indefinida,
+    })
+    if (r.ok) {
+      window.dispatchEvent(new CustomEvent('ts:historial-dia:refetch'))
+    }
+  }
+
+  const setColState = (next: Partial<Tablero>) => setTablero((prev) => ({ ...prev, ...next }))
+  const removeFrom = (col: ColKey, id: string) => (tablero[col] || []).filter((a: any) => String(a.id) !== String(id))
+
+  function openDetalle(a: Arreglo) {
+    setDetalleItem(a)
+    setDetalleOpen(true)
+    ;(window as any).__ts_last_arreglo = a
+  }
+
+  useEffect(() => {
+    const onOpen = (e: any) => {
+      const arregloId = String(e?.detail?.arregloId || '')
+      if (!arregloId) return
+      const all = [...(tablero.Inbox || []), ...(tablero['In progress'] || []), ...(tablero.Done || [])] as any[]
+      const found = all.find((x) => String(x.id) === arregloId)
+      if (found) openDetalle(found as any)
+    }
+    window.addEventListener('ts:kanban:open-detalle', onOpen)
+    return () => window.removeEventListener('ts:kanban:open-detalle', onOpen)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tablero.Inbox.length, tablero['In progress'].length, tablero.Done.length])
+
+  async function persistMove(a: Arreglo, from: ColKey, to: ColKey) {
+    const payload: any = {
+      ...(a as any),
+      tareas: Array.isArray((a as any).tareas) ? (a as any).tareas.map((t: any) => ({ ...t })) : [],
+    }
+
+    if (to === 'Inbox') {
+      payload.tareas = (payload.tareas || []).map((t: any) => ({ ...t, completa: false }))
+      payload.hora_salida = null
+      payload.horaSalida = null
+      payload.salida_indefinida = false
+      payload.salidaIndefinida = false
+    } else if (to === 'In progress') {
+      const tareas = payload.tareas || []
+      if (!tareas.some((t: any) => t.completa)) {
+        const idx = tareas.findIndex((t: any) => !t.completa)
+        if (idx >= 0) tareas[idx].completa = true
+        else if (tareas.length) tareas[0].completa = true
+      }
+      payload.tareas = tareas
+    } else if (to === 'Done') {
+      payload.tareas = (payload.tareas || []).map((t: any) => ({ ...t, completa: true }))
+
+      const manualSalida = extractTime(payload.hora_salida ?? payload.horaSalida)
+      if (toBool(payload.salida_indefinida ?? payload.salidaIndefinida)) {
+        const salidaReal = nowLocal()
+        payload.hora_salida = salidaReal
+        payload.horaSalida = salidaReal
+        payload.salida_indefinida = false
+        payload.salidaIndefinida = false
+      } else if (!manualSalida) {
+        const salidaReal = nowLocal()
+        payload.hora_salida = salidaReal
+        payload.horaSalida = salidaReal
+        payload.salida_indefinida = false
+        payload.salidaIndefinida = false
+      }
+    }
+
+    const ok = await putArreglo(payload)
+    if (!ok) return
+
+    const nextFrom = removeFrom(from, payload.id)
+    const nextTo = [payload, ...(tablero[to] || [])]
+    setColState({ [from]: nextFrom, [to]: nextTo } as Partial<Tablero>)
+
+    if (to === 'Done') {
+      await updateHistorialSalida(payload.id, {
+        salida_indefinida: 0,
+        hora_salida: extractTime(payload.hora_salida ?? payload.horaSalida) || null,
+      })
+    } else if (from === 'Done') {
+      await updateHistorialSalida(payload.id, { salida_indefinida: 0, hora_salida: null })
+    }
+
+    window.dispatchEvent(new CustomEvent('ts:calendar:refresh'))
+  }
+
+  async function moveLeft(a: Arreglo, from: ColKey) {
+    const to: ColKey = from === 'Done' ? 'In progress' : 'Inbox'
+    await persistMove(a, from, to)
+  }
+
+  async function moveRight(a: Arreglo, from: ColKey) {
+    const to: ColKey = from === 'Inbox' ? 'In progress' : 'Done'
+    await persistMove(a, from, to)
+  }
+
+  async function handleSaveDesdeModal(actualizado: Arreglo, nuevasTareas: Tarea[], moverADone: boolean) {
+    const payload: any = { ...(actualizado as any), tareas: nuevasTareas }
+
+    if (moverADone) {
+      const manualSalida = extractTime(payload.hora_salida ?? payload.horaSalida)
+      if (toBool(payload.salida_indefinida ?? payload.salidaIndefinida) || !manualSalida) {
+        const salidaReal = nowLocal()
+        payload.hora_salida = salidaReal
+        payload.horaSalida = salidaReal
+        payload.salida_indefinida = false
+        payload.salidaIndefinida = false
+      }
+    }
+
+    const ok = await putArreglo(payload)
+    if (!ok) return
+
+    const inInbox = (tablero.Inbox || []).some((x: any) => String(x.id) === String(payload.id))
+    const inProg = (tablero['In progress'] || []).some((x: any) => String(x.id) === String(payload.id))
+    const from: ColKey = inInbox ? 'Inbox' : inProg ? 'In progress' : 'Done'
+    const to: ColKey = moverADone ? 'Done' : from
+
+    const nextFrom = removeFrom(from, payload.id)
+    const nextTo = [payload, ...(tablero[to] || [])]
+    setColState({ [from]: nextFrom, [to]: nextTo } as Partial<Tablero>)
+
+    await updateHistorialSalida(payload.id, {
+      salida_indefinida: moverADone ? 0 : toBool(payload.salida_indefinida ?? payload.salidaIndefinida) ? 1 : 0,
+      hora_salida: moverADone
+        ? extractTime(payload.hora_salida ?? payload.horaSalida) || null
+        : toBool(payload.salida_indefinida ?? payload.salidaIndefinida)
+          ? null
+          : extractTime(payload.hora_salida ?? payload.horaSalida) || null,
+    })
+
+    window.dispatchEvent(new CustomEvent('ts:calendar:refresh'))
+    setDetalleOpen(false)
+    ;(window as any).__ts_last_arreglo = payload
+  }
+
+  useEffect(() => {
+    let sortables: any[] = []
+
+    ;(async () => {
+      let Sortable: any
+      try {
+        Sortable = (await import('sortablejs')).default
+      } catch {
+        Sortable = null
+      }
+      if (!Sortable) return
+
+      for (const col of COLS) {
+        const el = colRefs[col]?.current
+        if (!el) continue
+
+        const s = Sortable.create(el, {
+          group: 'kanban-arreglos',
+          animation: 150,
+          handle: '.kb-card',
+          onAdd: async (evt: any) => {
+            const id = String(evt.item?.dataset?.id || '')
+            const from = evt.from?.dataset?.col as ColKey | undefined
+            const to = evt.to?.dataset?.col as ColKey | undefined
+            if (!id || !from || !to) return
+
+            const item =
+              (tablero[from] || []).find((x: any) => String(x.id) === id) ||
+              [...(tablero.Inbox || []), ...(tablero['In progress'] || []), ...(tablero.Done || [])].find(
+                (x: any) => String(x.id) === id,
+              )
+
+            if (item) await persistMove(item as any, from, to)
+          },
+        })
+
+        sortables.push(s)
+      }
+    })()
+
+    return () => {
+      try {
+        sortables.forEach((s) => s?.destroy?.())
+      } catch {
+        // noop
+      }
+      sortables = []
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tablero.Inbox.length, tablero['In progress'].length, tablero.Done.length])
+
+  return (
+    <div className={'kb-wrap' + (modoEliminar ? ' modo-eliminar' : '')}>
+      {modoEliminar && (
+        <div className="kb-banner">
+          <strong>Modo eliminar</strong> — hacé clic en la ❌ de la tarjeta para eliminar
+          <button className="kb-exit" onClick={salirModoEliminar} type="button">
+            Salir
+          </button>
+        </div>
+      )}
+
+      <div className="kb-grid">
+        {COLS.map((col) => (
+          <section key={col} className="kb-col">
+            <header className="kb-colhead">
+              <h3>{COL_LABEL[col]}</h3>
+              <span className="kb-count">{(filtrado[col] || []).length}</span>
+            </header>
+
+            <div className="kb-list" ref={colRefs[col]} data-col={col}>
+              {(filtrado[col] || []).map((a: any) => (
+                <article
+                  key={a.id}
+                  className={`kb-card prio-${String(a.prioridad || 'baja').toLowerCase()}`}
+                  data-id={a.id}
+                  onClick={() => ((window as any).__ts_last_arreglo = a)}
+                  onDoubleClick={() => openDetalle(a)}
+                >
+                  <div className="kb-line">
+                    <span className="kb-tag">{a.patente || '—'}</span>
+                    <span className="kb-date">{a.fecha || ''}</span>
+                  </div>
+
+                  {a.motivo && <div className="kb-motivo">📌 {a.motivo}</div>}
+                  {a.anotaciones && <div className="kb-note">{a.anotaciones}</div>}
+
+                  {Array.isArray(a.tareas) && a.tareas.length > 0 && (
+                    <div className="kb-tasks">
+                      {a.tareas.slice(0, 3).map((t: any, i: number) => (
+                        <div key={String(t?.id || i)} className={`kb-task ${t.completa ? 'done' : ''}`}>
+                          {t.completa ? '✔' : '•'} {t.texto}
+                        </div>
+                      ))}
+                      {a.tareas.length > 3 && <div className="kb-more">+{a.tareas.length - 3} tareas…</div>}
+                    </div>
+                  )}
+
+                  <div className="kb-actions">
+                    <div className="kb-left">
+                      {col !== 'Inbox' && (
+                        <button title="Mover a la izquierda" onClick={() => moveLeft(a, col)} type="button">
+                          ←
+                        </button>
+                      )}
+                      {col !== 'Done' && (
+                        <button title="Mover a la derecha" onClick={() => moveRight(a, col)} type="button">
+                          →
+                        </button>
+                      )}
+                      <button title="Editar" onClick={() => openDetalle(a)} type="button">
+                        ✏️
+                      </button>
+                    </div>
+
+                    <div className="kb-right">
+                      {modoEliminar && (
+                        <button
+                          className="kb-del"
+                          title="Eliminar"
+                          type="button"
+                          onClick={async () => {
+                            const ok = window.confirm('¿Eliminar arreglo?')
+                            if (!ok) return
+
+                            const done = await deleteArreglo(a.id)
+                            if (!done) return
+
+                            const upd: Partial<Tablero> = {}
+                            for (const c of COLS) (upd as any)[c] = removeFrom(c, a.id)
+                            setColState(upd)
+
+                            await updateHistorialSalida(a.id, { salida_indefinida: 0, hora_salida: null })
+                            window.dispatchEvent(new CustomEvent('ts:calendar:refresh'))
+                          }}
+                        >
+                          ❌
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+
+      {detalleOpen && detalleItem && (
+        <ModalArregloDetalle arreglo={detalleItem} onSave={handleSaveDesdeModal} onCancel={() => setDetalleOpen(false)} />
+      )}
+    </div>
+  )
+}

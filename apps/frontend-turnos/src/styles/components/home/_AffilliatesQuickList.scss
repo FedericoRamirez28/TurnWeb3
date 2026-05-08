@@ -1,0 +1,338 @@
+.affiliates {
+  &__search {
+    margin-bottom: 8px;
+  }
+
+  &__list {
+    max-height: 420px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-right: 4px;
+  }
+
+  &__empty {
+    font-size: 0.85rem;
+    color: var(--color-ink-soft);
+  }
+}
+
+.affiliate-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: #fff;
+
+  &__avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    background: var(--color-primary-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--color-primary);
+  }
+
+  &__avatar--lg {
+    width: 44px;
+    height: 44px;
+    font-size: 1.1rem;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 0.8rem;
+
+    &--meta {
+      color: var(--color-ink-soft);
+    }
+  }
+
+  &__name {
+    font-weight: 600;
+  }
+
+  &__number {
+    color: var(--color-ink-soft);
+  }
+
+  &__next {
+    font-weight: 500;
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-end;
+  }
+}
+
+/* ===== Modal afiliados ===== */
+
+.affiliates-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px; 
+  background: color-mix(in oklab, #020617 55%, transparent);
+}
+
+.affiliates-modal {
+  width: min(720px, 100%);
+  max-height: 100%;
+  background: #fff;
+  border-radius: var(--radius-lg, 14px);
+  box-shadow: var(--shadow-soft, 0 18px 45px rgba(0, 0, 0, 0.22));
+  display: flex;
+  flex-direction: column;
+}
+
+.affiliates-modal--read {
+  width: min(680px, 100%);
+}
+
+.affiliates-modal__header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--color-border-subtle, #e0e0e0);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.affiliates-modal__header-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.affiliates-modal__title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--color-ink-strong, #111827);
+}
+
+.affiliates-modal__subtitle {
+  font-size: 0.8rem;
+  color: var(--color-ink-soft, #6b7280);
+}
+
+.affiliates-modal__close {
+  border: none;
+  background: transparent;
+  font-size: 1.4rem;
+  line-height: 1;
+  padding: 0 4px;
+  cursor: pointer;
+  color: var(--color-ink-soft, #6b7280);
+
+  &:hover {
+    color: var(--color-ink, #111827);
+  }
+}
+
+.affiliates-modal__body {
+  padding: 14px 18px;
+  overflow-y: auto;
+  max-height: calc(100vh - 120px);
+}
+
+.affiliates-modal__body--scroll {
+  padding: 14px 18px;
+  overflow-y: auto;
+  max-height: calc(100vh - 120px);
+}
+
+.affiliates-modal__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 14px;
+}
+
+/* Campos */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.8rem;
+
+  &__label {
+    font-weight: 500;
+    color: var(--color-ink-soft, #6b7280);
+  }
+
+  &__label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  &__action-link {
+    border: none;
+    background: transparent;
+    padding: 0;
+    font-size: 0.75rem;
+    color: var(--color-primary);
+    cursor: pointer;
+    text-decoration: underline;
+
+    &:disabled {
+      cursor: default;
+      opacity: 0.5;
+      text-decoration: none;
+    }
+  }
+
+  &__hint {
+    font-size: 0.75rem;
+    color: var(--color-ink-soft, #6b7280);
+  }
+
+  &__hint--error {
+    color: #b91c1c;
+  }
+
+  &--full {
+    grid-column: 1 / -1;
+  }
+
+  &--checkbox {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+
+    input[type='checkbox'] {
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+.affiliates-modal__footer {
+  padding: 10px 18px 14px;
+  border-top: 1px solid var(--color-border-subtle, #e0e0e0);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ===== Ficha / cartilla ===== */
+
+.affiliates-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.affiliates-sheet__section {
+  border-radius: var(--radius-md, 10px);
+  border: 1px solid var(--color-border-subtle, #e5e7eb);
+  padding: 10px 12px;
+  background: var(--color-surface-subtle, #f9fafb);
+}
+
+.affiliates-sheet__title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--color-ink, #111827);
+}
+
+.affiliates-sheet__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 14px;
+}
+
+.affiliates-sheet__grid--full {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.affiliates-sheet__highlight {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-primary, #006f46);
+}
+
+/* Fila de info */
+
+.affiliates-info-row {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.8rem;
+}
+
+.affiliates-info-row__label {
+  color: var(--color-ink-soft, #6b7280);
+}
+
+.affiliates-info-row__value {
+  color: var(--color-ink, #111827);
+  font-weight: 500;
+}
+
+/* ===== Responsive ===== */
+
+@media (max-width: 640px) {
+  .affiliate-card {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    row-gap: 6px;
+
+    &__actions {
+      grid-column: 1 / -1;
+      flex-direction: row;
+      justify-content: flex-end;
+    }
+  }
+
+  .affiliates-modal {
+    width: 100%;
+    max-height: 100vh;
+  }
+
+  .affiliates-modal__body,
+  .affiliates-modal__body--scroll {
+    padding: 12px;
+    max-height: calc(100vh - 110px);
+  }
+
+  .affiliates-modal__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .affiliates-sheet__grid,
+  .affiliates-sheet__grid--full {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .affiliates-modal__footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .affiliates-modal__footer .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

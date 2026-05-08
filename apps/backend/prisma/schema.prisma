@@ -1,0 +1,478 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/**
+ * ========= MODELO AFILIADO =========
+ */
+model Afiliado {
+  id             String @id @default(uuid())
+  numeroAfiliado String
+  dni            String @unique
+  nombreCompleto String
+
+  domicilio    String?
+  localidad    String?
+  codigoPostal String?
+  partido      String?
+  provincia    String?
+
+  telefono        String?
+  telefonoAlt     String?
+  email           String?
+  fechaNacimiento DateTime?
+
+  esTitular Boolean @default(true)
+  plan      String?
+  activo    Boolean @default(true)
+
+  turnos Turno[]
+  bonos  BonoAtencion[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/**
+ * ========= MODELO TURNO =========
+ */
+model Turno {
+  id String @id @default(uuid())
+
+  fechaTomado   DateTime  @default(now())
+  fechaReal     DateTime?
+  hora          String
+  estado        String
+  observaciones String?
+
+  tipoAtencion String
+  especialidad String?
+  laboratorio  String?
+
+  plan  String?
+  monto Int
+
+  // ✅ Mercado Pago
+  mpPagado Boolean @default(false)
+  mpMonto  Int     @default(0)
+  mpRef    String?
+
+  profesional String
+
+  // ⚠️ Esto es lo que ya tenías (nombre del prestador como texto)
+  prestador String
+
+  afiliadoId String
+  afiliado   Afiliado @relation(fields: [afiliadoId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // ✅ Nuevo: referencia opcional a Prestador (para vincularlo al bono / validación)
+  prestadorId  String?
+  prestadorRef Prestador? @relation(fields: [prestadorId], references: [id], onDelete: SetNull)
+
+  bonos BonoAtencion[]
+
+  @@index([afiliadoId])
+  @@index([prestadorId])
+  @@map("turnos")
+}
+
+model CierreCaja {
+  id        String   @id @default(uuid())
+  /// Fecha del cierre en formato ISO (yyyy-mm-dd)
+  fechaISO  String   @unique
+  /// Suma de todos los montos de la caja
+  total     Int
+  /// Snapshot de las filas de la caja (array de objetos CajaRow)
+  rows      Json
+  createdAt DateTime @default(now())
+
+  @@map("cierre_caja")
+}
+
+model User {
+  id           String  @id @default(uuid())
+  username     String  @unique
+  displayName  String
+  passwordHash String
+  role         String  @default("recepcion")
+  activo       Boolean @default(true)
+
+  passwordResets PasswordReset[]
+
+  // ✅ inversa para auditoría de empresas creadas
+  laboralCompaniesCreated LaboralCompany[]
+
+  // ✅ 1 a 1 opcional: si este user es prestador, tiene perfil Prestador
+  prestadorProfile Prestador?
+
+  // ✅ auditoría: bonos creados por un usuario (recepción/admin)
+  bonosCreados BonoAtencion[] @relation("BonoCreatedBy")
+
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  LaboralTurno             LaboralTurno[]
+  laboralNotes             LaboralNote[]
+  laboralAdicionales       LaboralAdicional[]
+  laboralPortadas          LaboralPortada[]
+  laboralConsultorioTurnos LaboralConsultorioTurno[]
+
+  @@map("users")
+}
+
+model PasswordReset {
+  id        String    @id @default(uuid())
+  token     String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  usedAt    DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("password_resets")
+}
+
+model LaboralCompany {
+  id        String  @id @default(uuid())
+  nombre    String
+  nroSocio  String?
+  cuit      String?
+  contacto  String?
+  telefono  String?
+  email     String?
+  domicilio String?
+  notas     String?
+
+  isActive Boolean @default(true)
+
+  createdByUserId String?
+  createdByUser   User?   @relation(fields: [createdByUserId], references: [id])
+
+  employees LaboralEmployee[]
+  turnos    LaboralTurno[]
+
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime                  @updatedAt
+  LaboralConsultorioTurno LaboralConsultorioTurno[]
+
+  @@index([nombre])
+  @@map("laboral_companies")
+}
+
+model LaboralEmployee {
+  id        String         @id @default(uuid())
+  companyId String
+  company   LaboralCompany @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  dni         String
+  nombre      String
+  nroAfiliado String?
+  puesto      String?
+
+  isActive Boolean @default(true)
+
+  turnos LaboralTurno[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([companyId, dni])
+  @@index([dni])
+  @@map("laboral_employees")
+}
+
+model LaboralTurno {
+  id String @id @default(uuid())
+
+  sede              String
+  fechaRecepcionISO String
+  fechaTurnoISO     String
+  horaTurno         String?
+  tipoExamen        String
+
+  companyId String
+  company   LaboralCompany @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  employeeId String
+  employee   LaboralEmployee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  nombreSnap      String
+  dniSnap         String
+  nroAfiliadoSnap String?
+  puestoSnap      String?
+
+  createdByUserId String?
+  createdByUser   User?   @relation(fields: [createdByUserId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([employeeId, sede, fechaTurnoISO, horaTurno, tipoExamen], name: "uniq_laboral_turno_employee")
+  @@index([fechaTurnoISO])
+  @@index([companyId])
+  @@index([employeeId])
+  @@index([sede, fechaTurnoISO, horaTurno])
+  @@map("laboral_turnos")
+}
+
+model LaboralNote {
+  id    String @id @default(uuid())
+  text  String
+  color String
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("laboral_notes")
+}
+
+model LaboralAdicional {
+  id     String @id @default(cuid())
+  userId String
+
+  empresa     String
+  nroAfiliado String?
+  nombre      String
+  dni         String
+  adicional   String
+  fechaISO    String
+  createdAt   DateTime @default(now())
+  User        User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, empresa, dni, adicional, fechaISO, nombre, nroAfiliado], name: "uniq_adicional_no_dup")
+  @@index([userId, fechaISO])
+  @@index([userId, dni])
+  @@index([userId, empresa])
+}
+
+model LaboralPortada {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  apellidoNombre  String
+  nroSocio        String?
+  domicilio       String?
+  fechaNacimiento String?
+  dni             String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, dni])
+  @@index([userId, apellidoNombre])
+  @@index([userId, dni])
+}
+
+model LaboralConsultorioTurno {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  companyId         String
+  company           LaboralCompany @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  empresaNombreSnap String
+
+  dni           String
+  nombre        String
+  nacimientoISO String?
+  motivo        String
+  diagnostico   String
+
+  fechaTurnoISO String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, companyId, dni, fechaTurnoISO, motivo], name: "uniq_consultorio_no_dup")
+  @@index([userId, fechaTurnoISO])
+  @@index([userId, companyId])
+  @@index([userId, dni])
+  @@map("laboral_consultorio_turnos")
+}
+
+enum TurnosPlan {
+  BASE
+  ESMERALDA
+  RUBI
+  DORADO
+  PARTICULAR
+  PERSONAL
+}
+
+enum TurnosPrecioTipo {
+  LABORATORIO
+  ESPECIALIDAD
+}
+
+model TurnosPrecio {
+  id     String           @id @default(cuid())
+  tipo   TurnosPrecioTipo
+  nombre String
+  plan   TurnosPlan
+  valor  Int
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tipo, nombre, plan], name: "uniq_turnos_precio")
+  @@index([tipo, plan])
+  @@map("turnos_precios")
+}
+
+model LaboralPrecio {
+  id            String @id @default(cuid())
+  categoria     String
+  nombre        String
+  valorSocios   Int
+  valorNoSocios Int
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([categoria, nombre], name: "uniq_laboral_precio")
+  @@index([categoria])
+  @@map("laboral_precios")
+}
+
+/**
+ * ========= PRESTADOR =========
+ */
+model Prestador {
+  id String @id @default(uuid())
+
+  // ✅ 1 a 1 con User (login del prestador)
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  nombre      String
+  razonSocial String?
+  cuit        String?
+  telefono    String?
+  email       String?
+  direccion   String?
+  isActive    Boolean @default(true)
+
+  // ✅ bonos emitidos PARA este prestador (destino)
+  bonosDestino BonoAtencion[] @relation("BonoPrestadorDestino")
+
+  // ✅ bonos marcados como usados POR este prestador (verificador)
+  bonosUsados BonoAtencion[] @relation("BonoUsedBy")
+
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  Turno            Turno[]
+  BonoAtencionScan BonoAtencionScan[]
+
+  @@index([nombre])
+  @@map("prestadores")
+}
+
+/**
+ * ========= BONO ATENCIÓN =========
+ */
+model BonoAtencion {
+  id String @id @default(uuid())
+
+  // ✅ código humano
+  code String @unique
+
+  afiliadoId String
+  afiliado   Afiliado @relation(fields: [afiliadoId], references: [id], onDelete: Restrict)
+
+  // ✅ prestador destino
+  prestadorId String
+  prestador   Prestador @relation("BonoPrestadorDestino", fields: [prestadorId], references: [id], onDelete: Restrict)
+
+  // opcional: si el bono sale de un turno
+  turnoId String?
+  turno   Turno?  @relation(fields: [turnoId], references: [id], onDelete: SetNull)
+
+  // snapshot por si luego cambian datos
+  afiliadoNombreSnap  String
+  afiliadoDniSnap     String
+  prestadorNombreSnap String
+
+  practica         String
+  observaciones    String?
+  fechaAtencionISO String?
+
+  issuedAt  DateTime @default(now())
+  expiresAt DateTime
+
+  status BonoStatus @default(ISSUED)
+  usedAt DateTime?
+
+  // ✅ quién lo validó/usó (prestador logueado)
+  usedByPrestadorId String?
+  usedByPrestador   Prestador? @relation("BonoUsedBy", fields: [usedByPrestadorId], references: [id], onDelete: SetNull)
+
+  // ✅ auditoría: quién lo creó (recepción/admin)
+  createdByUserId String?
+  createdByUser   User?   @relation("BonoCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  scans BonoAtencionScan[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([afiliadoId])
+  @@index([prestadorId])
+  @@index([turnoId])
+  @@index([status])
+  @@map("bonos_atencion")
+}
+
+enum BonoStatus {
+  ISSUED
+  USED
+  CANCELLED
+  EXPIRED
+}
+
+model BonoAtencionScan {
+  id String @id @default(uuid())
+
+  bonoId String
+  bono   BonoAtencion @relation(fields: [bonoId], references: [id], onDelete: Cascade)
+
+  scannedAt DateTime @default(now())
+
+  prestadorId String?
+  prestador   Prestador? @relation(fields: [prestadorId], references: [id], onDelete: SetNull)
+
+  ip        String?
+  userAgent String?
+
+  result BonoScanResult
+
+  @@index([bonoId])
+  @@index([prestadorId])
+  @@index([scannedAt])
+  @@map("bonos_atencion_scans")
+}
+
+enum BonoScanResult {
+  VALID
+  INVALID_TOKEN
+  NOT_FOUND
+  EXPIRED
+  USED
+  CANCELLED
+}

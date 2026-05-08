@@ -1,0 +1,114 @@
+.precios {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.precios__actions {
+  display: flex;
+  gap: var(--space);
+  align-items: center;
+}
+
+.precios__select {
+  min-width: 190px;
+}
+
+.precios__table {
+  margin-top: var(--space);
+}
+
+/* ===== Modal simple reutilizable ===== */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 18px;
+}
+
+.modal-card {
+  width: 720px;
+  max-width: 96vw;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+
+.modal-card__header {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space);
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.modal-card__title {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.modal-card__subtitle {
+  margin: 6px 0 0;
+  font-size: 0.88rem;
+  color: var(--color-ink-soft);
+}
+
+.modal-card__body {
+  padding: 16px 18px;
+}
+
+.modal-card__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space);
+  padding: 14px 18px;
+  border-top: 1px solid var(--color-border);
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space);
+}
+
+@media (max-width: 720px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field__label {
+  font-size: 0.85rem;
+  color: var(--color-ink-soft);
+}
+
+.field__hint {
+  font-size: 0.78rem;
+  color: var(--color-ink-soft);
+}
+
+.percent {
+  position: relative;
+}
+
+.percent__suffix {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-ink-soft);
+  font-size: 0.9rem;
+}

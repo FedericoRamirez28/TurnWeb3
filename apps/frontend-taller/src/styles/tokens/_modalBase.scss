@@ -1,0 +1,166 @@
+/* Base de modales (reutilizable en todos los modales de taller)
+   Usa los tokens del monorepo vía CSS vars:
+   --surface, --color-border, --radius-lg, --shadow-2, --space-*, --ink, etc.
+*/
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: var(--space-lg);
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(2px);
+}
+
+.modal {
+  width: min(720px, calc(100vw - 2 * var(--space-lg)));
+  max-height: min(86vh, 900px);
+  overflow: auto;
+
+  background: var(--surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2, 0 10px 30px rgba(0,0,0,0.22));
+
+  padding: var(--space-lg);
+}
+
+.modal h2 {
+  margin: 0 0 var(--space-md);
+  font-size: 1.15rem;
+  color: var(--ink);
+}
+
+.modal h3 {
+  margin: var(--space-md) 0 var(--space-sm);
+  font-size: 1rem;
+  color: var(--ink);
+}
+
+.modal label {
+  display: block;
+  margin: var(--space-sm) 0;
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+
+.modal input[type="text"],
+.modal input[type="date"],
+.modal input[type="time"],
+.modal input[type="datetime-local"],
+.modal select,
+.modal textarea {
+  width: 100%;
+  margin-top: 6px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--surface-2, #f6f8fb);
+  color: var(--ink);
+  padding: 10px 12px;
+  outline: none;
+}
+
+.modal textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+
+.modal input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.row-gap {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.inline-toggle {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2, #f6f8fb);
+}
+
+.checklist {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+
+  @media (max-width: 720px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.modal ul {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-sm) 0 0;
+}
+
+.modal li {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2, #f6f8fb);
+  margin-top: 8px;
+}
+
+.acciones {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  margin-top: var(--space-lg);
+}
+
+/* Botones (match estilo monorepo) */
+.modal .btn,
+.acciones button,
+.checklist button {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.modal .btn.primary,
+.acciones button.primary {
+  background: var(--brand, #2f6fed);
+  border-color: transparent;
+  color: #fff;
+}
+
+.modal .btn.ghost,
+.acciones button.ghost {
+  background: transparent;
+}
+
+.modal .btn:disabled,
+.acciones button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

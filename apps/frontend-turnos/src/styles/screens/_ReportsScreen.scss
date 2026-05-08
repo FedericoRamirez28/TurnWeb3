@@ -1,0 +1,308 @@
+.reports-screen {
+  padding: sp(7) 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  &__header {
+    margin-bottom: sp(2);
+    padding: 0 sp(1);
+  }
+
+  &__title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+
+  &__subtitle {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--color-ink-soft);
+  }
+
+  &__ranges-card {
+    margin-bottom: sp(3);
+  }
+
+  &__ranges-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: sp(3);
+    margin-bottom: sp(1.5);
+
+    @media (max-width: 640px) {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+
+  &__chart-card {
+    margin-top: sp(1);
+  }
+
+  &__chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: sp(3);
+    margin-bottom: sp(1.5);
+
+    @media (max-width: 640px) {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+
+  &__chart-title {
+    font-size: 1.1rem;
+    margin: 0 0 4px;
+  }
+
+  &__chart-subtitle {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--color-ink-soft);
+  }
+
+  &__chart-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    background: rgba(148, 163, 184, 0.08);
+    padding: 2px;
+    border-radius: 999px;
+  }
+
+  /* ===== variante de card solo para reportes ===== */
+  .card--reports {
+    padding: sp(2.5);
+    gap: sp(2);
+
+    .card__header {
+      align-items: flex-start;
+      margin-bottom: sp(1.2);
+    }
+  }
+
+  /* ===== Cards de rango ===== */
+
+  .reports-card {
+    &--full {
+      margin-top: sp(1.5);
+    }
+  }
+
+  .reports-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .reports-card__title {
+    margin-bottom: 4;
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+
+  .reports-card__subtitle {
+    font-size: 0.8rem;
+    color: var(--color-ink-soft);
+  }
+
+  .reports-card__body {
+    display: flex;
+    flex-direction: column;
+    
+    gap: sp(2.2);
+  }
+
+  .reports-card__totals {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: sp(1.2);
+    margin-bottom: sp(0.5);
+
+    @media (max-width: 1200px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @media (max-width: 640px) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .reports-card__row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: sp(2.2);
+
+    &.reports-card__row--bottom {
+      border-top: 1px solid var(--color-border);
+      padding-top: sp(1.4);
+    }
+
+    @media (max-width: 1024px) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .reports-card__column {
+    display: flex;
+    flex-direction: column;
+    gap: sp(1);
+  }
+
+  .reports-card__section-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .reports-kpi {
+    max-width: 80%;
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: rgba(148, 163, 184, 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+     box-shadow: 0 8px 8px rgba(15, 23, 42, 0.16);
+  
+
+    &__label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-ink-soft);
+    }
+
+    &__value {
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    &__meta {
+      font-size: 0.7rem;
+      color: var(--color-ink-soft);
+    }
+
+    &.reports-kpi--good {
+      background: rgba(34, 197, 94, 0.06);
+
+      .reports-kpi__value {
+        color: var(--color-success, #059669);
+      }
+    }
+
+    &.reports-kpi--bad {
+      background: rgba(239, 68, 68, 0.05);
+
+      .reports-kpi__value {
+        color: var(--color-danger, #e11d48);
+      }
+    }
+  }
+
+  /* ===== Listas por plan / prestador ===== */
+
+  .reports-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    &__item {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      column-gap: 14px;
+      align-items: center;
+      font-size: 0.8rem;
+      margin-right: 10%;
+    }
+
+    &__item--empty {
+      opacity: 0.45;
+    }
+
+    &__label {
+      color: var(--color-ink-soft);
+      max-width: 40;
+    }
+
+    &__value {
+      font-weight: 600;
+      text-align: right;
+      min-width: 14px;
+    }
+  }
+
+  /* ===== Pills especialidades / laboratorios ===== */
+
+  .reports-pill-group {
+    max-width: 80%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .reports-pill {
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(148, 163, 184, 0.08);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    align-items: baseline;
+
+    &__label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--color-ink-soft);
+    }
+
+    &__value {
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    &--primary {
+      border: 1px solid var(--color-primary);
+      background: rgba(0, 143, 107, 0.05);
+    }
+  }
+
+  /* ===== Toggle Mensual / Semanal / Diario ===== */
+
+  .reports-toggle-btn {
+    border: none;
+    background: transparent;
+    padding: 4px 12px;
+    font-size: 0.8rem;
+    border-radius: 999px;
+    cursor: pointer;
+    color: var(--color-ink-soft);
+    transition: background 0.15s ease, color 0.15s ease;
+
+    &--active {
+      background: var(--color-primary-soft);
+      color: var(--color-ink);
+      font-weight: 600;
+    }
+  }
+
+  /* ===== Gráfico de barras ===== */
+
+  .reports-chart__hint {
+    margin: 4px 0 0;
+    font-size: 0.75rem;
+    color: var(--color-ink-soft);
+    text-align: left;
+  }
+}
